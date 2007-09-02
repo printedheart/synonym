@@ -23,6 +23,8 @@
 #include <QGraphicsItem>
 #include <QList>
 #include <QFont>
+#include <QVector>
+#include <QMutex>
      
 #include <QtDebug>       
 class GraphEdge;
@@ -30,8 +32,30 @@ class DataNode;
 class MeaningNode;
 class PhraseNode;
 class GraphScene;
-
 class QGraphicsSceneMouseEvent;
+class QPointF;
+
+
+
+
+class LayoutPath {
+    public:
+        void addPoint(QPointF p) {
+            buffer[lastIndex++] = p;
+        }
+        QPointF  lastPoint()  {
+            return buffer[(lastIndex - 1)]; }
+        QPointF  takeFirstPoint() { 
+            return  buffer[firstIndex++]; }
+        void reset() { firstIndex = 0; lastIndex = 0;}
+        int pointCount() const { return lastIndex - firstIndex; } 
+    private:
+        static const  uint BUFFER_SIZE = 8192;
+        QPointF buffer[BUFFER_SIZE];
+        volatile uint firstIndex;
+        volatile uint lastIndex;
+};    
+
 
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
@@ -63,6 +87,15 @@ public:
     void setMass(double mass) { m_mass = mass; }
     double mass() const;
 
+    void addAnimationPos(const QPointF &point);
+    int animationPosCount();
+    void resetAnimation();
+    QPointF & lastAnimationPos();
+    QPointF   takeFirstAnimationPos();
+    
+    
+    LayoutPath & layoutPath() { return m_layoutPath; }
+
     bool visited() const { return m_visited; }
     void visit() { m_visited = true; }
     void resetVisit() { m_visited = false; }
@@ -73,12 +106,6 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) = 0; 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
-   // virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
-   // virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
-    
-    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
-
     
     QPointF m_newPos;
     QPointF m_intermedPos;
@@ -91,6 +118,18 @@ private:
 
     bool m_visited;
 
+    QList<QPointF> m_animationPoints;
+    QMutex m_pointsMutex;
+    
+    QPointF m_buffer[10000]; 
+    uint m_firstIndex;
+    uint m_lastIndex;
+    
+    QPointF m_lastPoint;
+    
+    
+    LayoutPath m_layoutPath;
+
 };
 
 
@@ -102,7 +141,6 @@ public:
 
     enum { Type = UserType + 91 };
     int type() const { return Type; }
-
     
     void setDataNode(DataNode *dataNode);
     DataNode *dataNode() const;
@@ -113,16 +151,15 @@ public:
 
     bool advance();
 
-signals:
-    void clicked(PhraseNode *phraseNode);
+    void showSoundButton();
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
     PhraseNode *m_phraseNode;
     QFont m_font;
-
     QPointF m_mousePressPos;
+
 
     
 };
@@ -143,7 +180,6 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 

@@ -83,7 +83,8 @@ PhraseNode::~PhraseNode()
 
 QString PhraseNode::phrase() const
 {
-    return DataNode::id();
+    QString idCopy(id());
+    return idCopy.replace(QChar('_'), QChar(' '));
 }
 
 

@@ -76,9 +76,6 @@ void GraphEdge::adjust()
     QLineF line(mapFromItem(m_source, 0, 0), mapFromItem(m_dest, 0, 0));
     qreal length = line.length();
 
-    
-    //QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
-
     prepareGeometryChange();
     m_sourcePoint = line.pointAt(nodeRadius / length); //line.p1() + edgeOffset;
     m_destPoint = line.pointAt(1 - nodeRadius / length);// line.p2() -  edgeOffset;
@@ -115,30 +112,11 @@ void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
         return;
     // Draw the line itself
     QLineF line(m_sourcePoint, m_destPoint);
-    painter->setPen(QPen(Qt::black, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    QColor c;
+    c.setHsv(0.0, 0.0, 150);
+    painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter->drawLine(line);
 }
-
-
-void GraphEdge::calculateForces()
-{
-    if (!m_source || !m_dest)
-        return;
-
-    QLineF line(mapFromItem(m_source, 0, 0), mapFromItem(m_dest, 0, 0));
-    qreal dx = line.dx();
-    qreal dy = line.dy();
-    
-    qreal distance2 = dx * dx + dy * dy;
-    qreal distance = sqrt(distance2);
-    //qDebug() << "Edge distance " << distance;
-    static int REST_DISTANCE = 75;
-    qreal force = 0.2 * (distance - REST_DISTANCE);
-        
-    m_source->applyForce(force * (dx / distance), force * ( dy / distance));
-    m_dest->applyForce(-force * (dx / distance), -force * (dy / distance));
-}
-
 
 
 

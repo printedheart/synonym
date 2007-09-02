@@ -22,10 +22,7 @@
 #include "node.h"
 #include "edge.h"
 #include <QDebug>            
-#include <QUrl>
-#include <QHttp>
 #include <QBuffer>                
-#include <QtXml>
 #include <QCoreApplication>
                   
 #include "wn.h"        
@@ -48,7 +45,7 @@ void WordDataLoader::load(const QString &phrase, WordDataGraph *dataGraph)
     
     for (int pos = 1; pos <= NUMPARTS; pos++) {
         SynsetPtr synset = findtheinfo_ds(phrase.toLatin1().data(),
-                                          pos, - HYPERPTR, ALLSENSES);
+                                          pos, - HYPERPTR  /*ANTPTR */, ALLSENSES);
 
         while (synset) {
             SynsetPtr nextSynset = synset->nextss;

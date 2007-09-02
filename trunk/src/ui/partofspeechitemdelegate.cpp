@@ -44,35 +44,73 @@ PartOfSpeechItemDelegate::~PartOfSpeechItemDelegate()
 //
 //     return QSize(view->width() - 4, rect.height() * proportion);
 // }
-
+/*
 QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
-    QFontMetrics fontMetrics = view->fontMetrics();
+    QFontMetricsF fontMetrics(view->fontMetrics());
     QString str = index.data().toString();
     QString elided;
-    int width = view->viewport()->width() - 6 - 12;
+    int width = view->viewport()->width() - 12;
     int times = 1;
+    bool more;
+    QRegExp spaces("^\\s*$");
     do {
+        more = false;
         elided = fontMetrics.elidedText(str, Qt::ElideRight, width);
+//         if (elided != str) {
+//             times++;            
+//             
+//             str.remove(0, elided.lastIndexOf(QChar(' ')));
+//         }
+        
         if (elided != str) {
-            times++;
-            
-            str.remove(0, elided.lastIndexOf(QChar(' ')));
-        }
-        //qDebug() << str << " " << elided;
-    } while(elided != str);
+            str.remove(0, elided.lastIndexOf(QChar(' ')) + 1);
+            if (!spaces.exactMatch(str)) {
+                times++;
+                more = true;
+            }
+        } 
+    } while(more);
     
-    return QSize(width - 12,
+    return QSize(width,
                  (fontMetrics.size(Qt::AlignJustify, index.data().toString())
                          .height() * times) - 3);
 }
+*/
 
+QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
+    QFontMetricsF fontMetrics(view->fontMetrics());
+    QString str = index.data().toString().trimmed();
+    QStringList words = str.split(QChar(' '));
+    QRectF boundingRect = fontMetrics.boundingRect(str);
+    int width = view->viewport()->width() - 6;
+    int times = 0;
+    while (words.size() > 0) {
+        times++;
+        qreal lineWidth = 0;
+        bool enoughSpace = true;
+        do {
+            QString word = words.first();
+            qreal wordWidth = fontMetrics.width(word);
+            if (wordWidth + lineWidth < width) {
+                lineWidth += wordWidth;
+                lineWidth += fontMetrics.width(QChar(' '));
+                words.removeFirst();
+            } else 
+                enoughSpace = false;
+                
+        } while (enoughSpace && words.size() > 0);
+    }
+    return QSize(width, boundingRect.height() * times - times + 1);
+}
+        
 void PartOfSpeechItemDelegate::paint(QPainter *painter,
                                      const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QRect rect(option.rect.topLeft(), option.rect.bottomRight());
-   // qDebug() << "paint    " << index.row() << "  " << rect.height();
     if (option.state & QStyle::State_Selected)
         painter->fillRect(rect, option.palette.highlight());
     
@@ -81,27 +119,16 @@ void PartOfSpeechItemDelegate::paint(QPainter *painter,
     painter->drawLine(rect.topLeft(), rect.topRight());
     painter->restore();
     
-    rect.setLeft(rect.left() + 2);
+    rect.setLeft(rect.left() + 4);
+    rect.setTop(rect.top() + 2);
     rect.setRight(rect.right() - 2);
     painter->drawText(rect, Qt::TextWordWrap , index.data().toString());
 }
 
 
-
-
-
-
-
-
-
-
-
-
 void PartOfSpeechItemView::resizeEvent(QResizeEvent *resizeEvent)
 {
-    if (resizeEvent->oldSize().width() < resizeEvent->size().width())
-        reset();
-    
+    reset();
     QListView::resizeEvent(resizeEvent);
 }
 

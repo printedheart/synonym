@@ -23,11 +23,12 @@
 #include <QGraphicsScene>
 #include <QList>
         
-
+class Layout;
 class GraphNode;
 class GraphEdge;
 class PhraseGraphNode;
 class DataNode;
+class QSvgRenderer;
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
 */
@@ -49,28 +50,37 @@ public:
     void propogateClickEvent(PhraseGraphNode *graphNode);
 
     void doInitialLayout(GraphNode *rootNode);
+
+    void displaySoundIcon();
+
+    void setCentralNode(GraphNode *node);
+    GraphNode *centralNode() const;
     
 signals:
     void nodeClicked(const QString &phrase);
+
+    void soundButtonClicked(const QString &phrase);
 protected:
     void timerEvent(QTimerEvent *event);
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void calculateForces();
     void doSpringAlgorithm(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
        
-    void drawItems(QPainter *painter,
-                                int numItems,
-                                QGraphicsItem *items[],
-                                const QStyleOptionGraphicsItem options[],
-                                        QWidget *widget);
 private:
     int m_timerId;
     int m_timerInterval;
 
     bool m_calculate;
 
+    GraphNode *m_centralNode;
+    QSvgRenderer *m_soundIconRenderer;
+
+    Layout *m_layout;
     void layoutNodes(GraphNode *node, GraphNode *parentNode);
+    
+    bool m_restartLayout;
 };
 
 #endif

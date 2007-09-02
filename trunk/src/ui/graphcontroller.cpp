@@ -21,12 +21,12 @@
 
 
 #include "graphscene.h"
-#include "../model/worddataloader.h"
-#include "../model/worddatagraph.h"
+#include "worddataloader.h"
+#include "worddatagraph.h"
 #include "graphnode.h"
 #include "graphedge.h"
-#include "../model/edge.h"
-#include "../model/node.h"                
+#include "edge.h"
+#include "node.h"
                   
 #include <cstdlib>
 #include <ctime>        
@@ -35,9 +35,6 @@
 #include <QtGui>
 #include <cmath>        
                                        
-        
-static const double Pi = 3.14159265358979323846264338327950288419717;
-static double TwoPi = 2.0 * Pi;
 
 static const int  HISTORY_SIZE = 10;
 
@@ -84,53 +81,31 @@ WordDataGraph*  GraphController::makeGraph(const QString &word)
         QList<Edge*> edges = dataGraph->edges();
         DataNode *centralNode = dataGraph->centralNode();
         
-
+/*
         foreach (Edge *edge, centralNode->edges()) {
             qDebug() << edge->id() << "  " << edge->sourceNode()->id() << "  " << edge->destNode()->id();
         }
 
         qDebug() << "\n\n";
-
+*/
 
         
         PhraseNode *phraseNode = qobject_cast<PhraseNode*>(centralNode);
         GraphNode *centralGraphNode = new PhraseGraphNode(m_scene);
         centralGraphNode->setDataNode(phraseNode);
-        centralGraphNode->setMass(4.0);
+        centralGraphNode->setMass(10.0);
         m_scene->addItem(centralGraphNode);
+        m_scene->setCentralNode(centralGraphNode);
         
-        double angleIncrement = TwoPi / centralNode->edges().size();
-        double phi = 0.0;
         foreach (Edge *edge , edges) {
-       // qDebug() << edge->id();
             GraphEdge *graphEdge = new GraphEdge();
             m_scene->addItem(graphEdge);
-        //graphEdge->setPos((rand()%10)+1, (rand()%10)+1);
   
   
             GraphNode *source = findGraphNode(edge->sourceNode());
             graphEdge->setSource(source);
             GraphNode *dest = findGraphNode(edge->destNode());
             graphEdge->setDest(dest);
-//             if (dest->dataNode() == centralNode) {
-//                 source->setPos(75 * cos(phi), 75 * sin(phi));
-//                 phi += angleIncrement;
-//             } else {
-//                 source->setPos(source->dataNode()->fixed()
-//                     ? QPointF(0, 0)
-//                     : QPointF(-15 + qrand() % 200, -15 + qrand() % 200));
-//                     //: QPointF(75 * cos(phi) * (qrand() % 5), 75 * sin(phi) * (qrand() % 5)));
-//             }
-//             if (source->dataNode() == centralNode) {
-//                 dest->setPos(75 * cos(phi), 75 * sin(phi));
-//                 phi += angleIncrement;
-//             } else {
-//                 dest->setPos(dest->dataNode()->fixed()
-//                     ? QPointF(0, 0)
-//                     : QPointF(-15 + qrand() % 200, -15 + qrand() % 200));
-//                     //: QPointF(75 * cos(phi) * (qrand() % 5) , 75 * sin(phi) * (qrand() % 5)));
-//             }
-//         }
         }
 
         QPair<WordDataGraph*, QList<QGraphicsItem*> > pair;
@@ -200,11 +175,23 @@ GraphNode* GraphController::findGraphNode(DataNode *dataNode)
 
     if (!dataNode->fixed())
         graphNode->setFlag(QGraphicsItem::ItemIsMovable);
-    else
+    else {
         graphNode->setMass(4.0);
+    }
     
     m_scene->addItem(graphNode);  
     return graphNode;
+}
+
+
+void GraphController::soundReady(const QString &word)
+{
+   WordDataGraph *dataGraph = m_graphHistory.back().first;
+   PhraseNode *node = qobject_cast<PhraseNode*>(dataGraph->centralNode());
+   if (node && node->phrase() == word) {
+        m_scene->displaySoundIcon();
+   }
+
 }
 
 #include "moc_graphcontroller.cpp"

@@ -29,6 +29,7 @@
     <tree>
       <hidenonprojectfiles>false</hidenonprojectfiles>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
+      <showvcsfields>false</showvcsfields>
     </tree>
   </kdevfileview>
   <kdevcppsupport>
@@ -37,14 +38,12 @@
       <version>4</version>
       <includestyle>4</includestyle>
       <designerintegration>ExternalDesigner</designerintegration>
-      <qmake>/usr/local/Trolltech/Qt-4.3.0/bin/qmake</qmake>
-      <designer>/usr/local/Trolltech/Qt-4.3.0/bin/designer</designer>
+      <qmake>/usr/local/Trolltech/Qt-4.3.1/bin/qmake</qmake>
+      <designer></designer>
       <root>/usr/lib/qt4</root>
       <designerpluginpaths/>
     </qt>
-    <references>
-      <pcs>Qt4</pcs>
-    </references>
+    <references/>
     <codecompletion>
       <automaticCodeCompletion>true</automaticCodeCompletion>
       <automaticArgumentsHint>true</automaticArgumentsHint>
@@ -144,7 +143,7 @@
   </kdevdebugger>
   <kdevtrollproject>
     <run>
-      <mainprogram/>
+      <mainprogram>/home/serega/devel/synonym</mainprogram>
       <programargs/>
       <directoryradio>executable</directoryradio>
       <runarguments>
@@ -169,7 +168,7 @@
       <envvars/>
     </run>
     <general>
-      <activedir>src</activedir>
+      <activedir></activedir>
     </general>
     <subclassing/>
     <make>

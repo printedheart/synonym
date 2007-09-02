@@ -20,7 +20,8 @@
 #include "graphscene.h"
 #include "graphedge.h"
 #include "graphnode.h"
-#include "../model/node.h"
+#include "layout.h"
+#include "node.h"
                 
 #include "math.h"
                 
@@ -28,19 +29,23 @@
 #include <QtCore>
                        
 #include <QtDebug>
-
+#include <QtSvg>
         
 static const double PI = 3.14159265358979323846264338327950288419717;
 static double TWO_PI = 2.0 * PI;
 
 GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(1), m_calculate(true)
+ : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_calculate(true), m_restartLayout(false)
 {
+    m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
+    m_layout = new ForceDirectedLayout4();
+
 }
 
 
 GraphScene::~GraphScene()
 {
+    delete m_layout;
 }
 
 void GraphScene::itemMoved()
@@ -112,110 +117,21 @@ void GraphScene::calculateForces()
     QList<GraphNode *> nodes;
     QList<GraphEdge *> edges;
     foreach (QGraphicsItem *item, items()) {
-//         if (GraphNode *node = qgraphicsitem_cast<PhraseGraphNode *>(item)) {
-//             node->discardForce();
-//             nodes << node;
-//         } else if (GraphNode *node = qgraphicsitem_cast<MeaningGraphNode *>(item)) {
-//             node->discardForce();
-//             nodes << node;
         if (item->type() == GraphNode::PhraseType || item->type() == GraphNode::MeaningType) {
             GraphNode *node = static_cast<GraphNode*>(item);
-            node->discardForce();
             nodes << node;
         } else if(GraphEdge *edge = qgraphicsitem_cast<GraphEdge *>(item))
             edges << edge;
     }
 
 
- //   qDebug() << "Items " << items().size() << " nodes " << nodes.size() << " edges " << edges.size();
-    doSpringAlgorithm(nodes, edges);
-    foreach (GraphNode *node, nodes) {
-        qreal xvel = node->force().x();
-        qreal yvel = node->force().y();
-      //  qDebug() << xvel << "  " << yvel;
-        if (qAbs(xvel) < 0.1 && qAbs(yvel) < 0.1)
-            xvel = yvel = 0;
-
-        QPointF newPos = node->pos() + QPointF(xvel, yvel);
-        newPos.setX(qMin(qMax(newPos.x(), sceneRect().left() + 10), sceneRect().right() - 10));
-        newPos.setY(qMin(qMax(newPos.y(), sceneRect().top() + 10), sceneRect().bottom() - 10));
-        node->setNewPos(newPos);
-    }
-    
-    
-    
-    bool itemsMoved = false;
-    foreach (GraphNode *node, nodes) {
-        if (mouseGrabberItem() != node)
-            if (node->advance())
-                itemsMoved = true;
-    }
-
-//    update(sceneRect());
-   // qDebug() << (itemsMoved ? " moved " : " not moved ");
-    if (!itemsMoved) {
+    bool needsLayout = m_layout->layout(nodes, edges, m_restartLayout);
+    if (!needsLayout) {
         killTimer(m_timerId);
         m_timerId = 0;
     }
+
 }  
-
-void GraphScene::doSpringAlgorithm(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
-{
-    foreach (GraphNode *aNode, nodes) {
-        //if (scene()->mouseGrabbedItem() == aNode)
-          //  continue;
-        foreach (GraphNode *bNode, nodes) {
-            // Find the distance between nodes
-            if (aNode == bNode) continue;
-
-        /*    QList<GraphEdge *> aNodeEdges = aNode->edges();
-            bool neighbors = false;
-            foreach (GraphEdge *edge, aNodeEdges) {
-                if (edge->source() == bNode || edge->dest() == bNode) {
-                    neighbors = true;
-                    break;
-                }
-            }
-            if (neighbors)
-                continue;
-          */  
-            QLineF line(aNode->pos(), bNode->pos());
-            qreal dx = line.dx();
-            qreal dy = line.dy();
-            qreal distance2 = dx * dx + dy * dy;
-            qreal distance = sqrt(distance2);
-            if (distance > 0) {
-                qreal repulsive =  5000 * aNode->mass() * bNode->mass()  / distance2;
-                qreal xvel = repulsive * dx / distance;
-                qreal yvel = repulsive * dy / distance;
-                //qDebug() << xvel << "  " << yvel;
- 
-                aNode->applyForce(- xvel, - yvel);
-                bNode->applyForce( xvel, yvel);
-            }
-        }
-    }
-    
-   // foreach (GraphEdge *edge, edges)
-     //   edge->calculateForces();
-    foreach (GraphEdge *edge, edges) {
-        if (!edge->source() || !edge->dest())
-            continue;
-
-        QLineF line(edge->source()->mapToScene(0, 0), edge->dest()->mapToScene(0, 0));
-        qreal dx = line.dx();
-        qreal dy = line.dy();
-    
-        qreal distance2 = dx * dx + dy * dy;
-        qreal distance = sqrt(distance2);
-    //qDebug() << "Edge distance " << distance;
-        static int REST_DISTANCE = 75;
-        qreal force = 0.2 * (distance - REST_DISTANCE);
-        
-        edge->source()->applyForce(force * (dx / distance), force * ( dy / distance));
-        edge->dest()->applyForce(-force * (dx / distance), -force * (dy / distance));
-    }
-}
 
 
 QList<GraphNode *> GraphScene::graphNodes() const
@@ -233,8 +149,8 @@ QList<GraphNode *> GraphScene::graphNodes() const
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    m_timerInterval = 1;
-    if (m_timerId >= 100) {
+    m_timerInterval = 10;
+    if (m_timerId >= 1) {
         killTimer(m_timerId);
         m_timerId = 0;
         itemMoved();
@@ -242,14 +158,16 @@ void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     
     if (mouseGrabberItem())
         itemMoved();
+    m_restartLayout = false;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
 void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseGrabberItem()) {
-        if (m_timerInterval < 100) {
-            m_timerInterval = 100;
+        m_restartLayout = true;
+        if (m_timerInterval <= 10) {
+            m_timerInterval = 20;
             if (m_timerId) {
                 killTimer(m_timerId);
                 m_timerId = 0;
@@ -261,22 +179,25 @@ void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
+void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    QList<QGraphicsItem*> eventItems = items(mouseEvent->scenePos());
+    foreach (QGraphicsItem *item, eventItems) {
+        QGraphicsSvgItem *svgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(item);
+        if (svgItem) {
+            emit soundButtonClicked(m_centralNode->dataNode()->id());
+        }
+    }
+    QGraphicsScene::mousePressEvent(mouseEvent);
+}
+
+
 void GraphScene::setCalculate(bool calculate)
 {
     m_calculate = calculate;
+    if (!calculate)
+        m_layout->stop();
 }
-
-
-
-void GraphScene::drawItems(QPainter *painter,
-               int numItems,
-               QGraphicsItem *items[],
-               const QStyleOptionGraphicsItem options[],
-                       QWidget *widget) {
-
-    QGraphicsScene::drawItems(painter, numItems, items, options, widget);
-}
-
 
 void GraphScene::propogateClickEvent(PhraseGraphNode *graphNode)
 {
@@ -284,3 +205,34 @@ void GraphScene::propogateClickEvent(PhraseGraphNode *graphNode)
     QString id = dataNode->id();
     emit nodeClicked(id);
 }
+
+
+void GraphScene::setCentralNode(GraphNode *node)
+{
+    m_centralNode = node;
+}
+
+GraphNode* GraphScene::centralNode() const
+{
+    return m_centralNode;
+}
+
+
+void GraphScene::displaySoundIcon()
+{
+    QGraphicsSvgItem *soundIcon = new QGraphicsSvgItem(m_centralNode);
+    soundIcon->setSharedRenderer(m_soundIconRenderer);
+  //  addItem(soundIcon);
+    
+    QRectF centralNodeRect = m_centralNode->boundingRect();
+    soundIcon->scale(0.15, 0.15);
+    QPointF soundPos(centralNodeRect.right() + 10,
+                     centralNodeRect.top() + 5);
+   
+    soundIcon->setPos(soundPos);
+    //soundIcon->setAcceptsHoverEvents(true);
+    soundIcon->setCursor(Qt::PointingHandCursor);
+}
+
+
+

@@ -22,19 +22,21 @@
 #include "graphscene.h"
 #include "graphcontroller.h"
 #include "partofspeechitemdelegate.h"
-#include "../model/worddatagraph.h"
-#include  "../model/worddataloader.h"
-#include "../model/node.h"
-#include "../model/partofspeechlistmodel.h"
+#include "worddatagraph.h"
+#include "worddataloader.h"
+#include "node.h"
+#include "partofspeechlistmodel.h"
+#include "pronunciationsoundholder.h"
+#include "player.h"
 #include <QtGui>
 #include <QtCore>
                         
-
         
 MainWindow::MainWindow()
  : QMainWindow()
 {
     GraphScene *scene = new GraphScene(this);
+    m_scene = scene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(-500, -600, 1000, 1200);
     m_graphView = new QGraphicsView(scene, this);
@@ -81,13 +83,23 @@ MainWindow::MainWindow()
         view->setResizeMode(QListView::Adjust);
         view->setWordWrap(true);
         QFont font = view->font();
-        font.setPointSize(10);
+        font.setPointSize(8);
         view->setFont(font);
         
         dockWidget->setWidget(view);
         addDockWidget(Qt::RightDockWidgetArea, dockWidget);        
-    } 
+    }
 
+
+
+    //Sound setup
+    m_soundHolder = new PronunciationSoundHolder(this);
+    connect (m_soundHolder, SIGNAL(soundReady(const QString&)),
+             m_graphController, SLOT(soundReady(const QString&)));
+
+    connect(m_scene, SIGNAL(soundButtonClicked(const QString&)),
+            this, SLOT(playSound(const QString&)));
+    
     
      
 }
@@ -110,7 +122,20 @@ void MainWindow::lookUpWordNet(const QString &word)
 {
     WordDataGraph *dataGraph = m_graphController->makeGraph(word);
     for (int i = 0; i < 4; i++)
-        m_posModels[i]->setDataGraph(dataGraph);    
+        m_posModels[i]->setDataGraph(dataGraph);
+
+    m_soundHolder->findPronunciation(word);
+        
 }
+
+void MainWindow::playSound(const QString &word)
+{
+    Player player;
+    QIODevice *sound = m_soundHolder->pronunciationSound(word);
+    if (sound) {
+        player.play(sound);
+    }
+}
+
 
 
