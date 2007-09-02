@@ -29,6 +29,9 @@ class WordDataLoader;
 class GraphController;
 class QListView;
 class PartOfSpeechListModel;
+class PronunciationSoundHolder;
+class GraphScene;
+
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
 */
@@ -41,6 +44,7 @@ public:
     ~MainWindow();
 private:
     QGraphicsView *m_graphView;
+    GraphScene *m_scene;
     WordDataLoader *m_loader;
     GraphController *m_graphController;
        
@@ -48,13 +52,17 @@ private:
 
     QListView *m_posViews[4];
     PartOfSpeechListModel *m_posModels[4];
-
     
     
+    PronunciationSoundHolder *m_soundHolder;
 private slots:
     void callLoadWord();
 
     void lookUpWordNet(const QString &word);
+
+    void playSound(const QString &word);
+
+   
 
 };
 

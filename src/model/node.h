@@ -26,8 +26,8 @@ class Edge;
 	@author Sergejs Melderis <sergey.melderis@gmail.com>
 */
 
-
-class DataNode : public QObject{
+class DataNode : public QObject
+{
 Q_OBJECT
 
 public:

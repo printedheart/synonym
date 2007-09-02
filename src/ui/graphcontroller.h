@@ -49,6 +49,8 @@ public:
 
 
     WordDataGraph* makeGraph(const QString &word);
+public slots:
+    void soundReady(const QString &word);
     
 private:
     GraphScene *m_scene;

@@ -27,6 +27,9 @@ class GraphNode;
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
 */
+
+
+
 class GraphEdge : public QGraphicsItem
 {
 public:
@@ -45,12 +48,11 @@ public:
     GraphNode* dest() const;
 
     void adjust();
-
-    void calculateForces();
     
-protected:
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
+protected:
+
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private:

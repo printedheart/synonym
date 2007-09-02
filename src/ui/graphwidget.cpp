@@ -20,8 +20,8 @@
 #include "graphwidget.h"
 #include "graphscene.h"
 #include "graphcontroller.h"
-#include "../model/worddatagraph.h"
-#include  "../model/worddataloader.h"
+//#include "../model/worddatagraph.h"
+//#include  "../model/worddataloader.h"
                                
 #include <QtDebug>
              
