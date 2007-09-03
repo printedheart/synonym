@@ -50,6 +50,8 @@ public:
     void setDataGraph(WordDataGraph *dataGraph);
 
 
+    MeaningNode *nodeAt(const QModelIndex &index);
+    QModelIndex indexForNode(MeaningNode *node);
 private:
     WordDataGraph *m_dataGraph;
 

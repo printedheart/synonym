@@ -55,10 +55,14 @@ public:
     DataNode* centralNode() const;
 
     QString toString() const;
+    
+    void setSelectedNode(DataNode *node);
+    
 signals:
     void nodeAdded(DataNode *node);
     void nodeRemoved(const QString &nodeId);
     void edgeAdded(Edge *edge);
+    
 private:
     QHash<QString, DataNode*> m_nodes;
     QHash<QString, Edge*> m_edges;

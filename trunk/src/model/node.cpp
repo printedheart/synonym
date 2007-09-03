@@ -19,8 +19,10 @@
  ***************************************************************************/
 #include "node.h"
 #include "edge.h"
+
+#include "worddatagraph.h"
                             
-DataNode::DataNode(const QString &id, QObject *parent)
+DataNode::DataNode(const QString &id, WordDataGraph *parent)
     : QObject(parent), m_id(id), m_fixed(false)
 {   
 }
@@ -72,7 +74,7 @@ QString DataNode::toString() const
 // PhraseNode
 
 
-PhraseNode::PhraseNode(const QString &id, QObject *parent)
+PhraseNode::PhraseNode(const QString &id, WordDataGraph *parent)
     :DataNode(id, parent)
 {
 }
@@ -89,7 +91,7 @@ QString PhraseNode::phrase() const
 
 
 // MeaningNode
-MeaningNode::MeaningNode(const QString &id, QObject *parent)
+MeaningNode::MeaningNode(const QString &id, WordDataGraph *parent)
     :DataNode(id, parent)
 {
 }
