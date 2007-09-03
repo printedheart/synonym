@@ -29,8 +29,10 @@ class WordDataLoader;
 class GraphController;
 class QListView;
 class PartOfSpeechListModel;
+class PartOfSpeechItemView;
 class PronunciationSoundHolder;
 class GraphScene;
+class QModelIndex;
 
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
@@ -42,6 +44,10 @@ public:
     MainWindow();
 
     ~MainWindow();
+    
+public slots:    
+    void nodeActivated(const QModelIndex &index);
+    void nodeActivated(const QString &id);
 private:
     QGraphicsView *m_graphView;
     GraphScene *m_scene;
@@ -50,7 +56,7 @@ private:
        
     QLineEdit *m_wordLine;
 
-    QListView *m_posViews[4];
+    PartOfSpeechItemView *m_posViews[4];
     PartOfSpeechListModel *m_posModels[4];
     
     
@@ -62,6 +68,8 @@ private slots:
 
     void playSound(const QString &word);
 
+private:
+    WordDataGraph *m_currentGraph;    
    
 
 };
