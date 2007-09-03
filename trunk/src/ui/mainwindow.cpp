@@ -60,18 +60,20 @@ MainWindow::MainWindow()
             this, SLOT(callLoadWord()));
     connect (scene, SIGNAL(nodeClicked(const QString &)),
             this, SLOT(lookUpWordNet(const QString&)));
+    connect (scene, SIGNAL(nodeMouseHovered(const QString&)),
+             this, SLOT(nodeActivated(const QString&)));
 
 
 
     // Setup item views.
-    QString partsOfSpeechHeaders[4] = { "Nouns", "Adjectives", "Verbs", "Adverbs"};
-    MeaningNode::PartOfSpeech partsOfSpeech[4] = { MeaningNode::Noun, MeaningNode::Adjective,
-        MeaningNode::Verb, MeaningNode::Adverb};
+    QString partsOfSpeechHeaders[4] = { "Nouns", "Verbs", "Adjectives", "Adverbs"};
+    MeaningNode::PartOfSpeech partsOfSpeech[4] = { MeaningNode::Noun, MeaningNode::Verb,
+        MeaningNode::Adjective, MeaningNode::Adverb};
                                      
     for (int i = 0; i < 4; i++) {
         QDockWidget *dockWidget = new QDockWidget(partsOfSpeechHeaders[i], this);
 
-        QListView *view = new PartOfSpeechItemView(this);
+        PartOfSpeechItemView *view = new PartOfSpeechItemView(this);
         m_posViews[i] = view;
         
         PartOfSpeechListModel *model =
@@ -85,9 +87,14 @@ MainWindow::MainWindow()
         QFont font = view->font();
         font.setPointSize(8);
         view->setFont(font);
+        view->setMouseTracking(true);
         
         dockWidget->setWidget(view);
         addDockWidget(Qt::RightDockWidgetArea, dockWidget);        
+        connect (view, SIGNAL(entered(const QModelIndex&)),
+                 this, SLOT(nodeActivated(const QModelIndex&)));
+        connect (scene, SIGNAL(nodeMouseHoverLeaved(const QString&)),
+                 view, SLOT(clearHighlighting()));
     }
 
 
@@ -121,6 +128,7 @@ void MainWindow::callLoadWord()
 void MainWindow::lookUpWordNet(const QString &word)
 {
     WordDataGraph *dataGraph = m_graphController->makeGraph(word);
+    m_currentGraph = dataGraph;
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(dataGraph);
 
@@ -136,6 +144,32 @@ void MainWindow::playSound(const QString &word)
         player.play(sound);
     }
 }
+
+void MainWindow::nodeActivated(const QModelIndex &index)
+{
+    PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
+            const_cast<QAbstractItemModel*>(index.model()));
+    MeaningNode *node = 0;
+    node = indexModel->nodeAt(index);
+    if (!node) {
+        m_scene->setActivated(QString());
+        return;
+    }
+    m_scene->setActivated(node->id());
+}
+
+void MainWindow::nodeActivated(const QString &id)
+{
+    DataNode *node = m_currentGraph->node(id);
+    if (node) {
+        MeaningNode *meaning = dynamic_cast<MeaningNode*>(node);
+        if (meaning) {
+            QModelIndex nodeIndex = m_posModels[meaning->partOfSpeech() - 1]->indexForNode(meaning);
+            m_posViews[meaning->partOfSpeech() - 1]->highlightItem(nodeIndex);
+        }
+    }
+}
+    
 
 
 

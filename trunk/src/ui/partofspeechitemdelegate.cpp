@@ -22,7 +22,7 @@
 #include <QtGui>
 
 
-PartOfSpeechItemDelegate::PartOfSpeechItemDelegate(QObject *parent)
+PartOfSpeechItemDelegate::PartOfSpeechItemDelegate(PartOfSpeechItemView *parent)
  : QAbstractItemDelegate(parent)
 {
 }
@@ -33,51 +33,7 @@ PartOfSpeechItemDelegate::~PartOfSpeechItemDelegate()
 }
 
 
-// QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-// {
-//     QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
-//     QFontMetrics fontMetrics = view->fontMetrics();
-//     QRect rect = fontMetrics.boundingRect(index.data().toString());
-//     int proportion = (rect.width() / (view->width() + 4));
-//     if (proportion == 0 || rect.width() > view->width())
-//         proportion++;
-//
-//     return QSize(view->width() - 4, rect.height() * proportion);
-// }
-/*
-QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
-    QFontMetricsF fontMetrics(view->fontMetrics());
-    QString str = index.data().toString();
-    QString elided;
-    int width = view->viewport()->width() - 12;
-    int times = 1;
-    bool more;
-    QRegExp spaces("^\\s*$");
-    do {
-        more = false;
-        elided = fontMetrics.elidedText(str, Qt::ElideRight, width);
-//         if (elided != str) {
-//             times++;            
-//             
-//             str.remove(0, elided.lastIndexOf(QChar(' ')));
-//         }
-        
-        if (elided != str) {
-            str.remove(0, elided.lastIndexOf(QChar(' ')) + 1);
-            if (!spaces.exactMatch(str)) {
-                times++;
-                more = true;
-            }
-        } 
-    } while(more);
-    
-    return QSize(width,
-                 (fontMetrics.size(Qt::AlignJustify, index.data().toString())
-                         .height() * times) - 3);
-}
-*/
+
 
 QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -111,8 +67,15 @@ void PartOfSpeechItemDelegate::paint(QPainter *painter,
                                      const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QRect rect(option.rect.topLeft(), option.rect.bottomRight());
-    if (option.state & QStyle::State_Selected)
+    if (option.state & QStyle::State_Selected) {
         painter->fillRect(rect, option.palette.highlight());
+    } else {
+        PartOfSpeechItemView *view = dynamic_cast<PartOfSpeechItemView*>(parent());
+        if (index == view->indexUnderMouse()) {
+            QBrush brush(QColor(218, 218, 218));
+            painter->fillRect(rect, brush);
+        }
+    }
     
     painter->save();
     painter->setPen(QPen(Qt::gray));
@@ -126,9 +89,92 @@ void PartOfSpeechItemDelegate::paint(QPainter *painter,
 }
 
 
+PartOfSpeechItemView::PartOfSpeechItemView(QWidget *parent):
+    QListView(parent)
+{
+    
+}
+    
+
 void PartOfSpeechItemView::resizeEvent(QResizeEvent *resizeEvent)
 {
     reset();
     QListView::resizeEvent(resizeEvent);
 }
+
+
+void PartOfSpeechItemView::mouseMoveEvent(QMouseEvent *event)
+{
+    QAbstractItemView::mouseMoveEvent(event);
+    QModelIndex index = indexAt(event->pos());
+    if (index.isValid()) {
+        m_indexUnderMouse = index;
+        update(index);
+        QModelIndex above = index.sibling(index.row() - 1, index.column());
+        if (above.isValid()) {
+            update(above);
+        }
+        QModelIndex below = index.sibling(index.row() + 1, index.column());
+        if (below.isValid()) {
+            update(below);
+        }
+    }
+    
+    bool mouseCloseToEdge = event->y() > viewport()->height() - 1 || event->y() < 1;
+    if (!index.isValid() || mouseCloseToEdge) {
+        QModelIndex above = index.sibling(m_indexUnderMouse.row() - 1, m_indexUnderMouse.column());
+        if (above.isValid()) {
+            update(above);
+        }
+        QModelIndex below = index.sibling(m_indexUnderMouse.row() + 1, m_indexUnderMouse.column());
+        if (below.isValid()) {
+            update(below);
+        }
+        QModelIndex old = m_indexUnderMouse;
+        m_indexUnderMouse = QModelIndex();
+        update(old);
+        emit entered(QModelIndex());
+    }
+
+}
+
+void PartOfSpeechItemView::wheelEvent(QWheelEvent*event)
+{
+    QAbstractItemView::wheelEvent(event);
+    QModelIndex index = indexAt(event->pos());
+    if (index.isValid()) {
+        m_indexUnderMouse = index;
+    } else {
+        m_indexUnderMouse = QModelIndex();
+    }
+    reset();
+}
+
+
+void PartOfSpeechItemView::highlightItem(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        m_indexUnderMouse = index;
+        update(index);
+    }    
+}
+
+void PartOfSpeechItemView::clearHighlighting()
+{
+    if (m_indexUnderMouse.isValid()) {
+        QModelIndex temp = m_indexUnderMouse;
+        m_indexUnderMouse = QModelIndex();
+        update(temp);
+    }
+}
+    
+
+QModelIndex  PartOfSpeechItemView::indexUnderMouse() const
+{
+    return m_indexUnderMouse;
+}
+
+
+
+
 

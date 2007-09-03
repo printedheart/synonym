@@ -26,35 +26,45 @@
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
 */
-class PartOfSpeechItemDelegate : public QAbstractItemDelegate
-{
-Q_OBJECT
-public:
-    PartOfSpeechItemDelegate(QObject *parent = 0);
 
-    ~PartOfSpeechItemDelegate();
-
-    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-
-
-    
-};
 
 
 class PartOfSpeechItemView : public QListView
 {
 Q_OBJECT
-        
+    
 public:
-    PartOfSpeechItemView(QWidget *parent = 0) :
-        QListView(parent) {}
+    PartOfSpeechItemView(QWidget *parent = 0);
 
     ~PartOfSpeechItemView() {};
-protected:
+
+    QModelIndex  indexUnderMouse() const;
+public slots:    
+    void highlightItem(const QModelIndex &index);
+    void clearHighlighting();
     
-    virtual void resizeEvent(QResizeEvent *resizeEvent);
+protected:
+    virtual void resizeEvent(QResizeEvent *resizeEvent);  
+    virtual void mouseMoveEvent(QMouseEvent *event);
+    virtual void wheelEvent(QWheelEvent*event);
+
+    QModelIndex m_indexUnderMouse;
 };
+
+
+class PartOfSpeechItemDelegate : public QAbstractItemDelegate
+{
+Q_OBJECT
+public:
+    PartOfSpeechItemDelegate(PartOfSpeechItemView *parent);
+
+    ~PartOfSpeechItemDelegate();
+
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;  
+};
+
+
 
 #endif
