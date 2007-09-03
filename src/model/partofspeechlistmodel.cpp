@@ -112,3 +112,29 @@ QModelIndex PartOfSpeechListModel::index(int row, int col, const QModelIndex& pa
         return QString("Row %1").arg(section);
 }
 
+MeaningNode * PartOfSpeechListModel::nodeAt(const QModelIndex &index)
+{
+    if (!index.isValid())
+        return 0;
+
+    if (index.row() >= rowCount())
+        return 0;
+    
+    return m_meanings.at(index.row());
+}
+
+QModelIndex PartOfSpeechListModel::indexForNode(MeaningNode *node)
+{
+    int index = m_meanings.indexOf(node);
+    QModelIndex modelIndex;
+    if (index != -1) {
+        modelIndex = createIndex(index, 0);
+    }
+    return modelIndex;
+}
+
+        
+
+
+    
+

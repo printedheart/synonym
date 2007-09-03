@@ -49,7 +49,7 @@ void WordDataLoader::load(const QString &phrase, WordDataGraph *dataGraph)
 
         while (synset) {
             SynsetPtr nextSynset = synset->nextss;
-            MeaningNode *meaning = new MeaningNode(QString::number(synset->hereiam));
+            MeaningNode *meaning = new MeaningNode(QString::number(synset->hereiam), dataGraph);
             meaning->setPartOfSpeech(pos);
             meaning->setMeaning(synset->defn);
             dataGraph->addNode(meaning);
@@ -58,7 +58,7 @@ void WordDataLoader::load(const QString &phrase, WordDataGraph *dataGraph)
             if (synset->wcount == 1) {
                 synset = synset->ptrlist;
                 if (synset) {
-                    MeaningNode *meaning2 = new MeaningNode(QString::number(synset->hereiam));
+                    MeaningNode *meaning2 = new MeaningNode(QString::number(synset->hereiam), dataGraph);
                     meaning2->setPartOfSpeech(pos);
                     meaning2->setMeaning(synset->defn);
                     dataGraph->addNode(meaning2);

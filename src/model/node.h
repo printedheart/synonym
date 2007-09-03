@@ -20,7 +20,9 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <QObject>        
+#include <QObject>
+        
+class WordDataGraph;        
 class Edge;
 /**
 	@author Sergejs Melderis <sergey.melderis@gmail.com>
@@ -31,7 +33,7 @@ class DataNode : public QObject
 Q_OBJECT
 
 public:
-    DataNode(const QString &id, QObject *parent = 0);
+    DataNode(const QString &id, WordDataGraph *parent);
     virtual ~DataNode();
 
     QString id() const;
@@ -43,8 +45,6 @@ public:
     bool fixed() const;
 
     virtual QString toString() const;
-signals:
-    void selected(QString phrase);
 private:
     QList<Edge *> m_edges;
 
@@ -58,7 +58,7 @@ class PhraseNode : public DataNode
 {
 Q_OBJECT
 public:
-    PhraseNode(const QString &id, QObject *parent = 0);
+    PhraseNode(const QString &id, WordDataGraph *parent);
     ~PhraseNode();
 
     QString phrase() const;
@@ -72,7 +72,7 @@ Q_OBJECT
 public:
     enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
     
-    MeaningNode(const QString &id, QObject *parent = 0);
+    MeaningNode(const QString &id, WordDataGraph *parent);
     ~MeaningNode();
 
     void setMeaning(const QString &meaning);
