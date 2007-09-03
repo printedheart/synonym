@@ -70,40 +70,48 @@ public:
     QList<GraphEdge*> edges() const { return m_edges; }
 
     QList<GraphNode*> neighbors() const;
-
+    
+    QString id() const;
 
     virtual void setDataNode(DataNode *dataNode) = 0;
     virtual DataNode *dataNode() const = 0;
     
-    QPointF force() const;
-    void applyForce(qreal fx, qreal fy);
+    // Force  and position calculation
+    inline QPointF force() const { return m_force; }
+    inline void applyForce(qreal fx, qreal fy) { m_force += QPointF(fx, fy); }
     void discardForce();
-    void setNewPos(QPointF newPos);
 
+    void setMass(double mass) { m_mass = mass; }
+    inline double mass() const { return m_mass; }
+    virtual bool advance();
+    void setNewPos(QPointF newPos);
+        
+    
+    
+    // Types for QGraphicsScene::qgraphicsitem_cast()
     enum GraphTypes { GraphType = UserType + 90, PhraseType, MeaningType };
     enum { Type = UserType + 90 };
     int type() const { return Type; }
 
-    void setMass(double mass) { m_mass = mass; }
-    double mass() const;
-
+    
+    
     void addAnimationPos(const QPointF &point);
     int animationPosCount();
     void resetAnimation();
-    QPointF & lastAnimationPos();
+    inline QPointF & lastAnimationPos() { return m_buffer[m_lastIndex - 1]; }
     QPointF   takeFirstAnimationPos();
     
-    
-    LayoutPath & layoutPath() { return m_layoutPath; }
 
     bool visited() const { return m_visited; }
     void visit() { m_visited = true; }
     void resetVisit() { m_visited = false; }
 
+    // Painting
     QPainterPath shape() const = 0; 
     virtual QRectF boundingRect() const = 0;
-    virtual bool advance();
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) = 0; 
+    
+    virtual void setActivated(bool /* activated */ ) {} ;
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     
@@ -127,9 +135,6 @@ private:
     
     QPointF m_lastPoint;
     
-    
-    LayoutPath m_layoutPath;
-
 };
 
 
@@ -178,6 +183,8 @@ public:
     QPainterPath shape() const;
     virtual QRectF boundingRect() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
+    
+    void setActivated(bool activated);
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
@@ -190,6 +197,8 @@ private:
     QGraphicsTextItem *m_defItem;
 
     void createToolTip();
+    void showToolTip(const QPointF &pos);
+    void hideToolTip();
 };
 
 

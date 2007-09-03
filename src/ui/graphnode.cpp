@@ -59,20 +59,6 @@ bool GraphNode::advance()
     return false;
 }
 
-double GraphNode::mass() const
-{
-    return m_mass;
-}
-
-void GraphNode::applyForce(qreal fx, qreal fy)
-{
-    m_force += QPointF(fx, fy);
-}
-
-QPointF GraphNode::force() const
-{
-    return m_force;
-}
 
 void GraphNode::discardForce()
 {
@@ -106,10 +92,6 @@ void GraphNode::addAnimationPos(const QPointF &point)
     m_buffer[m_lastIndex++] = point;
 }
 
-QPointF & GraphNode::lastAnimationPos() 
-{
-    return m_buffer[m_lastIndex - 1];
-}
 
 QPointF  GraphNode::takeFirstAnimationPos()
 {
@@ -128,6 +110,13 @@ void GraphNode::resetAnimation()
     m_firstIndex = 0;
     m_lastIndex = 0;    
 }
+
+QString GraphNode::id() const
+{
+    return dataNode()->id();
+}
+
+
 
 
 
@@ -228,8 +217,9 @@ void PhraseGraphNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mouseReleaseEvent(event);
     
     if (event->button() == Qt::LeftButton) {
-        if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos())
+        if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos()) {
             m_scene->propogateClickEvent(this);
+        }
     }
  
 }
@@ -308,17 +298,23 @@ void MeaningGraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     painter->drawEllipse(-5, -5, 10, 10);
 }
 
+void MeaningGraphNode::setActivated(bool activated)
+{
+    if (activated) {
+        showToolTip(pos());
+    } else {
+        hideToolTip();
+    }
+}
 
-
-
-void MeaningGraphNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{    
+void MeaningGraphNode::showToolTip(const QPointF &pos)
+{
     if (!m_toolTip)
         createToolTip();
     if (!m_toolTip->scene()) {
         scene()->addItem(m_toolTip);
     } 
-    QPointF scenePos = mapToScene(event->pos());
+    QPointF scenePos = pos;
     scenePos.setX(scenePos.x() + 20);
     m_toolTip->setPos(mapFromScene(scenePos));
     m_toolTip->setVisible(true);
@@ -326,10 +322,23 @@ void MeaningGraphNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
     setZValue(3);
 }
 
-void MeaningGraphNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void MeaningGraphNode::hideToolTip()
 {
     setZValue(1);
     m_toolTip->setVisible(false);    
+}
+    
+
+void MeaningGraphNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{    
+    showToolTip(event->scenePos());
+    m_scene->signalMouseHovered(this);
+}
+
+void MeaningGraphNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    hideToolTip();   
+    m_scene->signalMouseHoverLeaved(this);
 }
 
 void MeaningGraphNode::createToolTip()
@@ -340,7 +349,6 @@ void MeaningGraphNode::createToolTip()
     }
            
     // Prepare definition dext
-    qDebug() << m_node->meaning();
     QString definition = m_node->meaning().section(';', 0, 0);
     QString examples = m_node->meaning().section(';', 1);
     definition.remove(0, 1);

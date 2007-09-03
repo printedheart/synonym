@@ -48,6 +48,9 @@ public:
     void setCalculate(bool calculate);
 
     void propogateClickEvent(PhraseGraphNode *graphNode);
+    
+    void signalMouseHovered(GraphNode *graphNode);
+    void signalMouseHoverLeaved(GraphNode *graphNode);
 
     void doInitialLayout(GraphNode *rootNode);
 
@@ -55,10 +58,16 @@ public:
 
     void setCentralNode(GraphNode *node);
     GraphNode *centralNode() const;
+public slots:    
+    
+    void setActivated(const QString &id);
     
 signals:
-    void nodeClicked(const QString &phrase);
+    void nodeClicked(const QString &id);
 
+    void nodeMouseHovered(const QString &id);
+    void nodeMouseHoverLeaved(const QString &id);
+    
     void soundButtonClicked(const QString &phrase);
 protected:
     void timerEvent(QTimerEvent *event);
@@ -81,6 +90,8 @@ private:
     void layoutNodes(GraphNode *node, GraphNode *parentNode);
     
     bool m_restartLayout;
+    
+    GraphNode *m_activeNode;
 };
 
 #endif

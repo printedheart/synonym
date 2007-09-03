@@ -35,7 +35,7 @@ static const double PI = 3.14159265358979323846264338327950288419717;
 static double TWO_PI = 2.0 * PI;
 
 GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_calculate(true), m_restartLayout(false)
+ : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_calculate(true), m_restartLayout(false), m_activeNode(0)
 {
     m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
     m_layout = new ForceDirectedLayout4();
@@ -234,5 +234,34 @@ void GraphScene::displaySoundIcon()
     soundIcon->setCursor(Qt::PointingHandCursor);
 }
 
+
+void GraphScene::setActivated(const QString &id)
+{
+    if (m_activeNode && m_activeNode->id() == id) {
+        return;
+    }
+    
+    if (m_activeNode) {
+        m_activeNode->setActivated(false);
+    }
+    m_activeNode = 0;
+    QList<GraphNode*> nodes = graphNodes();
+    foreach (GraphNode *node, nodes) {
+        if (node->dataNode()->id() == id) {
+            node->setActivated(true);
+            m_activeNode = node;
+        }
+    }
+}
+    
+void GraphScene::signalMouseHovered(GraphNode *graphNode)
+{
+    emit nodeMouseHovered(graphNode->id());
+}
+
+void GraphScene::signalMouseHoverLeaved(GraphNode *graphNode)
+{
+    emit nodeMouseHoverLeaved(graphNode->id());
+}
 
 
