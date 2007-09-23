@@ -21,9 +21,9 @@
 #define GRAPHEDGE_H
 
 #include <QGraphicsItem>
+#include <QPen>
 
-
-class GraphNode;        
+class GraphNode;
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
 */
@@ -51,13 +51,27 @@ public:
     
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
+    
+    void setToolTip(const QString &toolTip);
+    
+    void setPen(QPen pan);
 protected:
-
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 private:
     GraphNode *m_source, *m_dest;
     QPointF m_sourcePoint, m_destPoint;
+    QPen m_pen;
+    
+    /* Tooltips */
+    QGraphicsPathItem *m_toolTip;
+    QGraphicsLineItem *m_pointer;
+    QGraphicsEllipseItem *m_connector;
+    QString m_toolTipString;
+    void createToolTip();
+    void adjustToolTipPos();
 };
 
 #endif
