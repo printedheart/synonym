@@ -1,0 +1,86 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!DOCTYPE KDevPrjSession>
+<KDevPrjSession>
+ <DocsAndViews NumberOfDocuments="17" >
+  <Doc0 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphcontroller.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc0>
+  <Doc1 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphnode.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc1>
+  <Doc2 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphscene.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphscene.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/mainwindow.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphcontroller.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc5>
+  <Doc6 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/worddataloader.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc6>
+  <Doc7 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/worddataloader.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc7>
+  <Doc8 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/worddatagraph.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/graphnode.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/partofspeechitemdelegate.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/partofspeechitemdelegate.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/node.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc12>
+  <Doc13 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/node.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc13>
+  <Doc14 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/partofspeechlistmodel.h" >
+   <View0 Encoding="" Type="Source" />
+  </Doc14>
+  <Doc15 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/model/partofspeechlistmodel.cpp" >
+   <View0 Encoding="" Type="Source" />
+  </Doc15>
+  <Doc16 NumberOfViews="1" URL="file:///home/serega/devel/synonym_svn/synonym/src/ui/mainwindow.cpp" >
+   <View0 Encoding="" line="167" Type="Source" />
+  </Doc16>
+ </DocsAndViews>
+ <pluginList>
+  <kdevdebugger>
+   <breakpointList/>
+   <showInternalCommands value="1" />
+  </kdevdebugger>
+  <kdevastyle>
+   <Extensions ext="*.cpp *.h,*.c *.h,*.cxx *.hxx,*.c++ *.h++,*.cc *.hh,*.C *.H,*.diff,*.inl,*.java,*.moc,*.patch,*.tlh,*.xpm" />
+   <AStyle IndentPreprocessors="0" FillCount="4" PadParenthesesOut="1" IndentNamespaces="1" IndentLabels="1" Fill="Tabs" MaxStatement="40" Brackets="Break" MinConditional="-1" IndentBrackets="0" PadParenthesesUn="1" BlockBreak="0" KeepStatements="1" KeepBlocks="1" BlockIfElse="0" IndentSwitches="1" PadOperators="0" FStyle="UserDefined" IndentCases="0" FillEmptyLines="0" BracketsCloseHeaders="0" BlockBreakAll="0" PadParenthesesIn="1" IndentClasses="1" IndentBlocks="0" FillForce="0" />
+  </kdevastyle>
+  <kdevbookmarks>
+   <bookmarks>
+    <bookmark url="/home/serega/devel/synonym/src/ui/partofspeechitemdelegate.cpp" >
+     <mark line="39" />
+    </bookmark>
+    <bookmark url="/home/serega/devel/synonym/src/sound/pronunciationsoundfactoryimpl.cpp" >
+     <mark line="53" />
+    </bookmark>
+   </bookmarks>
+  </kdevbookmarks>
+  <kdevsubversion>
+   <subversion base="" />
+  </kdevsubversion>
+  <kdevvalgrind>
+   <executable path="" params="" />
+   <valgrind path="" params="" />
+   <calltree path="" params="" />
+   <kcachegrind path="" />
+  </kdevvalgrind>
+ </pluginList>
+</KDevPrjSession>
