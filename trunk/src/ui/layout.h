@@ -24,12 +24,17 @@
 #include "graphedge.h"
 #include "graphscene.h"
 
+#include <cmath>
 #include <QList>
 #include <QLinkedList>
 #include <QThread>
 
+static const double PI = 3.14159265358979323846264338327950288419717;
+static double TWO_PI = 2.0 * PI;
+
+
 /**
-	@author Sergey Melderis <sergey.melderis@gmail.com>
+    @author Sergey Melderis <sergey.melderis@gmail.com>
 */
 class Layout
 {
@@ -38,13 +43,16 @@ public:
 
     virtual ~Layout() {};
 
-    virtual bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges) = 0;
+    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges) = 0;
     
-    virtual bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart) = 0;
+    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart) = 0;
     
     virtual void stop() {}
 
 };
+
+    
+/*                    
 
 class ForceDirectedLayout : public Layout
 {
@@ -52,9 +60,9 @@ public:
     ForceDirectedLayout();
     ~ForceDirectedLayout();
 
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
 
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
 private:
     static const int REST_DISTANCE = 75;
 
@@ -70,7 +78,7 @@ private:
 //     ForceDirectedLayout2();
 //     ~ForceDirectedLayout2();
 // 
-//     void layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+//     void layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
 //     
 // private:
 //     static const int REST_DISTANCE = 75;
@@ -86,9 +94,9 @@ public:
     ForceDirectedLayout3();
     ~ForceDirectedLayout3();
 
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
 
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
 private:
     static const int REST_DISTANCE = 75;
 
@@ -97,11 +105,12 @@ private:
     static const qreal REPULSION = 5000;
 
 };
-
+*/
 
 #include <QMutex>
 #include <QWaitCondition>                 
 
+                 
 class ForceDirectedLayout4 : public QThread, public Layout
 {
 Q_OBJECT
@@ -109,9 +118,9 @@ public:
     ForceDirectedLayout4();
     ~ForceDirectedLayout4();
 
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
     
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
     
     void run();
     
@@ -124,7 +133,12 @@ private slots:
         
 
 private:
-    bool _layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+    
+    bool layoutSerial(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+    
+    void prepareLayout(GraphicsNode *rootNode);
+    void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
+                        QSet<GraphicsNode*> &visitSet);
     
     static const int REST_DISTANCE = 100;
 
@@ -139,104 +153,29 @@ private:
         
     QMutex m_mutex;
     
-    QList<GraphNode*> m_nodes;
+    QList<GraphicsNode*> m_nodes;
     QList<GraphEdge*> m_edges;
+    
     
     volatile bool m_restart;
+    
+    
+    struct NodeAnimation {
+        NodeAnimation() : firstIndex(0), lastIndex(0) {}
+        static const  uint BUFFER_SIZE = 8192;
+        QPointF buffer[BUFFER_SIZE];
+        volatile uint firstIndex;
+        volatile uint lastIndex;
 
-};
-
-class ForceDirectedLayout5 : QThread,  public Layout
-{
-Q_OBJECT    
-public:
-    ForceDirectedLayout5(QObject *parent = 0);
-    ~ForceDirectedLayout5();
-
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
-    
-    bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart);
-    
-    void run();
-    
-    volatile bool finishedLayout;
-    
-    
-
-private slots:
-    void wakeUp();
-private:
-    
-    static const int REST_DISTANCE = 75;
-
-    static const qreal STIFFNESS = 0.15;
-
-    static const qreal REPULSION = 5000;
-    
-    QWaitCondition m_finished;
-    
-    QWaitCondition m_enoughPoints;
-    volatile bool firstRemoved;
-    
-    volatile bool m_abort;
-    QWaitCondition m_aborted;
-            
-    volatile bool m_hasPoints;
-    
-    QMutex m_mutex;
-    
-    QMutex m_mutex2;
-    QList<GraphNode*> m_nodes;
-    QList<GraphEdge*> m_edges;
-    QHash<GraphNode*, QLinkedList<QPointF> > m_points;
-
-};
-
-
-class ForceDirectedLayout6 : QThread,  public Layout
-{
-    Q_OBJECT    
-    public:
-        ForceDirectedLayout6(QObject *parent = 0);
-        ~ForceDirectedLayout6();
-
-        bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
-    
-        bool layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart);
-    
-        void run();
-    
-        volatile bool finishedLayout;
-    
-    
-
-    private slots:
-        void wakeUp();
-    private:
+        inline void addPoint(QPointF p) { buffer[lastIndex++] = p; }
+        inline QPointF &  lastPoint()  { return buffer[(lastIndex - 1)]; }
+        QPointF  takeFirstPoint() { return  buffer[firstIndex++]; }
+        inline void reset() { firstIndex = 0; lastIndex = 0;}
+        inline int pointCount() const { return lastIndex - firstIndex; } 
+    };
         
-        static const int DATA_KEY = 1;
-    
-        static const int REST_DISTANCE = 75;
+    QHash<GraphicsNode*, NodeAnimation> m_animations; 
 
-        static const qreal STIFFNESS = 0.15;
-
-        static const qreal REPULSION = 5000;
-    
-        QWaitCondition m_finished;
-    
-        QWaitCondition m_enoughPoints;
-        volatile bool firstRemoved;
-    
-        volatile bool m_abort;
-        QWaitCondition m_aborted;
-            
-        volatile bool m_hasPoints;
-    
-        QMutex m_mutex;
-    
-        QMutex m_mutex2;
-        QList<GraphNode*> m_nodes;
-        QList<GraphEdge*> m_edges;
 
 };
 
@@ -244,7 +183,8 @@ class ForceDirectedLayout6 : QThread,  public Layout
 
 
 
-    
+
+
 
 
 

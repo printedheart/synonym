@@ -27,6 +27,7 @@
 #include "graphedge.h"
 #include "edge.h"
 #include "node.h"
+#include "graphalgorithms.h"
                   
 #include <cstdlib>
 #include <ctime>        
@@ -54,119 +55,165 @@ GraphController::~GraphController()
 
 
 
-WordDataGraph*  GraphController::makeGraph(const QString &word)
+WordGraph*  GraphController::makeGraph(const QString &word)
 {
-    m_scene->setCalculate(false);
+    qDebug() << "makeGraph";
+    m_scene->setLayout(false);
     
     QList<QGraphicsItem*> items = m_scene->items();
-    foreach (QGraphicsItem *item, items)
-        m_scene->removeItem(item);
+    foreach (QGraphicsItem *item, items) {
+        if (!item->parentItem())
+            m_scene->removeItem(item);
+    }
 
-    WordDataGraph *dataGraph;
-    QList<QPair<WordDataGraph*, QList<QGraphicsItem*> > >::const_iterator iter =
+    WordGraph *wordGraph;
+    QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator iter =
             findInHistory(word);
     if (iter != m_graphHistory.constEnd()) {
-        dataGraph = (*iter).first;
+        wordGraph = (*iter).first;
         QList<QGraphicsItem*> items = (*iter).second;
         foreach (QGraphicsItem *item, items)
             m_scene->addItem(item);
             
     } else {
-        dataGraph = new WordDataGraph();
-        m_loader->load(word, dataGraph);
+        wordGraph = m_loader->createWordGraph(word);
         
-    
-    //TODO: What if dataGraph is empty.
+        qDebug() << wordGraph->toString();
         
-        QList<Edge*> edges = dataGraph->edges();
-        DataNode *centralNode = dataGraph->centralNode();
+        Node *centralNode = wordGraph->centralNode();
+        QList<Edge*> edges = centralNode->edges();
         
-/*
-        foreach (Edge *edge, centralNode->edges()) {
-            qDebug() << edge->id() << "  " << edge->sourceNode()->id() << "  " << edge->destNode()->id();
-        }
-
-        qDebug() << "\n\n";
-*/
-
-        
-        PhraseNode *phraseNode = qobject_cast<PhraseNode*>(centralNode);
-        GraphNode *centralGraphNode = new PhraseGraphNode(m_scene);
-        centralGraphNode->setDataNode(phraseNode);
-        centralGraphNode->setMass(10.0);
-        m_scene->addItem(centralGraphNode);
-        m_scene->setCentralNode(centralGraphNode);
+        WordNode *wordNode = qobject_cast<WordNode*>(centralNode);
+        GraphicsNode *centralGraphicsNode = new WordGraphicsNode(m_scene);
+        centralGraphicsNode->setNode(wordNode);
+        centralGraphicsNode->setMass(10.0);
+        m_scene->addItem(centralGraphicsNode);
+        m_scene->setCentralNode(centralGraphicsNode);
         
         foreach (Edge *edge , edges) {
-            GraphEdge *graphEdge = new GraphEdge();
+            addEdge(centralGraphicsNode, edge);
+/*            GraphEdge *graphEdge = new GraphEdge();
+            QString relationship = Relationship::toString(edge->relationship());
+            if (!relationship.isEmpty()) {
+                graphEdge->setToolTip(relationship);
+                graphEdge->setAcceptsHoverEvents(true);
+            }            
             m_scene->addItem(graphEdge);
   
   
-            GraphNode *source = findGraphNode(edge->sourceNode());
+            GraphicsNode *source = findGraphicsNode(edge->sourceNode());
             graphEdge->setSource(source);
-            GraphNode *dest = findGraphNode(edge->destNode());
-            graphEdge->setDest(dest);
+            GraphicsNode *dest = findGraphicsNode(edge->destNode());
+            graphEdge->setDest(dest);*/
         }
-
-        QPair<WordDataGraph*, QList<QGraphicsItem*> > pair;
-        pair.first = dataGraph;
+        
+        QList<GraphicsNode*> graphNodes = m_scene->graphNodes();
+        QPair<WordGraph*, QList<QGraphicsItem*> > pair;
+        pair.first = wordGraph;
         pair.second = m_scene->items();
         m_graphHistory.append(pair);
     
         if (m_graphHistory.size() > HISTORY_SIZE) {
-            QPair<WordDataGraph*, QList<QGraphicsItem*> > pair = m_graphHistory.takeFirst();
+            QPair<WordGraph*, QList<QGraphicsItem*> > pair = m_graphHistory.takeFirst();
             delete pair.first;
             foreach (QGraphicsItem *item, pair.second)
                 delete item;
         
             pair.second.clear();
         }
-        m_scene->doInitialLayout(centralGraphNode);
-
     }           
             
-    m_scene->setCalculate(true);
-    
+    m_scene->setLayout(true);
     m_scene->itemMoved();
-    
-    return dataGraph;    
+    return wordGraph;    
 }
 
 
-QList<QPair<WordDataGraph*, QList<QGraphicsItem*> > >::const_iterator
+QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator
         GraphController::findInHistory(const QString &word)
 {
-    QList<QPair<WordDataGraph*, QList<QGraphicsItem*> > >::const_iterator iter;
+    QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator iter;
     for (iter = m_graphHistory.constBegin(); iter != m_graphHistory.constEnd(); ++iter) {
-        WordDataGraph *dataGraph = (*iter).first;
-        if (dataGraph->centralNode()->id() == word)
+        WordGraph *wordGraph = (*iter).first;
+        if (wordGraph->centralNode()->id() == word)
             return iter;
     }
     return iter;
 }
 
 
-GraphNode* GraphController::findGraphNode(DataNode *dataNode)
+void GraphController::addEdge(GraphicsNode *graphNode, Edge *edge)
+{
+    qDebug() << graphNode;
+    Node *currentNode = graphNode->dataNode();
+    Node *otherNode = edge->neighborTo(currentNode);
+    
+    if (qobject_cast<MeaningNode*>(currentNode) 
+        && qobject_cast<MeaningNode*>(otherNode) 
+        && currentNode->degree() > 2) {
+        currentNode->graph()->removeNode(otherNode->id());
+         return;
+     }
+    
+    QList<GraphicsNode*> neighbors = findNeighbors(graphNode, graphNode->edges().constBegin(), graphNode->edges().constEnd());
+    foreach (GraphicsNode *neighbor, neighbors) {
+        if (neighbor->dataNode() == otherNode) {
+            return;
+        }
+    }
+    
+    GraphEdge *graphEdge = new GraphEdge();
+    QString relationship = Relationship::toString(edge->relationship());
+    if (!relationship.isEmpty()) {
+        graphEdge->setToolTip(relationship);
+        graphEdge->setAcceptsHoverEvents(true);
+    }            
+    m_scene->addItem(graphEdge);
+    graphEdge->setSource(graphNode);
+  
+    
+    GraphicsNode *destGraphicsNode = findGraphicsNode(otherNode);
+    graphEdge->setDest(destGraphicsNode);
+    
+    if (otherNode->edges().size() < 15) {
+        foreach (Edge *ed, otherNode->edges()) {
+            if (ed != edge) {
+                addEdge(destGraphicsNode,  ed);
+            }
+        }
+    } else {
+        WordGraph *graph = currentNode->graph();
+        foreach (Edge *ed, otherNode->edges()) {
+            if (ed != edge) {
+                graph->removeEdge(ed->id());
+            }
+        }
+    }
+                
+}
+
+
+GraphicsNode* GraphController::findGraphicsNode(Node *dataNode)
 {
     Q_ASSERT(dataNode != 0);
 
-    foreach (GraphNode *node, m_scene->graphNodes()) {
+    foreach (GraphicsNode *node, m_scene->graphNodes()) {
         if (node->dataNode() == dataNode) {
             return node;
         }
     }
     
-    PhraseNode *phraseNode = qobject_cast<PhraseNode*>(dataNode);
-    GraphNode *graphNode;
-    if (phraseNode) {
-        PhraseGraphNode *phraseGraphNode = new PhraseGraphNode(m_scene);
-        phraseGraphNode->setDataNode(phraseNode);
-        graphNode = phraseGraphNode;
+    WordNode *wordNode = qobject_cast<WordNode*>(dataNode);
+    GraphicsNode *graphNode;
+    if (wordNode) {
+        WordGraphicsNode *phraseGraphicsNode = new WordGraphicsNode(m_scene);
+        phraseGraphicsNode->setNode(wordNode);
+        graphNode = phraseGraphicsNode;
     } else {
         MeaningNode *meaningNode = qobject_cast<MeaningNode*>(dataNode);
-        MeaningGraphNode *meaningGraphNode = new MeaningGraphNode(m_scene);
-        meaningGraphNode->setDataNode(meaningNode);
-        graphNode = meaningGraphNode;
+        MeaningGraphicsNode *meaningGraphicsNode = new MeaningGraphicsNode(m_scene);
+        meaningGraphicsNode->setNode(meaningNode);
+        graphNode = meaningGraphicsNode;
         graphNode->setAcceptsHoverEvents(true);
     }
 
@@ -186,9 +233,9 @@ GraphNode* GraphController::findGraphNode(DataNode *dataNode)
 
 void GraphController::soundReady(const QString &word)
 {
-   WordDataGraph *dataGraph = m_graphHistory.back().first;
-   PhraseNode *node = qobject_cast<PhraseNode*>(dataGraph->centralNode());
-   if (node && node->phrase() == word) {
+   WordGraph *wordGraph = m_graphHistory.back().first;
+   WordNode *node = qobject_cast<WordNode*>(wordGraph->centralNode());
+   if (node && node->word() == word) {
         m_scene->displaySoundIcon();
    }
 

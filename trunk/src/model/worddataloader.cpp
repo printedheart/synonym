@@ -21,11 +21,9 @@
 #include "worddatagraph.h"
 #include "node.h"
 #include "edge.h"
-#include <QDebug>            
-#include <QBuffer>                
-#include <QCoreApplication>
-                  
+#include <QtCore>                  
 #include "wn.h"        
+#include <iostream>
 WordDataLoader::WordDataLoader(QObject *parent)
  : QObject(parent)
 {
@@ -37,54 +35,105 @@ WordDataLoader::~WordDataLoader()
 {
 }
 
-void WordDataLoader::load(const QString &phrase, WordDataGraph *dataGraph)
+WordGraph * WordDataLoader::createWordGraph(const QString &searchWord) 
 {
-    PhraseNode *phraseNode = new PhraseNode(phrase, dataGraph);
-    phraseNode->setFixed(true);
-    dataGraph->addNode(phraseNode);
+    WordGraph *wordGraph = new WordGraph();
+    WordNode *wordNode = new WordNode(searchWord, wordGraph);
+    wordNode->setFixed(true);
+    wordGraph->addNode(wordNode);
     
+    int searchTypes[8] = { -HYPERPTR ,  -HYPOPTR, /* -SIMPTR , */ -ENTAILPTR, -VERBGROUP, -CLASSIFICATION, -CLASS, -PERTPTR, - ANTPTR };
     for (int pos = 1; pos <= NUMPARTS; pos++) {
-        SynsetPtr synset = findtheinfo_ds(phrase.toLatin1().data(),
-                                          pos, - HYPERPTR  /*ANTPTR */, ALLSENSES);
-
-        while (synset) {
-            SynsetPtr nextSynset = synset->nextss;
-            MeaningNode *meaning = new MeaningNode(QString::number(synset->hereiam), dataGraph);
-            meaning->setPartOfSpeech(pos);
-            meaning->setMeaning(synset->defn);
-            dataGraph->addNode(meaning);
-            dataGraph->addEdge(phraseNode->id(), meaning->id());
-
-            if (synset->wcount == 1) {
-                synset = synset->ptrlist;
-                if (synset) {
-                    MeaningNode *meaning2 = new MeaningNode(QString::number(synset->hereiam), dataGraph);
-                    meaning2->setPartOfSpeech(pos);
-                    meaning2->setMeaning(synset->defn);
-                    dataGraph->addNode(meaning2);
-                    dataGraph->addEdge(meaning->id(), meaning2->id());
-
-                    for (int i = 0; i < synset->wcount; i++) {
-                        if (m_curPhrase != synset->words[i]) {
-                            PhraseNode *word =  new PhraseNode(synset->words[i], dataGraph);
-                            dataGraph->addNode(word);
-                            dataGraph->addEdge(meaning2->id(), word->id());
-                        }
-                    }
-                }
-            } else {
-                for (int i = 0; i < synset->wcount; i++) {
-                    if (m_curPhrase != synset->words[i]) {
-                        PhraseNode *word =  new PhraseNode(synset->words[i], dataGraph);
-                        dataGraph->addNode(word);
-                        dataGraph->addEdge(meaning->id(), word->id());
-                    }
-                }
-            }
+        for (int type = 0; type < 9; type++) {
+        
+            qDebug() << "before findtheinfo_ds" << pos << " " <<  type;
+            SynsetPtr synset = findtheinfo_ds(searchWord.toLatin1().data(),
+                                            pos, searchTypes[type], ALLSENSES);
+            qDebug() << "after findtheinfo_ds";
             
-
-            synset = nextSynset;
+            int relationshipType = searchTypes[type] > 0 ? searchTypes[type] : - searchTypes[type];
+            
+            while (synset) {
+                SynsetPtr nextSynset = synset->nextss;
+                
+                MeaningNode *meaning = new MeaningNode(QString::number(pos) + QString::number(synset->hereiam), wordGraph);
+                meaning->setPartOfSpeech(pos);
+                meaning->setMeaning(synset->defn);
+                wordGraph->addNode(meaning);
+                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id());
+    
+                for (int i = 0; i < synset->wcount; i++) {
+                    if (searchWord != synset->words[i]) {
+                        WordNode *word =  new WordNode(synset->words[i], wordGraph);
+                        wordGraph->addNode(word);
+                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id());
+                            
+                    }
+                }
+                
+                    synset = synset->ptrlist;
+                    if (synset) {//while (synset) {
+                        MeaningNode *meaning2 = new MeaningNode(QString::number(pos) + QString::number(synset->hereiam), wordGraph);
+                        meaning2->setPartOfSpeech(pos);
+                        meaning2->setMeaning(synset->defn);
+                        wordGraph->addNode(meaning2);
+                        Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id());
+                        
+                        if (edge) {
+                            edge->setRelationship(relationshipType);
+                        }
+    
+                        for (int i = 0; i < synset->wcount; i++) {
+                            if (searchWord != synset->words[i]) {
+                                WordNode *word =  new WordNode(synset->words[i], wordGraph);
+                                wordGraph->addNode(word);
+                                Edge *edge = wordGraph->addEdge(meaning2->id(), word->id());
+                            }
+                        }
+                        synset = synset->nextss;
+                        //synset = synset->ptrlist;
+                    }
+                synset = nextSynset;
+            }
         }
     }
+    
+    return wordGraph;
 }
 
+QStringList WordDataLoader::words() const
+{
+    QStringList allWords;
+    if (indexfps) {
+        QFile file;
+        for (int i = 1; i < NUMPARTS + 1; i++) {
+            QFile file;
+            if (!file.open(indexfps[1], QIODevice::ReadOnly | QIODevice::Text)) {
+                qDebug() << "Cannot open file" << file.fileName();
+                continue;
+            }
+                
+            while (!file.atEnd()) {
+                QByteArray line = file.readLine();
+                if (line.startsWith(' '))
+                    continue;
+                
+                QByteArray phraseWithUnderscores =  line.split(' ')[0];
+                QList<QByteArray> words = phraseWithUnderscores.split('_');
+                QString phrase;
+                foreach (QByteArray word, words) {
+                    phrase.append(word.data());
+                    phrase.append(' ');
+                }
+                allWords << phrase.trimmed();
+            }
+        }
+        
+        allWords.sort();   
+    }
+    return allWords;
+}
+
+
+
+    

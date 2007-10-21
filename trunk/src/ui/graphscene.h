@@ -22,15 +22,15 @@
 
 #include <QGraphicsScene>
 #include <QList>
-        
+#include <QSet>        
 class Layout;
-class GraphNode;
+class GraphicsNode;
 class GraphEdge;
-class PhraseGraphNode;
-class DataNode;
+class WordGraphicsNode;
+class Node;
 class QSvgRenderer;
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
 
 class GraphScene : public QGraphicsScene
@@ -43,23 +43,20 @@ public:
 
     void itemMoved();
 
-    QList<GraphNode *> graphNodes() const;
+    QList<GraphicsNode *> graphNodes() const;
 
-    void setCalculate(bool calculate);
+    void setLayout(bool enable);
 
-    void propogateClickEvent(PhraseGraphNode *graphNode);
+    void propogateClickEvent(GraphicsNode *graphNode);
     
-    void signalMouseHovered(GraphNode *graphNode);
-    void signalMouseHoverLeaved(GraphNode *graphNode);
-
-    void doInitialLayout(GraphNode *rootNode);
+    void signalMouseHovered(GraphicsNode *graphNode);
+    void signalMouseHoverLeaved(GraphicsNode *graphNode);
 
     void displaySoundIcon();
 
-    void setCentralNode(GraphNode *node);
-    GraphNode *centralNode() const;
+    void setCentralNode(GraphicsNode *node);
+    GraphicsNode *centralNode() const;
 public slots:    
-    
     void setActivated(const QString &id);
     
 signals:
@@ -74,24 +71,22 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
-    void calculateForces();
-    void doSpringAlgorithm(QList<GraphNode*> nodes, QList<GraphEdge*> edges);
+    void layout();
        
 private:
     int m_timerId;
     int m_timerInterval;
 
-    bool m_calculate;
+    bool m_enableLayout;
 
-    GraphNode *m_centralNode;
+    GraphicsNode *m_centralNode;
     QSvgRenderer *m_soundIconRenderer;
 
     Layout *m_layout;
-    void layoutNodes(GraphNode *node, GraphNode *parentNode);
+    void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode, QSet<GraphicsNode*> &visitSet);
     
-    bool m_restartLayout;
-    
-    GraphNode *m_activeNode;
+    bool m_restartLayout;    
+    GraphicsNode *m_activeNode;
 };
 
 #endif

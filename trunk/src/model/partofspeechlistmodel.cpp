@@ -24,7 +24,7 @@
 #include <QtCore>
 
 PartOfSpeechListModel::PartOfSpeechListModel(
-    MeaningNode::PartOfSpeech modelType, QObject *parent) :
+    WordGraph::PartOfSpeech modelType, QObject *parent) :
         QAbstractListModel(parent),m_dataGraph(0), m_modelType(modelType) 
 {
 }
@@ -34,10 +34,10 @@ PartOfSpeechListModel::~PartOfSpeechListModel()
 {
 }
 
-void PartOfSpeechListModel::setDataGraph(WordDataGraph *dataGraph)
+void PartOfSpeechListModel::setDataGraph(WordGraph *dataGraph)
 {
     if (m_dataGraph) {
-        disconnect(m_dataGraph, SIGNAL(nodeAdded(DataNode *)),
+        disconnect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
                 this, SLOT(reload()));
         disconnect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
                 this, SLOT(reload()));
@@ -47,7 +47,7 @@ void PartOfSpeechListModel::setDataGraph(WordDataGraph *dataGraph)
 
     m_dataGraph = dataGraph;
 
-    connect(m_dataGraph, SIGNAL(nodeAdded(DataNode *)),
+    connect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
             this, SLOT(reload()));
     connect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
             this, SLOT(reload()));

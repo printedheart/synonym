@@ -30,7 +30,9 @@
 #include "player.h"
 #include <QtGui>
 #include <QtCore>
-                        
+#include <stdlib.h>
+#include <wn.h>
+
         
 MainWindow::MainWindow()
  : QMainWindow()
@@ -67,8 +69,8 @@ MainWindow::MainWindow()
 
     // Setup item views.
     QString partsOfSpeechHeaders[4] = { "Nouns", "Verbs", "Adjectives", "Adverbs"};
-    MeaningNode::PartOfSpeech partsOfSpeech[4] = { MeaningNode::Noun, MeaningNode::Verb,
-        MeaningNode::Adjective, MeaningNode::Adverb};
+    WordGraph::PartOfSpeech partsOfSpeech[4] = { WordGraph::Noun, WordGraph::Verb,
+        WordGraph::Adjective, WordGraph::Adverb};
                                      
     for (int i = 0; i < 4; i++) {
         QDockWidget *dockWidget = new QDockWidget(partsOfSpeechHeaders[i], this);
@@ -108,7 +110,7 @@ MainWindow::MainWindow()
             this, SLOT(playSound(const QString&)));
     
     
-     
+   initCompleter();  
 }
 
 
@@ -127,7 +129,7 @@ void MainWindow::callLoadWord()
 
 void MainWindow::lookUpWordNet(const QString &word)
 {
-    WordDataGraph *dataGraph = m_graphController->makeGraph(word);
+    WordGraph *dataGraph = m_graphController->makeGraph(word);
     m_currentGraph = dataGraph;
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(dataGraph);
@@ -160,7 +162,7 @@ void MainWindow::nodeActivated(const QModelIndex &index)
 
 void MainWindow::nodeActivated(const QString &id)
 {
-    DataNode *node = m_currentGraph->node(id);
+    Node *node = m_currentGraph->node(id);
     if (node) {
         MeaningNode *meaning = dynamic_cast<MeaningNode*>(node);
         if (meaning) {
@@ -168,6 +170,43 @@ void MainWindow::nodeActivated(const QString &id)
             m_posViews[meaning->partOfSpeech() - 1]->highlightItem(nodeIndex);
         }
     }
+}
+
+void MainWindow::initCompleter()
+{
+//     if (indexfps) {
+//         QStringList allWords;
+//         QFile file;
+//         for (int i = 1; i < NUMPARTS + 1; i++) {
+//             QFile file;
+//             if (!file.open(indexfps[1], QIODevice::ReadOnly | QIODevice::Text)) {
+//                 qDebug() << "Cannot open file" << file.fileName();
+//                 continue;
+//             }
+//                 
+//             while (!file.atEnd()) {
+//                 QByteArray line = file.readLine();
+//                 if (line.startsWith(' '))
+//                     continue;
+//                 
+//                 QByteArray phraseWithUnderscores =  line.split(' ')[0];
+//                 QList<QByteArray> words = phraseWithUnderscores.split('_');
+//                 QString phrase;
+//                 foreach (QByteArray word, words) {
+//                     phrase.append(word.data());
+//                     phrase.append(' ');
+//                 }
+//                 allWords << phrase.trimmed();
+//             }
+//         }
+//         
+//         allWords.sort();
+    QStringList words = m_loader->words();   
+        QCompleter *completer = new QCompleter(words, this);
+        completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+        completer->setCaseSensitivity(Qt::CaseInsensitive);
+        m_wordLine->setCompleter(completer);
+    //}
 }
     
 

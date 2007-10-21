@@ -25,31 +25,29 @@
 #include <QtSvg>
 #include <cmath> 
                 
-GraphNode::GraphNode(GraphScene *scene)
-	:QGraphicsItem(0), m_mass(1.0), m_visited(false)
+GraphicsNode::GraphicsNode(GraphScene *scene)
+    :QGraphicsItem(0), m_mass(1.0)
 {
     m_scene = scene;   
     m_intermedPos.setX(2.0);
 }
 
-GraphNode::~GraphNode()
+GraphicsNode::~GraphicsNode()
 {
 }
 
-QList<GraphNode*> GraphNode::neighbors() const
+
+void GraphicsNode::addEdge(GraphEdge *edge)
 {
-    QList<GraphNode*> neighbors;
-    foreach (GraphEdge *edge, edges()) {
-        if (edge->source() == this)
-            neighbors.append(edge->dest());
-        else if (edge->dest() == this)
-            neighbors.append(edge->source());
-    }
-    return neighbors;
+     m_edges.append(edge);
+}
     
+QList<GraphEdge*> GraphicsNode::edges() const
+{ 
+    return m_edges;
 }
 
-bool GraphNode::advance()
+bool GraphicsNode::advance()
 {
      if (qAbs(m_newPos.x() - pos().x()) > 0.1 || qAbs(m_newPos.y() - pos().y()) > 0.1) {
          setPos(m_newPos);
@@ -59,19 +57,12 @@ bool GraphNode::advance()
     return false;
 }
 
-
-void GraphNode::discardForce()
-{
-    m_force.setX(0.0);
-    m_force.setY(0.0);
-}
-
-void GraphNode::setNewPos(QPointF newPos)
+void GraphicsNode::setNewPos(QPointF newPos)
 {
     m_newPos = newPos;
 }
 
-QVariant GraphNode::itemChange(GraphicsItemChange change, const QVariant &value)
+QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     switch (change) {
         case ItemPositionChange:
@@ -87,91 +78,73 @@ QVariant GraphNode::itemChange(GraphicsItemChange change, const QVariant &value)
 }
 
 
-void GraphNode::addAnimationPos(const QPointF &point)
-{
-    m_buffer[m_lastIndex++] = point;
-}
-
-
-QPointF  GraphNode::takeFirstAnimationPos()
-{
-    return m_buffer[m_firstIndex++];
-}
-    
-
-
-int GraphNode::animationPosCount()
-{
-    return m_lastIndex - m_firstIndex;
-}
-
-void GraphNode::resetAnimation()
-{
-    m_firstIndex = 0;
-    m_lastIndex = 0;    
-}
-
-QString GraphNode::id() const
+QString GraphicsNode::id() const
 {
     return dataNode()->id();
 }
 
-
-
-
-
+void GraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsItem::mouseReleaseEvent(event);
+    if (event->button() == Qt::LeftButton) {
+        if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos()) {
+            m_scene->propogateClickEvent(this);
+        }
+    }
+ 
+}
 
 
 
 /**
-    PhraseGraphNode definition
+    WordGraphicsNode definition
 */
-PhraseGraphNode::PhraseGraphNode(GraphScene *scene)
-    :GraphNode(scene), m_phraseNode(0)
+WordGraphicsNode::WordGraphicsNode(GraphScene *scene)
+    :GraphicsNode(scene), m_wordNode(0)
 {
     setZValue(2);
     m_font = QFont("Dejavu Sans", 8, QFont::Normal);
 }
 
-PhraseGraphNode::~PhraseGraphNode()
+WordGraphicsNode::~WordGraphicsNode()
 {}
 
-void PhraseGraphNode::setDataNode(DataNode *node)
+void WordGraphicsNode::setNode(Node *node)
 {
     if (node) {
-        m_phraseNode = qobject_cast<PhraseNode *>(node);
-        m_font.setPointSize(m_phraseNode->fixed() ? 14 : 8);
+        m_wordNode = qobject_cast<WordNode *>(node);
+        m_font.setPointSize(m_wordNode->fixed() ? 14 : 8);
     }
         
     else
-        m_phraseNode = 0;
+        m_wordNode = 0;
 }
 
-DataNode * PhraseGraphNode::dataNode() const
+Node * WordGraphicsNode::dataNode() const
 {
-    return m_phraseNode;
+    return m_wordNode;
 }
 
-QPainterPath PhraseGraphNode::shape() const
+QPainterPath WordGraphicsNode::shape() const
 {
     QPainterPath path;
     path.addRect(boundingRect());
     return path;
 }
 
-QRectF PhraseGraphNode::boundingRect() const
+QRectF WordGraphicsNode::boundingRect() const
 {
-    if (!m_phraseNode)
+    if (!m_wordNode)
         return QRectF();
     
     QFontMetrics metrics(m_font);
-    QRectF rect = metrics.boundingRect(m_phraseNode->phrase());
+    QRectF rect = metrics.boundingRect(m_wordNode->word());
         
     if (dataNode()->fixed()) 
         return rect.translated(- rect.width() / 2, rect.height() / 8);
     
     GraphEdge *edge = edges().first();
-    GraphNode *other = 0;
+    GraphicsNode *other = 0;
     if (edge->source() != this)
         other = edge->source();
     else
@@ -189,7 +162,7 @@ QRectF PhraseGraphNode::boundingRect() const
     return rect;
 }
 
-void PhraseGraphNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     
     Q_UNUSED(widget);
@@ -198,21 +171,21 @@ void PhraseGraphNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
     painter->setFont(m_font);
     painter->setPen(QPen(Qt::black, 1));
     painter->setBrush(Qt::NoBrush);
-    painter->drawText(boundingRect(), Qt::AlignCenter, m_phraseNode->phrase());
+    painter->drawText(boundingRect(), Qt::AlignCenter, m_wordNode->word());
      
     
    // painter->drawRect(boundingRect());
 }
 
-bool PhraseGraphNode::advance()
+bool WordGraphicsNode::advance()
 {
-    if (m_phraseNode->fixed())
+    if (m_wordNode->fixed())
         return false;
 
-    return GraphNode::advance();
+    return GraphicsNode::advance();
 }
 
-void PhraseGraphNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void WordGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     
@@ -224,7 +197,7 @@ void PhraseGraphNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
  
 }
 
-void PhraseGraphNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void WordGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_mousePressPos = event->pos();
     QGraphicsItem::mousePressEvent(event);
@@ -235,24 +208,26 @@ void PhraseGraphNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 
 /**
-    MeaningGraphNode definition
+    MeaningGraphicsNode definition
 */
 
 static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
 
-MeaningGraphNode::MeaningGraphNode(GraphScene *scene)
-    :GraphNode(scene), m_node(0), m_toolTip(0), m_defItem(0)
+int MeaningGraphicsNode::m_radius  = 5;
+
+MeaningGraphicsNode::MeaningGraphicsNode(GraphScene *scene)
+    :GraphicsNode(scene), m_node(0), m_toolTip(0), m_defItem(0)
 {
     setZValue(1);        
 }
 
-MeaningGraphNode::~MeaningGraphNode()
+MeaningGraphicsNode::~MeaningGraphicsNode()
 {
     delete m_defItem;
     delete m_toolTip;
 }
 
-void MeaningGraphNode::setDataNode(DataNode *node)
+void MeaningGraphicsNode::setNode(Node *node)
 {
     if (node) {
         m_node = qobject_cast<MeaningNode *>(node);
@@ -261,31 +236,31 @@ void MeaningGraphNode::setDataNode(DataNode *node)
 
 }
 
-DataNode * MeaningGraphNode::dataNode() const
+Node * MeaningGraphicsNode::dataNode() const
 {
     return m_node;
 }
 
-QRectF MeaningGraphNode::boundingRect() const
+QRectF MeaningGraphicsNode::boundingRect() const
 {
     if (!m_node)
         return QRectF();
         
     qreal adjust = 3;
     return QRectF(
-                  -5 - adjust, -5 - adjust,
-                   10 + adjust * 2, 10 + adjust * 2);
+                  -m_radius - adjust, -m_radius - adjust,
+                   m_radius * 2 + adjust * 2, m_radius * 2 + adjust * 2);
 }
 
 
-QPainterPath MeaningGraphNode::shape() const
+QPainterPath MeaningGraphicsNode::shape() const
 {
     QPainterPath path;
     path.addEllipse(boundingRect());
     return path;
 }
 
-void MeaningGraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void MeaningGraphicsNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(widget);
     if (!m_node)
@@ -295,10 +270,10 @@ void MeaningGraphNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     //painter->setPen(colors[m_node->partOfSpeech()]);
     painter->setBrush(QBrush(colors[m_node->partOfSpeech() - 1]));
     painter->setPen(Qt::black);
-    painter->drawEllipse(-5, -5, 10, 10);
+    painter->drawEllipse(-m_radius, -m_radius, 2 * m_radius, 2 * m_radius);
 }
 
-void MeaningGraphNode::setActivated(bool activated)
+void MeaningGraphicsNode::setActivated(bool activated)
 {
     if (activated) {
         showToolTip(pos());
@@ -307,7 +282,7 @@ void MeaningGraphNode::setActivated(bool activated)
     }
 }
 
-void MeaningGraphNode::showToolTip(const QPointF &pos)
+void MeaningGraphicsNode::showToolTip(const QPointF &pos)
 {
     if (!m_toolTip)
         createToolTip();
@@ -315,33 +290,49 @@ void MeaningGraphNode::showToolTip(const QPointF &pos)
         scene()->addItem(m_toolTip);
     } 
     QPointF scenePos = pos;
-    scenePos.setX(scenePos.x() + 20);
+    QRectF tooTipRect = m_toolTip->boundingRect();
+    
+    scenePos.setX(scenePos.x() + 30);
+    scenePos.setY(scenePos.y() - tooTipRect.height() - 20);
     m_toolTip->setPos(mapFromScene(scenePos));
     m_toolTip->setVisible(true);
     m_toolTip->update();
     setZValue(3);
+    
+    QPointF toolTipLeftPos = mapFromItem(m_toolTip, m_toolTip->boundingRect().bottomLeft());
+    QLineF line(mapFromParent(this->pos()), toolTipLeftPos);
+    QPointF startPoint = line.pointAt(m_radius / line.length());
+    
+    QLineF pointerLine = QLineF(startPoint, toolTipLeftPos);
+    pointerLine.setLength(pointerLine.length() + 10);
+    m_pointer->setLine(pointerLine);
+    m_pointer->setVisible(true);
+    m_pointer->update();
+    
+    
 }
 
-void MeaningGraphNode::hideToolTip()
+void MeaningGraphicsNode::hideToolTip()
 {
     setZValue(1);
-    m_toolTip->setVisible(false);    
+    m_toolTip->setVisible(false);
+    m_pointer->setVisible(false);    
 }
     
 
-void MeaningGraphNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void MeaningGraphicsNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {    
     showToolTip(event->scenePos());
     m_scene->signalMouseHovered(this);
 }
 
-void MeaningGraphNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void MeaningGraphicsNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     hideToolTip();   
     m_scene->signalMouseHoverLeaved(this);
 }
 
-void MeaningGraphNode::createToolTip()
+void MeaningGraphicsNode::createToolTip()
 {
     if (!m_toolTip) {
         m_toolTip = new QGraphicsPathItem(this);
@@ -381,14 +372,22 @@ void MeaningGraphNode::createToolTip()
     m_toolTip->setPen(pen);
     m_toolTip->setBrush(QBrush(Qt::white));    
     m_toolTip->setVisible(true);
-    m_toolTip->setZValue(4);
-    m_defItem->setZValue(5);
+    m_toolTip->setZValue(5);
+    m_defItem->setZValue(6);
+    
+    m_pointer = new QGraphicsLineItem(this);
+    m_pointer->setZValue(4);
 }
 
 
-void MeaningGraphNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void MeaningGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mousePressEvent(event);
+}
+
+void MeaningGraphicsNode::adjustToolTipPos()
+{
+    
 }
 
 

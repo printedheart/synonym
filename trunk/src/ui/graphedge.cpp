@@ -23,19 +23,17 @@
 #include <math.h>
 #include <QtGui>        
 
-
 GraphEdge::GraphEdge()
-    :m_source(0), m_dest(0), m_toolTip(0)
-{
-
-}
-        
-GraphEdge::GraphEdge(GraphNode *sourceNode, GraphNode *destNode)
-    :m_source(sourceNode), m_dest(destNode), m_toolTip(0)
+    : m_toolTip(0)
 {
     QColor c;
-    c.setHsv(0.0, 0.0, 150);
-    m_pen = QPen(c, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    c.setHsv(0.0, 0.0, 140);
+    m_pen = QPen(c, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+}
+        
+GraphEdge::GraphEdge(GraphicsNode *sourceNode, GraphicsNode *destNode)
+    :m_source(sourceNode), m_dest(destNode), m_toolTip(0)
+{
     m_source->addEdge(this);
     m_dest->addEdge(this);
     adjust();
@@ -44,28 +42,31 @@ GraphEdge::GraphEdge(GraphNode *sourceNode, GraphNode *destNode)
 
 GraphEdge::~GraphEdge()
 {
+    delete m_connector;
+    delete m_pointer;
+    delete m_toolTip;
 }
 
-void GraphEdge::setSource(GraphNode *source)
+void GraphEdge::setSource(GraphicsNode *source)
 {
     m_source = source;
     source->addEdge(this);
 }
 
-GraphNode* GraphEdge::source() const
+GraphicsNode* GraphEdge::source() const
 {
     return m_source;
 }
 
 
 
-void GraphEdge::setDest(GraphNode *dest)
+void GraphEdge::setDest(GraphicsNode *dest)
 {
     m_dest = dest;
     dest->addEdge(this);
 }
     
-GraphNode* GraphEdge::dest() const
+GraphicsNode* GraphEdge::dest() const
 {
     return m_dest;
 }
@@ -206,6 +207,7 @@ void GraphEdge::createToolTip()
     m_toolTip->setVisible(true);
     m_toolTip->setZValue(4);
     textItem->setZValue(5);
+    
     m_pointer = new QGraphicsLineItem(this);
     m_pointer->setZValue(3);
     m_connector = new QGraphicsEllipseItem(QRect(-3, -3, 6, 6), m_pointer);

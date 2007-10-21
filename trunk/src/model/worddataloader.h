@@ -21,10 +21,11 @@
 #define WORDDATALOADER_H
 
 #include <QObject>
+#include <QStringList>
 class QBuffer;        
-class WordDataGraph;
+class WordGraph;
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
 class WordDataLoader : public QObject
 {
@@ -33,15 +34,13 @@ public:
     WordDataLoader(QObject *parent = 0);
     
     ~WordDataLoader();
-public slots:
-    void load(const QString &phrase, WordDataGraph *dataGraph);
+     virtual WordGraph * createWordGraph(const QString &searchWord);
+     
+     virtual QStringList words() const;
 
-signals:
-    void loaded();
-private:
-    QString m_curPhrase;
+protected:
+    QString m_curWord;
 
 };
-
 
 #endif

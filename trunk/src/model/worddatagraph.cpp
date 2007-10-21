@@ -19,19 +19,21 @@
  ***************************************************************************/
 #include "worddatagraph.h"
 
-        
-WordDataGraph::WordDataGraph(QObject *parent)
+#include "graphalgorithms.h"  
+      
+WordGraph::WordGraph(QObject *parent)
     : QObject(parent)
 {
 }
 
 
-WordDataGraph::~WordDataGraph()
+WordGraph::~WordGraph()
 {
 }
 
-void WordDataGraph::addNode(DataNode *node)
+void WordGraph::addNode(Node *node)
 {
+    qDebug() << "addNode";
     QString nodeId = node->id();
     if (!m_nodes.contains(nodeId)) {
         m_nodes[nodeId] = node;
@@ -41,20 +43,50 @@ void WordDataGraph::addNode(DataNode *node)
     }
 }
 
-void WordDataGraph::removeNode(const QString &nodeId)
+void WordGraph::removeNode(const QString &nodeId)
 {
+    qDebug() << "removeNode " << nodeId;
     if (m_nodes.contains(nodeId)) {
-        DataNode *node = m_nodes[nodeId];
-        delete node;
+        Node *node = m_nodes[nodeId];
+        qDebug() << node;
+        foreach (Edge *edge, node->edges()) {   
+             
+            Node *neighbor = edge->neighborTo(node);
+            qDebug() << neighbor;
+            if (!neighbor) continue;
+            
+            for (int i = 0; i < node->m_edges.size(); i++) {
+                if (node->m_edges[i] == edge) {
+                    node->m_edges.removeAt(i);
+                    break;
+                }
+            }
+            for (int i = 0; i < neighbor->m_edges.size(); i++) {
+                if (neighbor->m_edges[i] == edge) {
+                    neighbor->m_edges.removeAt(i);
+                    break;
+                }
+            }
+            qDebug() << "removed edges in node";
+            m_edges.remove(edge->id());
+            delete edge;
+            
+            if (!isReachable(neighbor, centralNode())) {
+                removeNode(neighbor->id());
+            }
+        }
         m_nodes.remove(nodeId);
+        delete node;
         emit nodeRemoved(nodeId);
     }
 }
 
-Edge * WordDataGraph::addEdge(const QString &aNodeId, const QString &bNodeId)
+Edge * WordGraph::addEdge(const QString &aNodeId, const QString &bNodeId)
 {
+    qDebug() << "addEdge";
     QString edgeId = aNodeId + bNodeId;
     QString edgeId2 = bNodeId + aNodeId;
+    qDebug() << edgeId;
     bool hasEdge = m_edges.contains(edgeId) || m_edges.contains(edgeId2);
     bool hasNodes = m_nodes.contains(aNodeId) && m_nodes.contains(bNodeId);
     Edge *edge = 0;
@@ -66,9 +98,43 @@ Edge * WordDataGraph::addEdge(const QString &aNodeId, const QString &bNodeId)
     return edge;
 }
 
-void WordDataGraph::clearAll()
+void WordGraph::removeEdge(const QString &id)
 {
-    foreach (DataNode *node, m_nodes)
+    
+    qDebug() << "removeEdge " << id;
+    Node *source = m_edges[id]->source();
+    Node *dest = m_edges[id]->dest();
+    QList<Edge*> sourceNodeEdges = source->m_edges;
+    QList<Edge*> destNodeEdges = dest->m_edges;
+    Edge *edge = m_edges[id]; 
+    qDebug() << edge;
+            
+    for (int i = 0; i < sourceNodeEdges.size(); i++) {
+        if (sourceNodeEdges[i]->id() == id) {
+            sourceNodeEdges.removeAt(i);
+            break;
+        }
+    }
+    
+    for (int i = 0; i < destNodeEdges.size(); i++) {
+        if (destNodeEdges[i]->id() == id) {
+            destNodeEdges.removeAt(i);
+            break;
+        }
+    }
+    m_edges.remove(id);
+    delete edge;
+    if (!isReachable(source, centralNode())) {
+        removeNode(source->id());
+    }
+    if (!isReachable(dest, centralNode())) {
+        removeNode(dest->id());
+    }
+}
+
+void WordGraph::clearAll()
+{
+    foreach (Node *node, m_nodes)
         delete node;
 
     foreach (Edge *edge, m_edges)
@@ -79,21 +145,21 @@ void WordDataGraph::clearAll()
 }
 
 
-QList<PhraseNode*> WordDataGraph::phrases() const
+QList<WordNode*> WordGraph::phrases() const
 {
-    QList<PhraseNode*> phrases;
-    foreach (DataNode *node, m_nodes) {
-        PhraseNode *phrase = qobject_cast<PhraseNode*>(node);
+    QList<WordNode*> phrases;
+    foreach (Node *node, m_nodes) {
+        WordNode *phrase = qobject_cast<WordNode*>(node);
         if (phrase)
             phrases.append(phrase);
     }
     return phrases;
 }
 
-QList<MeaningNode *> WordDataGraph::meanings() const
+QList<MeaningNode *> WordGraph::meanings() const
 {
     QList<MeaningNode *> meanings;
-    foreach (DataNode *node, m_nodes) {
+    foreach (Node *node, m_nodes) {
         MeaningNode *meaning = qobject_cast<MeaningNode*>(node);
         if (meaning)
             meanings.append(meaning);
@@ -101,29 +167,29 @@ QList<MeaningNode *> WordDataGraph::meanings() const
     return meanings;
 }
 
-QList<Edge*> WordDataGraph::edges() const
+QList<Edge*> WordGraph::edges() const
 {
     return m_edges.values();
 }
 
-DataNode* WordDataGraph::node(const QString &id) const
+Node* WordGraph::node(const QString &id) const
 {
     return m_nodes[id];
 }
 
-Edge* WordDataGraph::edge(const QString &id) const
+Edge* WordGraph::edge(const QString &id) const
 {
     return m_edges[id];
 }
 
-DataNode* WordDataGraph::centralNode() const
+Node* WordGraph::centralNode() const
 {
     return node(m_centralNodeId);
 }
 
-QString WordDataGraph::toString() const
+QString WordGraph::toString() const
 {
-    centralNode()->toString();
+    return centralNode()->toString();
 }
 
 

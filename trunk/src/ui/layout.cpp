@@ -19,10 +19,11 @@
  ***************************************************************************/
 #include "layout.h"
 #include "math.h"
-
+#include "graphalgorithms.h"
 #include <QtGui>
 #include <QtCore>
 
+#if(0)
 ForceDirectedLayout::ForceDirectedLayout()
 {}
 
@@ -30,22 +31,22 @@ ForceDirectedLayout::ForceDirectedLayout()
 ForceDirectedLayout::~ForceDirectedLayout()
 {}
 
-bool ForceDirectedLayout::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart)
+bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart)
 {
     return layout(nodes, edges);
 }
 
-bool ForceDirectedLayout::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
 {
-    foreach (GraphNode *node, nodes) 
+    foreach (GraphicsNode *node, nodes) 
         node->discardForce();
-    foreach (GraphNode *aNode, nodes) {
-        foreach (GraphNode *bNode, nodes) {
+    foreach (GraphicsNode *aNode, nodes) {
+        foreach (GraphicsNode *bNode, nodes) {
             // Find the distance between nodes
             if (aNode == bNode) continue;
          bool haveRepulsion = true;
-            QList<GraphNode*> _aNeighbors = aNode->neighbors();
-            foreach (GraphNode *n, _aNeighbors) {
+            QList<GraphicsNode*> _aNeighbors = aNode->neighbors();
+            foreach (GraphicsNode *n, _aNeighbors) {
                 if (n == bNode)
                     haveRepulsion = false;
             }
@@ -60,11 +61,11 @@ bool ForceDirectedLayout::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edge
             if (distance > 0) {
                 /**********************/
 //                 bool haveCommonNeighbor = false;
-//                 QList<GraphNode*> aNeighbors = aNode->neighbors();
-//                 QList<GraphNode*> bNeighbors = bNode->neighbors();
+//                 QList<GraphicsNode*> aNeighbors = aNode->neighbors();
+//                 QList<GraphicsNode*> bNeighbors = bNode->neighbors();
 // 
-//                 foreach (GraphNode *aNeighbor, aNeighbors) {
-//                     foreach (GraphNode *bNeighbor, bNeighbors) {
+//                 foreach (GraphicsNode *aNeighbor, aNeighbors) {
+//                     foreach (GraphicsNode *bNeighbor, bNeighbors) {
 //                         if (aNeighbor == bNeighbor) {
 //                             haveCommonNeighbor = true;
 //                             break;
@@ -113,7 +114,7 @@ bool ForceDirectedLayout::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edge
 
     QGraphicsScene *scene = nodes.first()->scene();
     QRectF sceneRect = scene->sceneRect();
-    foreach (GraphNode *node, nodes) {
+    foreach (GraphicsNode *node, nodes) {
         qreal xvel = node->force().x();
         qreal yvel = node->force().y();
         //qDebug() << xvel << "  " << yvel;
@@ -128,7 +129,7 @@ bool ForceDirectedLayout::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edge
 
 
     bool itemsMoved = false;
-    foreach (GraphNode *node, nodes) {
+    foreach (GraphicsNode *node, nodes) {
         if (scene->mouseGrabberItem() != node)
             if (node->advance())
                 itemsMoved = true;
@@ -147,12 +148,12 @@ ForceDirectedLayout2::ForceDirectedLayout2()
 ForceDirectedLayout2::~ForceDirectedLayout2()
 {}
 
-void ForceDirectedLayout2::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
+void ForceDirectedLayout2::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
 {
-    foreach (GraphNode *aNode, nodes) {
+    foreach (GraphicsNode *aNode, nodes) {
         //if (scene()->mouseGrabbedItem() == aNode)
           //  continue;
-        foreach (GraphNode *bNode, nodes) {
+        foreach (GraphicsNode *bNode, nodes) {
             // Find the distance between nodes
             if (aNode == bNode) continue;
             QLineF line(aNode->pos(), bNode->pos());
@@ -205,11 +206,11 @@ ForceDirectedLayout3::ForceDirectedLayout3()
 
 ForceDirectedLayout3::~ForceDirectedLayout3()
 {}
-bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart)
+bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart)
 {
     return layout(nodes, edges);
 }
-bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
 {
     
     if (nodes.size() == 0) {
@@ -218,8 +219,8 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
 
     QGraphicsScene *scene = nodes.first()->scene();
 
-    QMultiHash<GraphNode*, QPointF> pointMap;
-    foreach (GraphNode *node, nodes) {
+    QMultiHash<GraphicsNode*, QPointF> pointMap;
+    foreach (GraphicsNode *node, nodes) {
         pointMap.insert(node, node->pos());
     }
     
@@ -232,15 +233,15 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
     while (!done) {
         done = true;
 
-        QHash<GraphNode*, QList<QPointF> >::const_iterator aIter;
-        QHash<GraphNode*, QList<QPointF> >::const_iterator bIter;
+        QHash<GraphicsNode*, QList<QPointF> >::const_iterator aIter;
+        QHash<GraphicsNode*, QList<QPointF> >::const_iterator bIter;
          
         //for ( aIter = pointMap.constBegin(); aIter != pointMap.constEnd(); ++aIter) {
-        foreach (GraphNode *aNode, nodes) {
-            //GraphNode *aNode = aIter.key();
+        foreach (GraphicsNode *aNode, nodes) {
+            //GraphicsNode *aNode = aIter.key();
             //for (bIter = pointMap.constBegin(); bIter != pointMap.constEnd(); ++bIter) {
-            foreach (GraphNode *bNode, nodes) {
-//                GraphNode *bNode = bIter.key();
+            foreach (GraphicsNode *bNode, nodes) {
+//                GraphicsNode *bNode = bIter.key();
                 if (aNode == bNode) continue;
                 QLineF line(pointMap.value(aNode), pointMap.value(bNode));
                 qreal dx = line.dx();
@@ -285,9 +286,9 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
         }
 
 
-        QMultiHash<GraphNode*, QPointF >::iterator iter = pointMap.begin();
+        QMultiHash<GraphicsNode*, QPointF >::iterator iter = pointMap.begin();
         for (; iter != pointMap.end(); iter++) {
-            GraphNode *node = iter.key();
+            GraphicsNode *node = iter.key();
     
             qreal xvel = node->force().x();
             qreal yvel = node->force().y();
@@ -316,7 +317,7 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
    // qDebug("Point count: %d", pointCount);
 
     
-    foreach (GraphNode *node, nodes) {
+    foreach (GraphicsNode *node, nodes) {
         node->setNewPos(pointMap.value(node));
     }
     
@@ -332,7 +333,7 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
 //     return true;
 
     bool itemsMoved = false;
-    foreach (GraphNode *node, nodes) {
+    foreach (GraphicsNode *node, nodes) {
         if (scene->mouseGrabberItem() != node)
             if (node->advance())
                 itemsMoved = true;
@@ -343,7 +344,7 @@ bool ForceDirectedLayout3::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edg
 }
 
 
-
+#endif
 
 
 ForceDirectedLayout4::ForceDirectedLayout4()
@@ -362,14 +363,64 @@ void ForceDirectedLayout4::wakeUp()
 ForceDirectedLayout4::~ForceDirectedLayout4()
 {}
 
-bool ForceDirectedLayout4::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart) 
+
+
+void ForceDirectedLayout4::prepareLayout(GraphicsNode *rootNode)
+{
+    rootNode->setPos(0.0, 0.0);
+    QSet<GraphicsNode*> visitSet;
+    layoutNodes(rootNode, 0, visitSet); 
+}
+
+void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
+                                          QSet<GraphicsNode*> &visitSet)
+{
+    QList<GraphEdge*> edges = node->edges();
+    QList<GraphicsNode*> neighbors = findNeighbors(node, edges.constBegin(), edges.constEnd()); //node->neighbors();
+    
+    QList<GraphicsNode*> children;
+    foreach (GraphicsNode *neighbor, neighbors) {
+        if (neighbor != parentNode && !visitSet.contains(neighbor))
+            children.append(neighbor);
+    }
+    
+    double angleIncrement;
+    double phi = 0.0;
+    if (!parentNode) {
+        angleIncrement = TWO_PI / children.size();
+        phi = 0.0;
+    } else {
+        qreal y = node->scenePos().y();
+        qreal x = node->scenePos().x();
+        qreal angle = atan2(y , x);
+        phi =  angle - (PI / 3);
+        angleIncrement = (PI / 3) * 2 / (children.size());
+        phi += angleIncrement;
+    }
+    
+    foreach (GraphicsNode *child, children) {
+        visitSet << child;
+        
+        QPointF childPos(REST_DISTANCE * cos(phi), REST_DISTANCE * sin(phi));
+        childPos += node->scenePos();
+        child->setPos(childPos);
+        phi += angleIncrement;
+    }
+
+    foreach (GraphicsNode *child, children) {
+        layoutNodes(child, node, visitSet);
+    } 
+}
+
+
+bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart) 
 {
     if (restart) {
         m_abort = true;
         if (isRunning()) {
             return true;
         }
-        return _layout(nodes, edges);
+        return layoutSerial(nodes, edges);
     }
     m_abort = false;
     return layout(nodes, edges);
@@ -382,63 +433,84 @@ void ForceDirectedLayout4::stop()
     
     
 
-bool ForceDirectedLayout4::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
 {
-    //qDebug() << "l";
     if (nodes.size() == 0) {
         return false;
     }
     QGraphicsScene *scene = nodes.first()->scene();
         
-    if (nodes.first()->animationPosCount() == 0) {
+   
+    if (m_animations.empty() || m_animations.constBegin()->pointCount() == 0) { 
         m_mutex.lock();
+        Q_ASSERT(!isRunning());
+        
         if (m_nodes.size() != nodes.size() || m_edges.size() != edges.size()) {
             m_nodes = nodes;
             m_edges = edges;
+            
+            GraphicsNode *rootNode;
+            foreach (GraphicsNode *node, m_nodes) {
+                if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
+                    rootNode = node;
+                    break;
+                }
+            }
+            prepareLayout(rootNode);
         }
         
-        foreach (GraphNode *node, m_nodes) 
-            node->addAnimationPos(node->pos());
+        foreach (GraphicsNode *node, m_nodes)
+            m_animations[node].addPoint(node->pos());
         
         finishedLayout = false;
         m_mutex.unlock();
+       
         start(QThread::LowestPriority);
         
+         //We want to get some points as soon as possible
+        QThread::currentThread()->usleep(10000);
     }
     
     
-    if (m_nodes.first()->animationPosCount() < 5 && !finishedLayout)
+    if (m_animations.constBegin()->pointCount() < 10 && !finishedLayout)
         return true;
 
+    
     m_mutex.lock();
     int nodesCount = m_nodes.size();
     int nodesToTake = nodesCount / 20 > 0 ? nodesCount / 20 : 1;
     for (int i = 0; i < nodesCount; i++) {
-        GraphNode *node = m_nodes.at(i);
-        if (node->animationPosCount() > nodesToTake) {
-            for (int n = 0; n < nodesToTake; n++)
-                node->takeFirstAnimationPos();
-            node->setNewPos(node->takeFirstAnimationPos());
-        } else if (node->animationPosCount() > 0)
-            node->setNewPos(node->takeFirstAnimationPos());
+        GraphicsNode *node = m_nodes.at(i);
+        NodeAnimation & animation = m_animations[node];
+        if (animation.pointCount() > nodesToTake) {
+            for (int n = 0; n < nodesToTake; n++) {
+                animation.takeFirstPoint();
+            }
+            node->setNewPos(animation.takeFirstPoint());
+        } else if (animation.pointCount() > 0) {
+            node->setNewPos(animation.takeFirstPoint());
+        }
     }
     m_mutex.unlock();
     
     bool itemsMoved = false;
     for (int i = 0; i < nodesCount; i++) {
-        GraphNode *node = m_nodes.at(i);
+        GraphicsNode *node = m_nodes.at(i);
         if (scene->mouseGrabberItem() != node)
             if (node->advance())
                 itemsMoved = true;
     }
 
-    return itemsMoved || nodes.first()->animationPosCount() > 0 ||  isRunning();
+    bool needsMoreLayout =  itemsMoved || m_animations.constBegin()->pointCount() > 0 ||  isRunning();
+    if (!needsMoreLayout) {
+        m_animations.clear();
+    }
+    return needsMoreLayout;
 }
 
-
- 
 void ForceDirectedLayout4::run()
 {
+    QHash<GraphicsNode*, QPointF> resultForces;
     QGraphicsScene *scene = m_nodes.first()->scene();
     bool done = false;
     int count = 0;
@@ -447,19 +519,21 @@ void ForceDirectedLayout4::run()
         done = true;
         finishedLayout = false;
         count++;
+        resultForces.clear();
         
         for (int a = 0; a < nodesCount; a++) {   
-            GraphNode *aNode = m_nodes.at(a);
+            GraphicsNode *aNode = m_nodes.at(a);
             if (m_abort) {
-                for (int i = 0; i < nodesCount; i++)
-                    m_nodes.at(i)->resetAnimation();
+                foreach (NodeAnimation animation, m_animations) {
+                    animation.reset();
+                }
                 return;
             }
             
             for (int b = 0; b < nodesCount; b++) {
-                GraphNode *bNode = m_nodes.at(b);
+                GraphicsNode *bNode = m_nodes.at(b);
                 if (aNode == bNode) continue;
-                QLineF line(aNode->lastAnimationPos(), bNode->lastAnimationPos());
+                QLineF line(m_animations[aNode].lastPoint(), m_animations[bNode].lastPoint());
                 qreal dx = line.dx();
                 qreal dy = line.dy();
                 qreal distance2 = dx * dx + dy * dy;
@@ -470,20 +544,20 @@ void ForceDirectedLayout4::run()
                     qreal xvel = repulsive * dx / distance;
                     qreal yvel = repulsive * dy / distance;
  
-                    aNode->applyForce(- xvel, - yvel);
-                    bNode->applyForce( xvel, yvel);
+                    resultForces[aNode] += QPointF(-xvel, -yvel);
+                    resultForces[bNode] += QPointF(xvel, yvel);
                 }
             }
         }
         
 
         foreach (GraphEdge *edge, m_edges) {
-            GraphNode *source = edge->source();
-            GraphNode *dest = edge->dest();
+            GraphicsNode *source = edge->source();
+            GraphicsNode *dest = edge->dest();
             if (!source || !dest)
                 continue;
 
-            QLineF line(source->lastAnimationPos(), dest->lastAnimationPos());
+            QLineF line(m_animations[source].lastPoint(), m_animations[dest].lastPoint());
             qreal dx = line.dx();
             qreal dy = line.dy();
     
@@ -493,26 +567,27 @@ void ForceDirectedLayout4::run()
             if (distance > 0) {
                 qreal force = -(STIFFNESS * (REST_DISTANCE - distance));
         
-                source->applyForce(force * (dx / distance), force * ( dy / distance));
-                dest->applyForce(-force * (dx / distance), -force * (dy / distance));
+                resultForces[source] += QPointF(force * (dx / distance), force * ( dy / distance));
+                resultForces[dest] += QPointF(-force * (dx / distance), -force * (dy / distance));
             }
 
         }
 
 
         for (int i = 0; i < nodesCount; i++) {
-            GraphNode *node = m_nodes.at(i);
+            GraphicsNode *node = m_nodes.at(i);
             if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
-                node->addAnimationPos(node->pos());
+                m_animations[node].addPoint(node->pos());
                 continue;
             }
              
-            qreal xvel = node->force().x();
-            qreal yvel = node->force().y();
+            QPointF resultForce = resultForces[node];
+            qreal xvel = resultForce.x();
+            qreal yvel = resultForce.y();
             if (qAbs(xvel) < 0.1 && qAbs(yvel) < 0.1)
                 xvel = yvel = 0;
 
-            QPointF previous = node->lastAnimationPos();
+            QPointF previous = m_animations[node].lastPoint();
             QPointF newPos = previous + QPointF(xvel, yvel);
             
             newPos.setX(qMin(qMax(newPos.x(), scene->sceneRect().left() + 10), scene->sceneRect().right() - 10));
@@ -521,16 +596,14 @@ void ForceDirectedLayout4::run()
             if (previous != newPos)
                 done = false;
             
-            node->addAnimationPos(newPos);
-            node->discardForce();
+            m_animations[node].addPoint(newPos);
         }
         
         
-        if (!firstRemoved && m_nodes.first()->animationPosCount() == 2 && !done) {
+        if (!firstRemoved && m_animations.constBegin()->pointCount() == 2 && !done) {
             m_mutex.lock();
-            for (int i = 0; i < nodesCount; i++) {
-                GraphNode *node = m_nodes.at(i);
-                node->takeFirstAnimationPos();
+            foreach (NodeAnimation animation, m_animations) {
+                animation.takeFirstPoint();
             }
             firstRemoved = true;         
             m_mutex.unlock();    
@@ -540,9 +613,8 @@ void ForceDirectedLayout4::run()
     
     if (!firstRemoved) {
         m_mutex.lock();
-        for (int i = 0; i < nodesCount; i++) {
-            GraphNode *node = m_nodes.at(i);
-            node->takeFirstAnimationPos();
+        foreach (NodeAnimation animation, m_animations) {
+            animation.takeFirstPoint();
         }
         m_mutex.unlock();    
     }
@@ -550,20 +622,19 @@ void ForceDirectedLayout4::run()
 }
 
 
-bool ForceDirectedLayout4::_layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
 {
-    //qDebug() << "_l";
-    QList<GraphNode*>::const_iterator aIter;
-    QList<GraphNode*>::const_iterator bIter;
+    QHash<GraphicsNode*, QPointF> resultForces;
+    QList<GraphicsNode*>::const_iterator aIter;
+    QList<GraphicsNode*>::const_iterator bIter;
     
+  //  for (aIter = nodes.constBegin(); aIter != nodes.constEnd(); aIter++) {
+//        (*aIter)->resetAnimation();
+    //}
     for (aIter = nodes.constBegin(); aIter != nodes.constEnd(); aIter++) {
-        (*aIter)->discardForce();
-        (*aIter)->resetAnimation();
-    }
-    for (aIter = nodes.constBegin(); aIter != nodes.constEnd(); aIter++) {
-        GraphNode *aNode = *aIter;
+        GraphicsNode *aNode = *aIter;
         for (bIter = nodes.constBegin(); bIter != nodes.constEnd(); bIter++) {
-            GraphNode *bNode = *bIter;
+            GraphicsNode *bNode = *bIter;
             
             // Find the distance between nodes
             if (aNode == bNode) continue;
@@ -576,8 +647,8 @@ bool ForceDirectedLayout4::_layout(QList<GraphNode*> nodes, QList<GraphEdge*> ed
                 qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
                 qreal xvel = repulsive * dx / distance;
                 qreal yvel = repulsive * dy / distance;
-                aNode->applyForce(- xvel, - yvel);
-                bNode->applyForce( xvel, yvel);
+                resultForces[aNode] += QPointF(-xvel, -yvel);
+                resultForces[bNode] += QPointF(xvel, yvel);
             }
         }
     }
@@ -595,18 +666,18 @@ bool ForceDirectedLayout4::_layout(QList<GraphNode*> nodes, QList<GraphEdge*> ed
         if (distance > 0) {
             qreal force = -(STIFFNESS * (REST_DISTANCE - distance));
         
-            edge->source()->applyForce(force * (dx / distance), force * ( dy / distance));
-            edge->dest()->applyForce(-force * (dx / distance), -force * (dy / distance));
+            resultForces[edge->source()] += QPointF(force * (dx / distance), force * ( dy / distance));
+            resultForces[edge->dest()] += QPointF(-force * (dx / distance), -force * (dy / distance));
         }
     }
         
     QGraphicsScene *scene = nodes.first()->scene();
     QRectF sceneRect = scene->sceneRect();
-    QList<GraphNode*>::const_iterator iter;
+    QList<GraphicsNode*>::const_iterator iter;
     for (iter = nodes.constBegin(); iter != nodes.constEnd(); iter++) {
-        GraphNode *node = *iter;
-        qreal xvel = node->force().x();
-        qreal yvel = node->force().y();
+        GraphicsNode *node = *iter;
+        qreal xvel = resultForces[node].x();
+        qreal yvel = resultForces[node].y();
         if (qAbs(xvel) < 0.1 && qAbs(yvel) < 0.1)
             xvel = yvel = 0;
 
@@ -626,479 +697,6 @@ bool ForceDirectedLayout4::_layout(QList<GraphNode*> nodes, QList<GraphEdge*> ed
     return itemsMoved;
         
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-ForceDirectedLayout5::ForceDirectedLayout5(QObject *parent)
-    :QThread(parent)
-{
-    connect(this, SIGNAL(finished()), this, SLOT(wakeUp()));
-    m_abort = false;
-    m_hasPoints = false;
-}
-
-ForceDirectedLayout5::~ForceDirectedLayout5()
-{
-}
-
-
-
-bool ForceDirectedLayout5::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart) 
-{
- /*   if (restart) {
-    m_mutex.lock();
-    m_abort = true;
-    if (isRunning()) {
-    Q_ASSERT(m_iterationTime != -1);
-    m_aborted.wait(&m_mutex, m_iterationTime == -1 ? 5 : m_iterationTime + 5);
-}
-    Q_ASSERT(!isRunning());
-    foreach (GraphNode *node, nodes) 
-    node->resetAnimationPoints();
-        
-    m_abort = false;
-    m_mutex.unlock();
-}
- */ 
-    return layout(nodes, edges);
-}
-
-void ForceDirectedLayout5::wakeUp()
-{
-    m_finished.wakeAll();
-}
-    
-    
-
-bool ForceDirectedLayout5::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
-{
-    if (nodes.size() == 0) {
-        return false;
-    }
-    QGraphicsScene *scene = nodes.first()->scene();
-    
-    // If hash map does not have the first node, means all nodes are different.
-    GraphNode *firstNode = nodes.first();
-    if (!m_points.contains(firstNode)) {
-        m_mutex.lock();
-        if (isRunning()) {
-            m_finished.wait(&m_mutex);
-        }
-        
-    
-        m_nodes = nodes;
-        m_edges = edges;
-        m_points.clear();
-        
-        foreach (GraphNode *node, m_nodes) {
-            QLinkedList<QPointF> list;
-            list << node->pos();
-            m_points[node] = list;
-        }
-                
-        
-        finishedLayout = false;
-        m_mutex.unlock();
-        start();
-    }
-    
-     
-    m_mutex.lock();
-    if (m_points.constBegin().value().count() < 20 && !finishedLayout)
-        m_enoughPoints.wait(&m_mutex);
-    m_mutex.unlock();
-    
-    QHash<GraphNode*, QLinkedList<QPointF> >::iterator iter;
-    for (iter = m_points.begin(); iter != m_points.end(); ++iter) {
-        if (iter.value().count() > 0) {
-            iter.key()->setNewPos(iter.value().takeFirst());
-        }
-    }
-    
-    QHash<GraphNode*, QLinkedList<QPointF> >::const_iterator const_iter;
-    bool itemsMoved = false;
-    for (const_iter = m_points.constBegin(); const_iter != m_points.constEnd(); ++const_iter) {
-        GraphNode *node = const_iter.key();
-        if (scene->mouseGrabberItem() != node)
-            if (node->advance())
-                itemsMoved = true;
-    }
-
-    
-    return itemsMoved ||  isRunning();
-}
-
-
-
-void ForceDirectedLayout5::run()
-{
-    qDebug() << "run() start";
-    QTime t;
-    t.start();
-    QGraphicsScene *scene = m_nodes.first()->scene();
-    bool done = false;
-    int count = 0;
-    
-    while (!done) {
-        done = true;
-        finishedLayout = false;
-        count++;
-        
-        QHash<GraphNode*, QLinkedList<QPointF> >::const_iterator aIter;
-        QHash<GraphNode*, QLinkedList<QPointF> >::const_iterator bIter;
-        for (aIter = m_points.constBegin(); aIter != m_points.constEnd(); ++aIter) {    
-        GraphNode *aNode = aIter.key();
-            if (m_abort) {
-                m_aborted.wakeAll();
-                return;
-            }
-            
-            for (bIter = m_points.constBegin(); bIter != m_points.constEnd(); ++bIter) {    
-                GraphNode *bNode = bIter.key();
-                if (aNode == bNode) continue;
-                QLineF line(aIter.value().last(), bIter.value().last());
-                qreal dx = line.dx();
-                qreal dy = line.dy();
-                qreal distance2 = dx * dx + dy * dy;
-                qreal distance = sqrt(distance2);
-                if (distance > 0) {
-
-                    qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
-                    qreal xvel = repulsive * dx / distance;
-                    qreal yvel = repulsive * dy / distance;
-                        //qDebug() << xvel << "  " << yvel;
- 
-                    aNode->applyForce(- xvel, - yvel);
-                    bNode->applyForce( xvel, yvel);
-                }
-            }
-        }
-        
-
-        foreach (GraphEdge *edge, m_edges) {
-            GraphNode *source = edge->source();
-            GraphNode *dest = edge->dest();
-            if (!source || !dest)
-                continue;
-
-            QLineF line(m_points[source].last(), m_points[dest].last());
-            qreal dx = line.dx();
-            qreal dy = line.dy();
-    
-            qreal distance2 = dx * dx + dy * dy;
-            qreal distance = sqrt(distance2);
-            
-            if (distance > 0) {
-                qreal force = -(STIFFNESS * (REST_DISTANCE - distance));
-        
-                source->applyForce(force * (dx / distance), force * ( dy / distance));
-                dest->applyForce(-force * (dx / distance), -force * (dy / distance));
-            }
-
-        }
-
-
-        QHash<GraphNode*, QLinkedList<QPointF> >::iterator i;
-        for (i = m_points.begin(); i != m_points.end(); i++) {
-            GraphNode *node = i.key();
-            if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
-                i.value().append(node->pos());
-                continue;
-            }
-             
-            qreal xvel = node->force().x();
-            qreal yvel = node->force().y();
-            if (qAbs(xvel) < 0.01 && qAbs(yvel) < 0.01)
-                xvel = yvel = 0;
-
-            QPointF previous = i.value().last();
-            QPointF newPos = previous + QPointF(xvel, yvel);
-            
-            newPos.setX(qMin(qMax(newPos.x(), scene->sceneRect().left() + 10), scene->sceneRect().right() - 10));
-            newPos.setY(qMin(qMax(newPos.y(), scene->sceneRect().top() + 10), scene->sceneRect().bottom() - 10));
-            
-            if (previous != newPos)
-                done = false;
-            
-            i.value().append(newPos);
-            node->discardForce();
-        }
-        
-        
-        if (count == 2 && !done && !firstRemoved) {
-            m_mutex.lock();
-            for (i = m_points.begin(); i != m_points.end(); ++i) {
-                i.value().takeFirst();
-            }
-            firstRemoved = true;         
-            m_mutex.unlock();    
-        }
-        
-        if (m_points.begin().value().count() == 20)
-            m_enoughPoints.wakeAll();
-         
-    }
-    
-    if (!firstRemoved) {
-        m_mutex.lock();
-        QHash<GraphNode*, QLinkedList<QPointF> >::iterator i;
-        for (i = m_points.begin(); i != m_points.end(); ++i) {
-          //  Q_ASSERT(node->pointCount() > 0);
-            i.value().takeFirst();    
-        }
-        m_mutex.unlock();    
-    }
-    finishedLayout = true;
-    qDebug() << "end";
-    qDebug("Time elapsed: %d ms", t.elapsed());
-    qDebug() << count;
-    
-    m_enoughPoints.wakeAll();
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-ForceDirectedLayout6::ForceDirectedLayout6(QObject *parent)
-    :QThread(parent)
-{
-    connect(this, SIGNAL(finished()), this, SLOT(wakeUp()));
-    m_abort = false;
-    m_hasPoints = false;
-}
-
-ForceDirectedLayout6::~ForceDirectedLayout6()
-{
-}
-
-
-
-bool ForceDirectedLayout6::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges, bool restart) 
-{
- /*   if (restart) {
-    m_mutex.lock();
-    m_abort = true;
-    if (isRunning()) {
-    Q_ASSERT(m_iterationTime != -1);
-    m_aborted.wait(&m_mutex, m_iterationTime == -1 ? 5 : m_iterationTime + 5);
-}
-    Q_ASSERT(!isRunning());
-    foreach (GraphNode *node, nodes) 
-    node->resetAnimationPoints();
-        
-    m_abort = false;
-    m_mutex.unlock();
-}
- */ 
-    return layout(nodes, edges);
-}
-
-void ForceDirectedLayout6::wakeUp()
-{
-    m_finished.wakeAll();
-}
-        
-
-bool ForceDirectedLayout6::layout(QList<GraphNode*> nodes, QList<GraphEdge*> edges)
-{
-    if (nodes.size() == 0) {
-        return false;
-    }
-    QGraphicsScene *scene = nodes.first()->scene();
-    
-    if (nodes.first()->layoutPath().pointCount() == 0) {
-        m_mutex.lock();
-        if (m_nodes.size() != nodes.size() ||  m_edges.size() != edges.size()) {
-        
-            if (isRunning()) {
-                m_finished.wait(&m_mutex);
-            }
-        
-            m_nodes = nodes;
-            m_edges = edges;
-            
-            foreach (GraphNode *node, m_nodes) {
-                node->layoutPath().reset();
-                node->layoutPath().addPoint(node->pos());
-            }
-            
-            finishedLayout = false;
-            m_mutex.unlock();
-            start();
-        }
-    }
-    
-     
-    m_mutex.lock();
-    if (m_nodes.first()->layoutPath().pointCount() < 20 && !finishedLayout)
-        m_enoughPoints.wait(&m_mutex);
-    m_mutex.unlock();
-    
-    
-    foreach (GraphNode *node, m_nodes) {
-        if (node->layoutPath().pointCount() > 0)
-            node->setNewPos(node->layoutPath().takeFirstPoint());
-    }
-    
-    bool itemsMoved = false;
-    foreach (GraphNode *node, m_nodes) {
-        if (scene->mouseGrabberItem() != node)
-            if (node->advance())
-                itemsMoved = true;
-    }
-
-    
-    return itemsMoved ||  isRunning();
-}
-
-
-
-void ForceDirectedLayout6::run()
-{
-    qDebug() << "run() start";
-    QTime t;
-    t.start();
-    QGraphicsScene *scene = m_nodes.first()->scene();
-    bool done = false;
-    int count = 0;
-    
-    while (!done) {
-        done = true;
-        finishedLayout = false;
-        count++;
-        
-        QList<GraphNode*>::iterator aIter;
-        QList<GraphNode*>::iterator bIter;
-        for (aIter = m_nodes.begin(); aIter != m_nodes.end(); ++aIter) {    
-            GraphNode *aNode = (*aIter);
-            if (m_abort) {
-                m_aborted.wakeAll();
-                return;
-            }
-            
-            for (bIter = m_nodes.begin(); bIter != m_nodes.end(); ++bIter) {    
-                GraphNode *bNode = (*bIter);
-                if (aNode == bNode) continue;
-                QLineF line(aNode->layoutPath().lastPoint(), bNode->layoutPath().lastPoint());
-                qreal dx = line.dx();
-                qreal dy = line.dy();
-                qreal distance2 = dx * dx + dy * dy;
-                qreal distance = sqrt(distance2);
-                if (distance > 0) {
-
-                    qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
-                    qreal xvel = repulsive * dx / distance;
-                    qreal yvel = repulsive * dy / distance;
-                        //qDebug() << xvel << "  " << yvel;
- 
-                    aNode->applyForce(- xvel, - yvel);
-                    bNode->applyForce( xvel, yvel);
-                }
-            }
-        }
-        
-
-        foreach (GraphEdge *edge, m_edges) {
-            GraphNode *source = edge->source();
-            GraphNode *dest = edge->dest();
-            if (!source || !dest)
-                continue;
-
-            QLineF line(source->layoutPath().lastPoint(), dest->layoutPath().lastPoint());
-            qreal dx = line.dx();
-            qreal dy = line.dy();
-    
-            qreal distance2 = dx * dx + dy * dy;
-            qreal distance = sqrt(distance2);
-            
-            if (distance > 0) {
-                qreal force = -(STIFFNESS * (REST_DISTANCE - distance));
-        
-                source->applyForce(force * (dx / distance), force * ( dy / distance));
-                dest->applyForce(-force * (dx / distance), -force * (dy / distance));
-            }
-
-        }
-
-
-        foreach (GraphNode *node, m_nodes) {
-            if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
-                node->layoutPath().addPoint(node->pos());
-                continue;
-            }
-             
-            qreal xvel = node->force().x();
-            qreal yvel = node->force().y();
-            if (qAbs(xvel) < 0.01 && qAbs(yvel) < 0.01)
-                xvel = yvel = 0;
-
-            QPointF previous = node->layoutPath().lastPoint();
-            QPointF newPos = previous + QPointF(xvel, yvel);
-            
-            newPos.setX(qMin(qMax(newPos.x(), scene->sceneRect().left() + 10), scene->sceneRect().right() - 10));
-            newPos.setY(qMin(qMax(newPos.y(), scene->sceneRect().top() + 10), scene->sceneRect().bottom() - 10));
-            
-            if (previous != newPos)
-                done = false;
-            
-            node->layoutPath().addPoint(newPos);
-            node->discardForce();
-        }
-        
-        
-        if (count == 2 && !done && !firstRemoved) {
-            m_mutex.lock();
-            foreach (GraphNode *node, m_nodes) {
-                node->layoutPath().takeFirstPoint();
-            }
-            firstRemoved = true;         
-            m_mutex.unlock();    
-        }
-        
-        if (m_nodes.first()->layoutPath().pointCount() == 25)
-            m_enoughPoints.wakeAll();
-         
-    }
-    
-    if (!firstRemoved) {
-        m_mutex.lock();
-        foreach (GraphNode *node, m_nodes) {
-            node->layoutPath().takeFirstPoint();
-        }
-        m_mutex.unlock();    
-    }
-    finishedLayout = true;
-    qDebug() << "end";
-    qDebug("Time elapsed: %d ms", t.elapsed());
-    qDebug() << count;
-    
-    m_enoughPoints.wakeAll();
-}
-
 
 
 

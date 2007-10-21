@@ -24,7 +24,7 @@
 #include <QMainWindow>
 class QGraphicsView;
 class QLineEdit;
-class WordDataGraph;
+class WordGraph;
 class WordDataLoader;
 class GraphController;
 class QListView;
@@ -35,7 +35,7 @@ class GraphScene;
 class QModelIndex;
 
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
 class MainWindow : public QMainWindow
 {
@@ -69,7 +69,10 @@ private slots:
     void playSound(const QString &word);
 
 private:
-    WordDataGraph *m_currentGraph;    
+    WordGraph *m_currentGraph;    
+    
+    
+    void initCompleter();
    
 
 };

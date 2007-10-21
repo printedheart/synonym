@@ -21,7 +21,20 @@
 #include "node.h"
 #include <QPointF>
 
-Edge::Edge(const QString &id, DataNode *sourceNode, DataNode *destNode, QObject *parent)
+
+const QString Relationship::descriptions[22] = 
+{ "Antonym",   "Is a",          "Hyponym",
+              "Entails",   "Is similar to", "Is member of",
+              "Is made of", "Is part of",   "Member",
+              "Has stuff",  "Has part",      "Meronym",
+              "Holonym"  ,  "Cause",         "Participle",
+              "Also see",  "Pertains to nound", "Attribute",
+              "Verb group", "Derivation", "Domain",
+              "Class"};
+
+                    
+
+Edge::Edge(const QString &id, Node *sourceNode, Node *destNode, QObject *parent)
     :QObject(parent), m_id(id), m_source(sourceNode), m_dest(destNode)
 {
     m_source->addEdge(this);
@@ -35,22 +48,22 @@ Edge::~Edge()
 {
 }
 
-DataNode *Edge::sourceNode() const
+Node *Edge::source() const
 {
     return m_source;
 }
 
-void Edge::setSourceNode(DataNode *node)
+void Edge::setSource(Node *node)
 {
     m_source = node;
 }
 
-DataNode *Edge::destNode() const
+Node *Edge::dest() const
 {
     return m_dest;
 }
 
-void Edge::setDestNode(DataNode *node)
+void Edge::setDest(Node *node)
 {
     m_dest = node;
 }
@@ -59,25 +72,25 @@ QString Edge::id() const
 {
     return m_id;
 }
-/*
-void Edge::adjust()
+
+int Edge::relationship() const
 {
-    if (!m_source || !m_dest)
-        return;
-
-    QGraphicsItem *source = dynamic_cast<QGraphicsItem*>(m_source);
-    QGraphicsItem *dest = dynamic_cast<QGraphicsItem*>(m_dest);
-    QLineF line(mapFromItem(source, 0, 0), mapFromItem(dest, 0, 0));
-    qreal length = line.length();
-    QPointF edgeOffset((line.dx() * 10) / length, (line.dy() * 10) / length);
-    
-    prepareGeometryChange();
-    QPointF sourcePoint = line.p1() + edgeOffset;
-    QPointF destPoint = line.p2() - edgeOffset;
-    setLine(QLineF(sourcePoint, destPoint));
+    return m_relationship;
 }
-*/
 
+void Edge::setRelationship(int relationship)
+{
+    m_relationship = relationship;
+}
+
+Node * Edge::neighborTo(Node *to) const
+{
+    if (to == source())
+        return dest();
+    if (to == dest())
+        return source();
+    return 0;
+}
 
 
 

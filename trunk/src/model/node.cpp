@@ -22,68 +22,76 @@
 
 #include "worddatagraph.h"
                             
-DataNode::DataNode(const QString &id, WordDataGraph *parent)
+Node::Node(const QString &id, WordGraph *parent)
     : QObject(parent), m_id(id), m_fixed(false)
 {   
 }
 
 
-
-DataNode::~ DataNode()
+Node::~ Node()
 {
 }
 
-void DataNode::addEdge(Edge *edge)
+void Node::addEdge(Edge *edge)
 {
     m_edges << edge;
 }
 
-QList<Edge *> DataNode::edges() const
+QList<Edge *> Node::edges() const
 {
     return m_edges;
 }
 
-QString DataNode::id() const
+unsigned int Node::degree() const
+{
+    return edges().size();
+}
+
+QString Node::id() const
 {
     return m_id;
 }
 
-void DataNode::setFixed(bool fixed)
+void Node::setFixed(bool fixed)
 {
     m_fixed = fixed;
 }
 
-bool DataNode::fixed() const
+bool Node::fixed() const
 {
     return m_fixed;
 }
 
-QString DataNode::toString() const
+QString Node::toString() const
 {
     QString str;
     foreach (Edge *edge, m_edges) {
         str.append(edge->id() + "  " + edge->id() + "  ");
-        str.append(edge->sourceNode()->id() + "  ");
-        str.append(edge->destNode()->id() + "\n");
+        str.append(edge->source()->id() + "  ");
+        str.append(edge->dest()->id() + "\n");
     }
     return str;
 }
 
+WordGraph * Node::graph() const
+{
+    return static_cast<WordGraph*>(parent());
+}
 
 
-// PhraseNode
 
+// WordNode
 
-PhraseNode::PhraseNode(const QString &id, WordDataGraph *parent)
-    :DataNode(id, parent)
+WordNode::WordNode(const QString &id, WordGraph *parent)
+    :Node(id, parent)
 {
 }
 
-PhraseNode::~PhraseNode()
+WordNode::~WordNode()
 {
 }
 
-QString PhraseNode::phrase() const
+QString WordNode::word() const
 {
     QString idCopy(id());
     return idCopy.replace(QChar('_'), QChar(' '));
@@ -91,8 +99,8 @@ QString PhraseNode::phrase() const
 
 
 // MeaningNode
-MeaningNode::MeaningNode(const QString &id, WordDataGraph *parent)
-    :DataNode(id, parent)
+MeaningNode::MeaningNode(const QString &id, WordGraph *parent)
+    :Node(id, parent)
 {
 }
 

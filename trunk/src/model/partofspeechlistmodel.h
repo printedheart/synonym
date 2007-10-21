@@ -23,8 +23,7 @@
 #include <QAbstractListModel>
 #include <QStringList>
 #include "node.h"
-class MeaningNode;
-class WordDataGraph;
+#include "worddatagraph.h"
 
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
@@ -34,7 +33,7 @@ class PartOfSpeechListModel : public QAbstractListModel
 Q_OBJECT
 public:
     PartOfSpeechListModel(
-                  MeaningNode::PartOfSpeech modelType, QObject *parent = 0);
+                  WordGraph::PartOfSpeech modelType, QObject *parent = 0);
 
     ~PartOfSpeechListModel();
 
@@ -47,17 +46,17 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation,
                         int role = Qt::DisplayRole) const;
 
-    void setDataGraph(WordDataGraph *dataGraph);
+    void setDataGraph(WordGraph *dataGraph);
 
 
     MeaningNode *nodeAt(const QModelIndex &index);
     QModelIndex indexForNode(MeaningNode *node);
 private:
-    WordDataGraph *m_dataGraph;
+    WordGraph *m_dataGraph;
 
     QList<MeaningNode*> m_meanings;
 
-    MeaningNode::PartOfSpeech m_modelType;
+    WordGraph::PartOfSpeech m_modelType;
     QStringList stringList;
 private slots:
     void reload();
