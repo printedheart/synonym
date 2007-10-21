@@ -23,9 +23,9 @@
 #include <QGraphicsItem>
 #include <QPen>
 
-class GraphNode;
+class GraphicsNode;
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
 
 
@@ -34,18 +34,18 @@ class GraphEdge : public QGraphicsItem
 {
 public:
     GraphEdge();
-    GraphEdge(GraphNode *sourceNode, GraphNode *destNode);
+    GraphEdge(GraphicsNode *sourceNode, GraphicsNode *destNode);
 
     ~GraphEdge();
 
     enum { Type = UserType + 111 };
     int type() const { return Type; }
 
-    void setSource(GraphNode *source);
-    GraphNode* source() const;
+    void setSource(GraphicsNode *source);
+    GraphicsNode* source() const;
 
-    void setDest(GraphNode *dest);
-    GraphNode* dest() const;
+    void setDest(GraphicsNode *dest);
+    GraphicsNode* dest() const;
 
     void adjust();
     
@@ -61,7 +61,7 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 private:
-    GraphNode *m_source, *m_dest;
+    GraphicsNode *m_source, *m_dest;
     QPointF m_sourcePoint, m_destPoint;
     QPen m_pen;
     

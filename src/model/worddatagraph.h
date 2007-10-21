@@ -20,51 +20,57 @@
 #ifndef WORDDATAGRAPH_H
 #define WORDDATAGRAPH_H
 
-
-#include <QObject>
-#include <QHash>
-#include <QList>
+#include <QtCore>
 #include "node.h"
 #include "edge.h"
 /**
         @author Sergejs <sergey.melderis@gmail.com>
  */
-class WordDataGraph : public QObject
+
+
+
+
+
+
+
+class WordGraph : public QObject
 {
 Q_OBJECT
 public:
-    WordDataGraph(QObject *parent = 0);
-    ~WordDataGraph();
+    WordGraph(QObject *parent = 0);
+    ~WordGraph();
 
-    void addNode(DataNode *node);
+    enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
+    
+    void addNode(Node *node);
     void removeNode(const QString &nodeId);
     Edge * addEdge(const QString &aNodeId, const QString &bNodeId);
-//void removeEdge(const QString &edgeId);
+    void removeEdge(const QString &edgeId);
 
     void clearAll();
 
 
-    QList<PhraseNode *> phrases() const;
+    QList<WordNode *> phrases() const;
     QList<MeaningNode *> meanings() const;
 
-    DataNode* node(const QString &id) const;
+    Node* node(const QString &id) const;
     Edge *edge(const QString &id) const;
 
     QList<Edge*> edges() const;
 
-    DataNode* centralNode() const;
+    Node* centralNode() const;
 
     QString toString() const;
     
-    void setSelectedNode(DataNode *node);
+    void setSelectedNode(Node *node);
     
 signals:
-    void nodeAdded(DataNode *node);
+    void nodeAdded(Node *node);
     void nodeRemoved(const QString &nodeId);
     void edgeAdded(Edge *edge);
     
 private:
-    QHash<QString, DataNode*> m_nodes;
+    QHash<QString, Node*> m_nodes;
     QHash<QString, Edge*> m_edges;
     QString m_centralNodeId;
 };

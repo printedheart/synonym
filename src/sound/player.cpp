@@ -20,7 +20,6 @@
 #include "player.h"
 
 #include <QtCore>
-
 Player::Player()
  : QObject(), m_playProcess(0)
 {
@@ -34,7 +33,7 @@ Player::~Player()
 
 void Player::play(QIODevice *sound)
 {
-    qDebug() << "play";
+    
     if (!m_playProcess) {
         m_playProcess = new QProcess();
         connect (m_playProcess, SIGNAL(finished(int, QProcess::ExitStatus)),
@@ -56,9 +55,9 @@ void Player::play(QIODevice *sound)
     m_soundFile->write(all);
     m_soundFile->flush();
 
-    QString program = "play";
+    QString program = "aplay";
     QStringList args;
-    args << m_soundFile->fileName();
+    args  <<  m_soundFile->fileName();
     QProcess *proccess = new QProcess();
     proccess->start(program, args);
 }

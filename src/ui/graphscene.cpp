@@ -30,12 +30,9 @@
                        
 #include <QtDebug>
 #include <QtSvg>
-        
-static const double PI = 3.14159265358979323846264338327950288419717;
-static double TWO_PI = 2.0 * PI;
 
 GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_calculate(true), m_restartLayout(false), m_activeNode(0)
+ : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_enableLayout(true), m_restartLayout(false), m_activeNode(0)
 {
     m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
     m_layout = new ForceDirectedLayout4();
@@ -50,10 +47,9 @@ GraphScene::~GraphScene()
 
 void GraphScene::itemMoved()
 {
-    if (!m_calculate)
+    if (!m_enableLayout)
         return;
     if (!m_timerId) {
-    //    qDebug() << m_timerInterval;
         m_timerId = startTimer(m_timerInterval);
     }
     
@@ -61,64 +57,20 @@ void GraphScene::itemMoved()
 
 void GraphScene::timerEvent(QTimerEvent *event)
 {
-    if (!m_calculate)
+    if (!m_enableLayout)
         return;
     Q_UNUSED(event);
-    calculateForces();
+    layout();
 }
 
-void GraphScene::doInitialLayout(GraphNode *rootNode)
-{
-    rootNode->setPos(0.0, 0.0);
-    layoutNodes(rootNode, 0);
-}
-static int EDGE_DISTANCE = 100;
 
-void GraphScene::layoutNodes(GraphNode *node, GraphNode *parentNode)
+void GraphScene::layout()
 {
-    QList<GraphNode*> neighbors = node->neighbors();
-    
-    QList<GraphNode*> children;
-    foreach (GraphNode *neighbor, neighbors) {
-        if (neighbor != parentNode && !neighbor->visited())
-            children.append(neighbor);
-    }
-    
-    double angleIncrement;
-    double phi = 0.0;
-    if (!parentNode) {
-        angleIncrement = TWO_PI / children.size();
-        phi = 0.0;
-    } else {
-        qreal y = node->scenePos().y();
-        qreal x = node->scenePos().x();
-        qreal angle = atan2(y , x);
-        phi =  angle - (PI / 3);
-        angleIncrement = (PI / 3) * 2 / (children.size());
-        phi += angleIncrement;
-    }
-    
-    foreach (GraphNode *child, children) {
-        child->visit();
-        
-        QPointF childPos(EDGE_DISTANCE * cos(phi), EDGE_DISTANCE * sin(phi));
-        childPos += node->scenePos();
-        child->setPos(childPos);
-        phi += angleIncrement;
-    }
-
-    foreach (GraphNode *child, children) {
-        layoutNodes(child, node);
-    }
-}
-
-void GraphScene::calculateForces()
-{
-    QList<GraphNode *> nodes;
+    QList<GraphicsNode *> nodes;
     QList<GraphEdge *> edges;
     foreach (QGraphicsItem *item, items()) {
-        if (item->type() == GraphNode::PhraseType || item->type() == GraphNode::MeaningType) {
-            GraphNode *node = static_cast<GraphNode*>(item);
+        if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
+            GraphicsNode *node = static_cast<GraphicsNode*>(item);
             nodes << node;
         } else if(GraphEdge *edge = qgraphicsitem_cast<GraphEdge *>(item))
             edges << edge;
@@ -134,15 +86,15 @@ void GraphScene::calculateForces()
 }  
 
 
-QList<GraphNode *> GraphScene::graphNodes() const
+QList<GraphicsNode *> GraphScene::graphNodes() const
 {
-    QList<GraphNode*> nodes;
+    QList<GraphicsNode*> nodes;
     foreach (QGraphicsItem *item, items()) {
-        if (GraphNode *node = qgraphicsitem_cast<PhraseGraphNode *>(item)) {
-            nodes << node;
-        } else if (GraphNode *node = qgraphicsitem_cast<MeaningGraphNode *>(item)) {
+        if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
+            GraphicsNode *node = static_cast<GraphicsNode*>(item);
             nodes << node;
         }
+        
     }
     return nodes;
 }
@@ -167,7 +119,7 @@ void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     if (mouseGrabberItem()) {
         m_restartLayout = true;
         if (m_timerInterval <= 10) {
-            m_timerInterval = 20;
+            m_timerInterval = 30;
             if (m_timerId) {
                 killTimer(m_timerId);
                 m_timerId = 0;
@@ -192,27 +144,27 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 }
 
 
-void GraphScene::setCalculate(bool calculate)
+void GraphScene::setLayout(bool enable)
 {
-    m_calculate = calculate;
-    if (!calculate)
+    m_enableLayout = enable;
+    if (!enable)
         m_layout->stop();
 }
 
-void GraphScene::propogateClickEvent(PhraseGraphNode *graphNode)
+void GraphScene::propogateClickEvent(GraphicsNode *graphNode)
 {
-    DataNode *dataNode = graphNode->dataNode();
+    Node *dataNode = graphNode->dataNode();
     QString id = dataNode->id();
     emit nodeClicked(id);
 }
 
 
-void GraphScene::setCentralNode(GraphNode *node)
+void GraphScene::setCentralNode(GraphicsNode *node)
 {
     m_centralNode = node;
 }
 
-GraphNode* GraphScene::centralNode() const
+GraphicsNode* GraphScene::centralNode() const
 {
     return m_centralNode;
 }
@@ -245,8 +197,8 @@ void GraphScene::setActivated(const QString &id)
         m_activeNode->setActivated(false);
     }
     m_activeNode = 0;
-    QList<GraphNode*> nodes = graphNodes();
-    foreach (GraphNode *node, nodes) {
+    QList<GraphicsNode*> nodes = graphNodes();
+    foreach (GraphicsNode *node, nodes) {
         if (node->dataNode()->id() == id) {
             node->setActivated(true);
             m_activeNode = node;
@@ -254,12 +206,12 @@ void GraphScene::setActivated(const QString &id)
     }
 }
     
-void GraphScene::signalMouseHovered(GraphNode *graphNode)
+void GraphScene::signalMouseHovered(GraphicsNode *graphNode)
 {
     emit nodeMouseHovered(graphNode->id());
 }
 
-void GraphScene::signalMouseHoverLeaved(GraphNode *graphNode)
+void GraphScene::signalMouseHoverLeaved(GraphicsNode *graphNode)
 {
     emit nodeMouseHoverLeaved(graphNode->id());
 }

@@ -27,16 +27,16 @@
 
 class GraphScene;
 class WordDataLoader;
-class WordDataGraph;
-class MeaningGraphNode;
-class PhraseGraphNode;
+class WordGraph;
+class MeaningGraphicsNode;
+class WordGraphicsNode;
 class GraphEdge;
-class DataNode;
-class GraphNode;
+class Node;
+class GraphicsNode;
 class QGraphicsItem;                     
-              
+class Edge;              
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
 class GraphController : public QObject
 {
@@ -48,7 +48,7 @@ public:
     ~GraphController();
 
 
-    WordDataGraph* makeGraph(const QString &word);
+    WordGraph* makeGraph(const QString &word);
 public slots:
     void soundReady(const QString &word);
     
@@ -57,11 +57,13 @@ private:
     WordDataLoader *m_loader;
 
 
-    QList<QPair<WordDataGraph*, QList<QGraphicsItem*> > > m_graphHistory;
+    QList<QPair<WordGraph*, QList<QGraphicsItem*> > > m_graphHistory;
     
-    GraphNode* findGraphNode(DataNode *dataNode);
-
-    QList<QPair<WordDataGraph*, QList<QGraphicsItem*> > >::const_iterator
+    GraphicsNode* findGraphicsNode(Node *dataNode);
+    
+    void addEdge(GraphicsNode *graphNode, Edge *edge);
+    
+    QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator
             findInHistory(const QString &word);
 };
 

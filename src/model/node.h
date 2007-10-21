@@ -22,57 +22,62 @@
 
 #include <QObject>
         
-class WordDataGraph;        
+class WordGraph;        
 class Edge;
 /**
-	@author Sergejs Melderis <sergey.melderis@gmail.com>
+    @author Sergejs Melderis <sergey.melderis@gmail.com>
 */
 
-class DataNode : public QObject
+class Node : public QObject
 {
 Q_OBJECT
 
 public:
-    DataNode(const QString &id, WordDataGraph *parent);
-    virtual ~DataNode();
+    Node(const QString &id, WordGraph *parent);
+    virtual ~Node();
+    
+    friend class WordGraph;
+    
+    WordGraph * graph() const;
 
     QString id() const;
 
     QList<Edge *> edges() const;
     void addEdge(Edge *edge);
+    
+    unsigned int degree() const;
 
     void setFixed(bool fixed);
     bool fixed() const;
-
+    
     virtual QString toString() const;
+    
 private:
     QList<Edge *> m_edges;
-
+    
     bool m_fixed;
     QString m_id;
-    bool visited;
 };
 
 
-class PhraseNode : public DataNode
+
+class WordNode : public Node
 {
 Q_OBJECT
 public:
-    PhraseNode(const QString &id, WordDataGraph *parent);
-    ~PhraseNode();
+    WordNode(const QString &id, WordGraph *parent);
+    ~WordNode();
 
-    QString phrase() const;
+    QString word() const;
 private:
     
 };
 
-class MeaningNode : public DataNode
+class MeaningNode : public Node
 {
 Q_OBJECT
 public:
-    enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
-    
-    MeaningNode(const QString &id, WordDataGraph *parent);
+    MeaningNode(const QString &id, WordGraph *parent);
     ~MeaningNode();
 
     void setMeaning(const QString &meaning);
@@ -86,5 +91,10 @@ private:
     QString m_meaning;
     int m_pos;
 };
+
+
+
+
+
 
 #endif

@@ -70,7 +70,6 @@ void PronunciationSoundFactoryImpl::httpHtmlRequestFinished(int requestId, bool 
     }
 
     QByteArray html = m_htmlBuffer.data();
-  //  qDebug() << html;
     int linkIndex = html.indexOf("<a href=\"/ahd/pron/");
     QString link;
     if (linkIndex != -1) {
@@ -80,7 +79,6 @@ void PronunciationSoundFactoryImpl::httpHtmlRequestFinished(int requestId, bool 
         for (int i = startLink; i <= endLink; i++) {
             link.append(QChar(html[i]));
         }
-        qDebug() << "Link: " << link;
         QUrl url("http://www.yourdictionary.com" + link);
         QString soundName = link.section('/', -1);
 

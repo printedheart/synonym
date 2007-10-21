@@ -28,9 +28,9 @@
      
 #include <QtDebug>       
 class GraphEdge;
-class DataNode;
+class Node;
 class MeaningNode;
-class PhraseNode;
+class WordNode;
 class GraphScene;
 class QGraphicsSceneMouseEvent;
 class QPointF;
@@ -58,29 +58,22 @@ class LayoutPath {
 
 
 /**
-	@author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs <sergey.melderis@gmail.com>
 */
-class GraphNode : public QGraphicsItem
+class GraphicsNode : public QGraphicsItem
 {
 public:
-    GraphNode(GraphScene * scene);
-    virtual ~GraphNode();
+    GraphicsNode(GraphScene * scene);
+    virtual ~GraphicsNode();
 
-    void addEdge(GraphEdge *edge) { m_edges.append(edge); }
-    QList<GraphEdge*> edges() const { return m_edges; }
+    void addEdge(GraphEdge *edge); 
+    QList<GraphEdge*> edges() const;
 
-    QList<GraphNode*> neighbors() const;
-    
     QString id() const;
 
-    virtual void setDataNode(DataNode *dataNode) = 0;
-    virtual DataNode *dataNode() const = 0;
+    virtual void setNode(Node *dataNode) = 0;
+    virtual Node *dataNode() const = 0;
     
-    // Force  and position calculation
-    inline QPointF force() const { return m_force; }
-    inline void applyForce(qreal fx, qreal fy) { m_force += QPointF(fx, fy); }
-    void discardForce();
-
     void setMass(double mass) { m_mass = mass; }
     inline double mass() const { return m_mass; }
     virtual bool advance();
@@ -93,19 +86,6 @@ public:
     enum { Type = UserType + 90 };
     int type() const { return Type; }
 
-    
-    
-    void addAnimationPos(const QPointF &point);
-    int animationPosCount();
-    void resetAnimation();
-    inline QPointF & lastAnimationPos() { return m_buffer[m_lastIndex - 1]; }
-    QPointF   takeFirstAnimationPos();
-    
-
-    bool visited() const { return m_visited; }
-    void visit() { m_visited = true; }
-    void resetVisit() { m_visited = false; }
-
     // Painting
     QPainterPath shape() const = 0; 
     virtual QRectF boundingRect() const = 0;
@@ -114,6 +94,7 @@ public:
     virtual void setActivated(bool /* activated */ ) {} ;
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     
     QPointF m_newPos;
     QPointF m_intermedPos;
@@ -121,34 +102,20 @@ protected:
 private:
     double m_mass;
     QList<GraphEdge*> m_edges;
-
     QPointF m_force;
-
-    bool m_visited;
-
-    QList<QPointF> m_animationPoints;
-    QMutex m_pointsMutex;
-    
-    QPointF m_buffer[10000]; 
-    uint m_firstIndex;
-    uint m_lastIndex;
-    
-    QPointF m_lastPoint;
-    
 };
 
 
-class PhraseGraphNode : public GraphNode
+class WordGraphicsNode : public GraphicsNode
 {
 public:
-    PhraseGraphNode(GraphScene *scene);
-    ~PhraseGraphNode();
+    WordGraphicsNode(GraphScene *scene);
+    ~WordGraphicsNode();
 
-    enum { Type = UserType + 91 };
-    int type() const { return Type; }
+    int type() const { return PhraseType; }
     
-    void setDataNode(DataNode *dataNode);
-    DataNode *dataNode() const;
+    void setNode(Node *dataNode);
+    Node *dataNode() const;
     
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
@@ -161,25 +128,23 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    PhraseNode *m_phraseNode;
+    WordNode *m_wordNode;
     QFont m_font;
     QPointF m_mousePressPos;
-
-
-    
 };
 
-class MeaningGraphNode : public GraphNode
+class MeaningGraphicsNode : public GraphicsNode
 {
 public:
-    MeaningGraphNode(GraphScene *scene);
-    ~MeaningGraphNode();
-
-    void setDataNode(DataNode *dataNode);
-    DataNode *dataNode() const;
+    static void setRadius(int radius) { m_radius = radius; }
     
-    enum { Type = UserType + 92 };
-    int type() const { return Type; }
+    MeaningGraphicsNode(GraphScene *scene);
+    ~MeaningGraphicsNode();
+
+    void setNode(Node *dataNode);
+    Node *dataNode() const;
+    
+    int type() const { return MeaningType; }
     QPainterPath shape() const;
     virtual QRectF boundingRect() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
@@ -195,10 +160,14 @@ private:
 
     QGraphicsPathItem *m_toolTip;
     QGraphicsTextItem *m_defItem;
-
+    QGraphicsLineItem *m_pointer;
+    
     void createToolTip();
     void showToolTip(const QPointF &pos);
     void hideToolTip();
+    void adjustToolTipPos();
+    
+    static int m_radius;
 };
 
 
