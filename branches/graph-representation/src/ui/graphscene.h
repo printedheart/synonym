@@ -25,9 +25,8 @@
 #include <QSet>        
 class Layout;
 class GraphicsNode;
-class GraphEdge;
+class GraphicsEdge;
 class WordGraphicsNode;
-class Node;
 class QSvgRenderer;
 /**
     @author Sergejs <sergey.melderis@gmail.com>
@@ -47,7 +46,7 @@ public:
 
     void setLayout(bool enable);
 
-    void propogateClickEvent(GraphicsNode *graphNode);
+    void signalClickEvent(GraphicsNode *graphNode);
     
     void signalMouseHovered(GraphicsNode *graphNode);
     void signalMouseHoverLeaved(GraphicsNode *graphNode);
@@ -56,6 +55,7 @@ public:
 
     void setCentralNode(GraphicsNode *node);
     GraphicsNode *centralNode() const;
+    
 public slots:    
     void setActivated(const QString &id);
     

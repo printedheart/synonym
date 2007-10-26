@@ -31,12 +31,12 @@ ForceDirectedLayout::ForceDirectedLayout()
 ForceDirectedLayout::~ForceDirectedLayout()
 {}
 
-bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart)
+bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart)
 {
     return layout(nodes, edges);
 }
 
-bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
 {
     foreach (GraphicsNode *node, nodes) 
         node->discardForce();
@@ -90,7 +90,7 @@ bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> e
         }
     }
     
-    foreach (GraphEdge *edge, edges) {
+    foreach (GraphicsEdge *edge, edges) {
         if (!edge->source() || !edge->dest())
             continue;
 
@@ -148,7 +148,7 @@ ForceDirectedLayout2::ForceDirectedLayout2()
 ForceDirectedLayout2::~ForceDirectedLayout2()
 {}
 
-void ForceDirectedLayout2::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
+void ForceDirectedLayout2::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
 {
     foreach (GraphicsNode *aNode, nodes) {
         //if (scene()->mouseGrabbedItem() == aNode)
@@ -174,7 +174,7 @@ void ForceDirectedLayout2::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> 
     }
     
 
-    foreach (GraphEdge *edge, edges) {
+    foreach (GraphicsEdge *edge, edges) {
         if (!edge->source() || !edge->dest())
             continue;
 
@@ -206,11 +206,11 @@ ForceDirectedLayout3::ForceDirectedLayout3()
 
 ForceDirectedLayout3::~ForceDirectedLayout3()
 {}
-bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart)
+bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart)
 {
     return layout(nodes, edges);
 }
-bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
 {
     
     if (nodes.size() == 0) {
@@ -262,7 +262,7 @@ bool ForceDirectedLayout3::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> 
         }
         
 
-        foreach (GraphEdge *edge, edges) {
+        foreach (GraphicsEdge *edge, edges) {
             if (!edge->source() || !edge->dest())
                 continue;
 
@@ -367,6 +367,7 @@ ForceDirectedLayout4::~ForceDirectedLayout4()
 
 void ForceDirectedLayout4::prepareLayout(GraphicsNode *rootNode)
 {
+    qDebug() << "prepareLayout()" << rootNode->id();
     rootNode->setPos(0.0, 0.0);
     QSet<GraphicsNode*> visitSet;
     layoutNodes(rootNode, 0, visitSet); 
@@ -375,12 +376,12 @@ void ForceDirectedLayout4::prepareLayout(GraphicsNode *rootNode)
 void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
                                           QSet<GraphicsNode*> &visitSet)
 {
-    QList<GraphEdge*> edges = node->edges();
-    QList<GraphicsNode*> neighbors = findNeighbors(node, edges.constBegin(), edges.constEnd()); //node->neighbors();
+    QSet<GraphicsEdge*> edges = node->edges();
+    QSet<GraphicsNode*> neighbors = node->neighbors();
     
     QList<GraphicsNode*> children;
     foreach (GraphicsNode *neighbor, neighbors) {
-        if (neighbor != parentNode && !visitSet.contains(neighbor))
+        if (neighbor != parentNode && !visitSet.contains(neighbor) && neighbor->scene())
             children.append(neighbor);
     }
     
@@ -413,7 +414,7 @@ void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentN
 }
 
 
-bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart) 
+bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart) 
 {
     if (restart) {
         m_abort = true;
@@ -433,7 +434,7 @@ void ForceDirectedLayout4::stop()
     
     
 
-bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout4::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
 {
     if (nodes.size() == 0) {
         return false;
@@ -551,7 +552,7 @@ void ForceDirectedLayout4::run()
         }
         
 
-        foreach (GraphEdge *edge, m_edges) {
+        foreach (GraphicsEdge *edge, m_edges) {
             GraphicsNode *source = edge->source();
             GraphicsNode *dest = edge->dest();
             if (!source || !dest)
@@ -622,7 +623,7 @@ void ForceDirectedLayout4::run()
 }
 
 
-bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges)
+bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
 {
     QHash<GraphicsNode*, QPointF> resultForces;
     QList<GraphicsNode*>::const_iterator aIter;
@@ -653,7 +654,7 @@ bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> nodes, QList<GraphE
         }
     }
     
-    foreach (GraphEdge *edge, edges) {
+    foreach (GraphicsEdge *edge, edges) {
         if (!edge->source() || !edge->dest())
             continue;
 

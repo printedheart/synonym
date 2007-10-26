@@ -21,40 +21,17 @@
 #define GRAPHNODE_H
 
 #include <QGraphicsItem>
-#include <QList>
+#include <QSet>
 #include <QFont>
 #include <QVector>
 #include <QMutex>
      
 #include <QtDebug>       
-class GraphEdge;
-class Node;
-class MeaningNode;
-class WordNode;
+class GraphicsEdge;
 class GraphScene;
 class QGraphicsSceneMouseEvent;
 class QPointF;
-
-
-
-
-class LayoutPath {
-    public:
-        void addPoint(QPointF p) {
-            buffer[lastIndex++] = p;
-        }
-        QPointF  lastPoint()  {
-            return buffer[(lastIndex - 1)]; }
-        QPointF  takeFirstPoint() { 
-            return  buffer[firstIndex++]; }
-        void reset() { firstIndex = 0; lastIndex = 0;}
-        int pointCount() const { return lastIndex - firstIndex; } 
-    private:
-        static const  uint BUFFER_SIZE = 8192;
-        QPointF buffer[BUFFER_SIZE];
-        volatile uint firstIndex;
-        volatile uint lastIndex;
-};    
+class WordGraph;
 
 
 /**
@@ -63,23 +40,30 @@ class LayoutPath {
 class GraphicsNode : public QGraphicsItem
 {
 public:
-    GraphicsNode(GraphScene * scene);
+    GraphicsNode(const QString &id, WordGraph *graph);
     virtual ~GraphicsNode();
-
-    void addEdge(GraphEdge *edge); 
-    QList<GraphEdge*> edges() const;
-
+    
+    friend class WordGraph;
+    friend class GraphicsEdge;
+    
     QString id() const;
+    
+    QSet<GraphicsEdge*> edges() const;
 
-    virtual void setNode(Node *dataNode) = 0;
-    virtual Node *dataNode() const = 0;
+    QSet<GraphicsNode*> neighbors() const;
+    
+    unsigned int degree() const;
+    
+    WordGraph * graph() const;
+    
+    QString toString();
+    
     
     void setMass(double mass) { m_mass = mass; }
     inline double mass() const { return m_mass; }
+    
     virtual bool advance();
     void setNewPos(QPointF newPos);
-        
-    
     
     // Types for QGraphicsScene::qgraphicsitem_cast()
     enum GraphTypes { GraphType = UserType + 90, PhraseType, MeaningType };
@@ -96,26 +80,26 @@ protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     
+    GraphScene *graphScene() const;
+private:    
     QPointF m_newPos;
     QPointF m_intermedPos;
-    GraphScene *m_scene;
-private:
     double m_mass;
-    QList<GraphEdge*> m_edges;
-    QPointF m_force;
+    QSet<GraphicsEdge*> m_edges;
+    
+    QString m_id;
+    WordGraph *m_graph;
+    
 };
 
 
 class WordGraphicsNode : public GraphicsNode
 {
 public:
-    WordGraphicsNode(GraphScene *scene);
+    WordGraphicsNode(const QString &id, WordGraph *graph);
     ~WordGraphicsNode();
 
     int type() const { return PhraseType; }
-    
-    void setNode(Node *dataNode);
-    Node *dataNode() const;
     
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
@@ -128,7 +112,6 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    WordNode *m_wordNode;
     QFont m_font;
     QPointF m_mousePressPos;
 };
@@ -136,13 +119,12 @@ private:
 class MeaningGraphicsNode : public GraphicsNode
 {
 public:
+    MeaningGraphicsNode(const QString &id, WordGraph *graph);
+    
     static void setRadius(int radius) { m_radius = radius; }
     
     MeaningGraphicsNode(GraphScene *scene);
     ~MeaningGraphicsNode();
-
-    void setNode(Node *dataNode);
-    Node *dataNode() const;
     
     int type() const { return MeaningType; }
     QPainterPath shape() const;
@@ -156,8 +138,6 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
 private:
-    MeaningNode *m_node;
-
     QGraphicsPathItem *m_toolTip;
     QGraphicsTextItem *m_defItem;
     QGraphicsLineItem *m_pointer;

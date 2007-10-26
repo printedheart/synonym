@@ -24,36 +24,45 @@
 #include <QPen>
 
 class GraphicsNode;
+class WordGraph;
 /**
     @author Sergejs <sergey.melderis@gmail.com>
 */
 
 
 
-class GraphEdge : public QGraphicsItem
+class GraphicsEdge : public QGraphicsItem
 {
 public:
-    GraphEdge();
-    GraphEdge(GraphicsNode *sourceNode, GraphicsNode *destNode);
-
-    ~GraphEdge();
-
+    GraphicsEdge(const QString &id, GraphicsNode *source, 
+                 GraphicsNode *dest, WordGraph *graph);
+    virtual ~GraphicsEdge();
+    
+    friend class WordGraph;
+    
+    /* Edge */
+    QString id() const;
+    
+    WordGraph *graph() const;
+    
+    GraphicsNode* source() const;
+    GraphicsNode* dest() const;
+    
+    GraphicsNode* adjacentNode(GraphicsNode *node) const;
+    
+    bool directed() const;
+    
+    
+    /* QGraphcisItem.  Painting. */
     enum { Type = UserType + 111 };
     int type() const { return Type; }
-
-    void setSource(GraphicsNode *source);
-    GraphicsNode* source() const;
-
-    void setDest(GraphicsNode *dest);
-    GraphicsNode* dest() const;
-
+    
     void adjust();
     
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
     
     void setToolTip(const QString &toolTip);
-    
     void setPen(QPen pan);
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -61,7 +70,13 @@ protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 private:
+    /* Graph */
+    QString m_id;
+    WordGraph *m_graph;
     GraphicsNode *m_source, *m_dest;
+    bool m_directed;
+    
+    /* Representation */
     QPointF m_sourcePoint, m_destPoint;
     QPen m_pen;
     

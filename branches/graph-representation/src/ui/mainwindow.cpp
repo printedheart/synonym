@@ -24,7 +24,6 @@
 #include "partofspeechitemdelegate.h"
 #include "worddatagraph.h"
 #include "worddataloader.h"
-#include "node.h"
 #include "partofspeechlistmodel.h"
 #include "pronunciationsoundholder.h"
 #include "player.h"
@@ -151,7 +150,7 @@ void MainWindow::nodeActivated(const QModelIndex &index)
 {
     PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
             const_cast<QAbstractItemModel*>(index.model()));
-    MeaningNode *node = 0;
+    Node *node = 0;
     node = indexModel->nodeAt(index);
     if (!node) {
         m_scene->setActivated(QString());
@@ -164,49 +163,23 @@ void MainWindow::nodeActivated(const QString &id)
 {
     Node *node = m_currentGraph->node(id);
     if (node) {
-        MeaningNode *meaning = dynamic_cast<MeaningNode*>(node);
-        if (meaning) {
-            QModelIndex nodeIndex = m_posModels[meaning->partOfSpeech() - 1]->indexForNode(meaning);
-            m_posViews[meaning->partOfSpeech() - 1]->highlightItem(nodeIndex);
+        QVariant meaning = node->data(MEANING);
+        if (meaning.isValid()) {
+            int partOfSpeech = node->data(POS).toInt();
+            QModelIndex nodeIndex = m_posModels[partOfSpeech - 1]->indexForNode(node);
+            m_posViews[partOfSpeech - 1]->highlightItem(nodeIndex);
         }
     }
 }
 
 void MainWindow::initCompleter()
 {
-//     if (indexfps) {
-//         QStringList allWords;
-//         QFile file;
-//         for (int i = 1; i < NUMPARTS + 1; i++) {
-//             QFile file;
-//             if (!file.open(indexfps[1], QIODevice::ReadOnly | QIODevice::Text)) {
-//                 qDebug() << "Cannot open file" << file.fileName();
-//                 continue;
-//             }
-//                 
-//             while (!file.atEnd()) {
-//                 QByteArray line = file.readLine();
-//                 if (line.startsWith(' '))
-//                     continue;
-//                 
-//                 QByteArray phraseWithUnderscores =  line.split(' ')[0];
-//                 QList<QByteArray> words = phraseWithUnderscores.split('_');
-//                 QString phrase;
-//                 foreach (QByteArray word, words) {
-//                     phrase.append(word.data());
-//                     phrase.append(' ');
-//                 }
-//                 allWords << phrase.trimmed();
-//             }
-//         }
-//         
-//         allWords.sort();
+
     QStringList words = m_loader->words();   
-        QCompleter *completer = new QCompleter(words, this);
-        completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        m_wordLine->setCompleter(completer);
-    //}
+    QCompleter *completer = new QCompleter(words, this);
+    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_wordLine->setCompleter(completer);
 }
     
 
