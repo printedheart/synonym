@@ -22,7 +22,6 @@
 
 #include <QAbstractListModel>
 #include <QStringList>
-#include "node.h"
 #include "worddatagraph.h"
 
 /**
@@ -49,12 +48,12 @@ public:
     void setDataGraph(WordGraph *dataGraph);
 
 
-    MeaningNode *nodeAt(const QModelIndex &index);
-    QModelIndex indexForNode(MeaningNode *node);
+    Node *nodeAt(const QModelIndex &index);
+    QModelIndex indexForNode(Node *node);
 private:
     WordGraph *m_dataGraph;
 
-    QList<MeaningNode*> m_meanings;
+    QList<Node*> m_meanings;
 
     WordGraph::PartOfSpeech m_modelType;
     QStringList stringList;

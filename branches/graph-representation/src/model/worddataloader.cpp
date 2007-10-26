@@ -19,8 +19,8 @@
  ***************************************************************************/
 #include "worddataloader.h"
 #include "worddatagraph.h"
-#include "node.h"
-#include "edge.h"
+#include "graphnode.h"
+#include "graphedge.h"
 #include <QtCore>                  
 #include "wn.h"        
 #include <iostream>
@@ -38,11 +38,10 @@ WordDataLoader::~WordDataLoader()
 WordGraph * WordDataLoader::createWordGraph(const QString &searchWord) 
 {
     WordGraph *wordGraph = new WordGraph();
-    WordNode *wordNode = new WordNode(searchWord, wordGraph);
-    wordNode->setFixed(true);
-    wordGraph->addNode(wordNode);
+    Node *wordNode = wordGraph->addNode(searchWord, WordFactory());
+    wordNode->setData(WORD, searchWord);
     
-    int searchTypes[8] = { -HYPERPTR ,  -HYPOPTR, /* -SIMPTR , */ -ENTAILPTR, -VERBGROUP, -CLASSIFICATION, -CLASS, -PERTPTR, - ANTPTR };
+    int searchTypes[8] = { -HYPERPTR ,  -HYPOPTR, /* -SIMPTR ,*/  -ENTAILPTR, -VERBGROUP, -CLASSIFICATION, -CLASS, -PERTPTR, - ANTPTR };
     for (int pos = 1; pos <= NUMPARTS; pos++) {
         for (int type = 0; type < 9; type++) {
         
@@ -56,40 +55,43 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord)
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
-                MeaningNode *meaning = new MeaningNode(QString::number(pos) + QString::number(synset->hereiam), wordGraph);
-                meaning->setPartOfSpeech(pos);
-                meaning->setMeaning(synset->defn);
-                wordGraph->addNode(meaning);
-                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id());
+                Node *meaning = wordGraph->addNode(
+                        QString::number(pos) + QString::number(synset->hereiam), MeaningFactory());
+                meaning->setData(POS, QVariant(pos));
+                meaning->setData(MEANING, synset->defn);
+                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id(), EdgeFactory());
     
                 for (int i = 0; i < synset->wcount; i++) {
                     if (searchWord != synset->words[i]) {
-                        WordNode *word =  new WordNode(synset->words[i], wordGraph);
-                        wordGraph->addNode(word);
-                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id());
+                        Node *word = wordGraph->addNode(synset->words[i], WordFactory());
+                        word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
+                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id(), EdgeFactory());
+                        if (edge) edge->setData(RELATIONSHIP, relationshipType);
                             
                     }
                 }
                 
                     synset = synset->ptrlist;
                     if (synset) {//while (synset) {
-                        MeaningNode *meaning2 = new MeaningNode(QString::number(pos) + QString::number(synset->hereiam), wordGraph);
-                        meaning2->setPartOfSpeech(pos);
-                        meaning2->setMeaning(synset->defn);
-                        wordGraph->addNode(meaning2);
-                        Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id());
+                        Node *meaning2 = wordGraph->addNode(
+                                QString::number(pos) + QString::number(synset->hereiam), MeaningFactory());
+                        
+                        meaning2->setData(POS, pos);
+                        meaning2->setData(MEANING, synset->defn);
+                        Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), EdgeFactory());
                         
                         if (edge) {
-                            edge->setRelationship(relationshipType);
+                            edge->setData(RELATIONSHIP, relationshipType);
                         }
     
                         for (int i = 0; i < synset->wcount; i++) {
                             if (searchWord != synset->words[i]) {
-                                WordNode *word =  new WordNode(synset->words[i], wordGraph);
-                                wordGraph->addNode(word);
-                                Edge *edge = wordGraph->addEdge(meaning2->id(), word->id());
+                                Node *word = wordGraph->addNode(synset->words[i], WordFactory());
+                                word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
+                                Edge *edge = wordGraph->addEdge(meaning2->id(), word->id(), EdgeFactory());
                             }
                         }
+                        
                         synset = synset->nextss;
                         //synset = synset->ptrlist;
                     }
