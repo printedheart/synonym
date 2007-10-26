@@ -4,8 +4,6 @@ TEMPLATE = app
 INCLUDEPATH = . src src/ui src/model src/sound
 
 HEADERS = src/model/worddatagraph.h \
-        src/model/edge.h \
-        src/model/node.h \
         src/model/worddataloader.h \
         src/model/partofspeechlistmodel.h \
         src/ui/graphnode.h \
@@ -22,12 +20,11 @@ HEADERS = src/model/worddatagraph.h \
         src/sound/pronunciationsoundfactory.h \
         src/sound/pronunciationsoundholder.h  \
         src/sound/pronunciationsoundfactoryimpl.h \
-        src/sound/player.h
+        src/sound/player.h \
+        src/model/graphalgorithms.h
 
 
 SOURCES = src/model/worddatagraph.cpp \
-        src/model/edge.cpp \
-        src/model/node.cpp \
         src/model/worddataloader.cpp \
         src/model/partofspeechlistmodel.cpp \
         src/ui/graphnode.cpp \
@@ -68,3 +65,7 @@ INCLUDEPATH += /usr/local/WordNet-3.0/include
 
 LIBS += -L/usr/local/WordNet-3.0/lib \
 -lWN
+SOURCES -= src/model/edge.cpp \
+src/model/node.cpp
+HEADERS -= src/model/edge.h \
+src/model/node.h
