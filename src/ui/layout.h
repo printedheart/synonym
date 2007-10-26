@@ -43,9 +43,9 @@ public:
 
     virtual ~Layout() {};
 
-    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges) = 0;
+    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges) = 0;
     
-    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart) = 0;
+    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart) = 0;
     
     virtual void stop() {}
 
@@ -60,9 +60,9 @@ public:
     ForceDirectedLayout();
     ~ForceDirectedLayout();
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
 private:
     static const int REST_DISTANCE = 75;
 
@@ -78,7 +78,7 @@ private:
 //     ForceDirectedLayout2();
 //     ~ForceDirectedLayout2();
 // 
-//     void layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+//     void layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
 //     
 // private:
 //     static const int REST_DISTANCE = 75;
@@ -94,9 +94,9 @@ public:
     ForceDirectedLayout3();
     ~ForceDirectedLayout3();
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
 private:
     static const int REST_DISTANCE = 75;
 
@@ -118,9 +118,9 @@ public:
     ForceDirectedLayout4();
     ~ForceDirectedLayout4();
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
     
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
     
     void run();
     
@@ -134,7 +134,7 @@ private slots:
 
 private:
     
-    bool layoutSerial(QList<GraphicsNode*> nodes, QList<GraphEdge*> edges);
+    bool layoutSerial(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
     
     void prepareLayout(GraphicsNode *rootNode);
     void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
@@ -154,7 +154,7 @@ private:
     QMutex m_mutex;
     
     QList<GraphicsNode*> m_nodes;
-    QList<GraphEdge*> m_edges;
+    QList<GraphicsEdge*> m_edges;
     
     
     volatile bool m_restart;

@@ -21,8 +21,6 @@
 #include "graphedge.h"
 #include "graphnode.h"
 #include "layout.h"
-#include "node.h"
-                
 #include "math.h"
                 
 #include <QtGui>
@@ -67,12 +65,12 @@ void GraphScene::timerEvent(QTimerEvent *event)
 void GraphScene::layout()
 {
     QList<GraphicsNode *> nodes;
-    QList<GraphEdge *> edges;
+    QList<GraphicsEdge *> edges;
     foreach (QGraphicsItem *item, items()) {
         if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
             GraphicsNode *node = static_cast<GraphicsNode*>(item);
             nodes << node;
-        } else if(GraphEdge *edge = qgraphicsitem_cast<GraphEdge *>(item))
+        } else if(GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
             edges << edge;
     }
 
@@ -137,7 +135,7 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     foreach (QGraphicsItem *item, eventItems) {
         QGraphicsSvgItem *svgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(item);
         if (svgItem) {
-            emit soundButtonClicked(m_centralNode->dataNode()->id());
+            emit soundButtonClicked(m_centralNode->id());
         }
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
@@ -151,11 +149,9 @@ void GraphScene::setLayout(bool enable)
         m_layout->stop();
 }
 
-void GraphScene::propogateClickEvent(GraphicsNode *graphNode)
+void GraphScene::signalClickEvent(GraphicsNode *graphNode)
 {
-    Node *dataNode = graphNode->dataNode();
-    QString id = dataNode->id();
-    emit nodeClicked(id);
+    emit nodeClicked(graphNode->id());
 }
 
 
@@ -199,7 +195,7 @@ void GraphScene::setActivated(const QString &id)
     m_activeNode = 0;
     QList<GraphicsNode*> nodes = graphNodes();
     foreach (GraphicsNode *node, nodes) {
-        if (node->dataNode()->id() == id) {
+        if (node->id() == id) {
             node->setActivated(true);
             m_activeNode = node;
         }

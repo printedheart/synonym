@@ -18,17 +18,18 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "graphnode.h"
+#include "worddatagraph.h"
 #include "graphedge.h"
-#include "node.h"
 #include "graphscene.h"        
 #include <QtGui>
 #include <QtSvg>
 #include <cmath> 
                 
-GraphicsNode::GraphicsNode(GraphScene *scene)
-    :QGraphicsItem(0), m_mass(1.0)
+                
+#include "graphalgorithms.h"                
+GraphicsNode::GraphicsNode(const QString &id, WordGraph *graph)
+    : m_mass(1.0), m_id(id), m_graph(graph)
 {
-    m_scene = scene;   
     m_intermedPos.setX(2.0);
 }
 
@@ -36,15 +37,34 @@ GraphicsNode::~GraphicsNode()
 {
 }
 
-
-void GraphicsNode::addEdge(GraphEdge *edge)
+QString GraphicsNode::id() const
 {
-     m_edges.append(edge);
+    return m_id;
 }
+
     
-QList<GraphEdge*> GraphicsNode::edges() const
+QSet<GraphicsEdge*> GraphicsNode::edges() const
 { 
     return m_edges;
+}
+
+QSet<GraphicsNode*> GraphicsNode::neighbors() const
+{
+    QSet<GraphicsNode*> set;
+    findNeighbors(this, m_edges.begin(), m_edges.end(), set);
+    return set;    
+}
+
+
+unsigned int GraphicsNode::degree() const
+{
+    return edges().size();
+}
+
+
+WordGraph * GraphicsNode::graph() const
+{
+    return m_graph;
 }
 
 bool GraphicsNode::advance()
@@ -66,9 +86,10 @@ QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &val
 {
     switch (change) {
         case ItemPositionChange:
-            foreach (GraphEdge *edge, m_edges)
+            foreach (GraphicsEdge *edge, m_edges) {
                 edge->adjust();
-            m_scene->itemMoved();
+            }
+            graphScene()->itemMoved();
             break;
         default:
             break;
@@ -78,29 +99,34 @@ QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &val
 }
 
 
-QString GraphicsNode::id() const
-{
-    return dataNode()->id();
-}
-
 void GraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
     if (event->button() == Qt::LeftButton) {
         if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos()) {
-            m_scene->propogateClickEvent(this);
+            graphScene()->signalClickEvent(this);
         }
     }
  
 }
 
 
+GraphScene * GraphicsNode::graphScene() const
+{
+    Q_ASSERT_X(scene() != 0, "graphScene()", id().toLatin1().data());
+    if (scene()) 
+        return qobject_cast<GraphScene*>(scene());
+    
+    return 0;
+}
+        
+
 
 /**
     WordGraphicsNode definition
 */
-WordGraphicsNode::WordGraphicsNode(GraphScene *scene)
-    :GraphicsNode(scene), m_wordNode(0)
+WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
+    :GraphicsNode(id, graph)
 {
     setZValue(2);
     m_font = QFont("Dejavu Sans", 8, QFont::Normal);
@@ -109,21 +135,6 @@ WordGraphicsNode::WordGraphicsNode(GraphScene *scene)
 WordGraphicsNode::~WordGraphicsNode()
 {}
 
-void WordGraphicsNode::setNode(Node *node)
-{
-    if (node) {
-        m_wordNode = qobject_cast<WordNode *>(node);
-        m_font.setPointSize(m_wordNode->fixed() ? 14 : 8);
-    }
-        
-    else
-        m_wordNode = 0;
-}
-
-Node * WordGraphicsNode::dataNode() const
-{
-    return m_wordNode;
-}
 
 QPainterPath WordGraphicsNode::shape() const
 {
@@ -133,17 +144,17 @@ QPainterPath WordGraphicsNode::shape() const
 }
 
 QRectF WordGraphicsNode::boundingRect() const
-{
-    if (!m_wordNode)
-        return QRectF();
-    
-    QFontMetrics metrics(m_font);
-    QRectF rect = metrics.boundingRect(m_wordNode->word());
+{   
+    QFont font = m_font;
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
+        font.setPointSize(m_font.pointSize() * 1.5);
+    QFontMetrics metrics(font);
+    QRectF rect = metrics.boundingRect(data(WORD).toString());
         
-    if (dataNode()->fixed()) 
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
         return rect.translated(- rect.width() / 2, rect.height() / 8);
     
-    GraphEdge *edge = edges().first();
+    GraphicsEdge *edge = *(edges().begin());
     GraphicsNode *other = 0;
     if (edge->source() != this)
         other = edge->source();
@@ -164,22 +175,21 @@ QRectF WordGraphicsNode::boundingRect() const
 
 void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    
     Q_UNUSED(widget);
     
-    painter->setClipRect( option->exposedRect );
-    painter->setFont(m_font);
+    painter->setClipRect(option->exposedRect);
+    QFont font = m_font;
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
+        font.setPointSize(m_font.pointSize() * 1.5);
+    painter->setFont(font);
     painter->setPen(QPen(Qt::black, 1));
     painter->setBrush(Qt::NoBrush);
-    painter->drawText(boundingRect(), Qt::AlignCenter, m_wordNode->word());
-     
-    
-   // painter->drawRect(boundingRect());
+    painter->drawText(boundingRect(), Qt::AlignCenter, data(WORD).toString());
 }
 
 bool WordGraphicsNode::advance()
 {
-    if (m_wordNode->fixed())
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
         return false;
 
     return GraphicsNode::advance();
@@ -191,7 +201,7 @@ void WordGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     
     if (event->button() == Qt::LeftButton) {
         if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos()) {
-            m_scene->propogateClickEvent(this);
+            graphScene()->signalClickEvent(this);
         }
     }
  
@@ -215,8 +225,8 @@ static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
 
 int MeaningGraphicsNode::m_radius  = 5;
 
-MeaningGraphicsNode::MeaningGraphicsNode(GraphScene *scene)
-    :GraphicsNode(scene), m_node(0), m_toolTip(0), m_defItem(0)
+MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
+    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0)
 {
     setZValue(1);        
 }
@@ -227,25 +237,9 @@ MeaningGraphicsNode::~MeaningGraphicsNode()
     delete m_toolTip;
 }
 
-void MeaningGraphicsNode::setNode(Node *node)
-{
-    if (node) {
-        m_node = qobject_cast<MeaningNode *>(node);
-    } else
-        m_node = 0;
-
-}
-
-Node * MeaningGraphicsNode::dataNode() const
-{
-    return m_node;
-}
 
 QRectF MeaningGraphicsNode::boundingRect() const
-{
-    if (!m_node)
-        return QRectF();
-        
+{        
     qreal adjust = 3;
     return QRectF(
                   -m_radius - adjust, -m_radius - adjust,
@@ -263,12 +257,8 @@ QPainterPath MeaningGraphicsNode::shape() const
 void MeaningGraphicsNode::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(widget);
-    if (!m_node)
-        return;
-
     painter->setClipRect( option->exposedRect );
-    //painter->setPen(colors[m_node->partOfSpeech()]);
-    painter->setBrush(QBrush(colors[m_node->partOfSpeech() - 1]));
+    painter->setBrush(QBrush(colors[data(POS).toInt() - 1]));
     painter->setPen(Qt::black);
     painter->drawEllipse(-m_radius, -m_radius, 2 * m_radius, 2 * m_radius);
 }
@@ -323,13 +313,13 @@ void MeaningGraphicsNode::hideToolTip()
 void MeaningGraphicsNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {    
     showToolTip(event->scenePos());
-    m_scene->signalMouseHovered(this);
+    graphScene()->signalMouseHovered(this);
 }
 
 void MeaningGraphicsNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     hideToolTip();   
-    m_scene->signalMouseHoverLeaved(this);
+    graphScene()->signalMouseHoverLeaved(this);
 }
 
 void MeaningGraphicsNode::createToolTip()
@@ -340,8 +330,9 @@ void MeaningGraphicsNode::createToolTip()
     }
            
     // Prepare definition dext
-    QString definition = m_node->meaning().section(';', 0, 0);
-    QString examples = m_node->meaning().section(';', 1);
+    QString meaningText = data(MEANING).toString();
+    QString definition = meaningText.section(';', 0, 0);
+    QString examples = meaningText.section(';', 1);
     definition.remove(0, 1);
     examples.remove(examples.length() - 2, 1);
     QString defHtml = definition;

@@ -20,6 +20,7 @@
 #ifndef GRAPHCONTROLLER_H
 #define GRAPHCONTROLLER_H
 
+#include "worddatagraph.h"
 #include <QObject>
 #include <QStack>
 #include <QPair>
@@ -27,17 +28,15 @@
 
 class GraphScene;
 class WordDataLoader;
-class WordGraph;
 class MeaningGraphicsNode;
 class WordGraphicsNode;
-class GraphEdge;
-class Node;
+class GraphicsEdge;
 class GraphicsNode;
 class QGraphicsItem;                     
-class Edge;              
 /**
     @author Sergejs <sergey.melderis@gmail.com>
 */
+
 class GraphController : public QObject
 {
 Q_OBJECT
@@ -59,7 +58,7 @@ private:
 
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > > m_graphHistory;
     
-    GraphicsNode* findGraphicsNode(Node *dataNode);
+    GraphicsNode * findGraphicsNode(Node *dataNode);
     
     void addEdge(GraphicsNode *graphNode, Edge *edge);
     
