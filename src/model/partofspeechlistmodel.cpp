@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "partofspeechlistmodel.h"
 #include "worddatagraph.h"
-#include "node.h"
+#include "graphalgorithms.h"
 
 #include <QtCore>
 
@@ -69,7 +69,7 @@ QVariant PartOfSpeechListModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        QString fullMeaning =  m_meanings.at(index.row())->meaning();
+        QString fullMeaning =  m_meanings.at(index.row())->data(MEANING).toString();
         QString definition = fullMeaning.section(';', 0, 0);
         definition.remove(0, 1);
         return definition;
@@ -85,19 +85,13 @@ void PartOfSpeechListModel::reload()
     endRemoveRows();
 
     beginInsertRows(QModelIndex(), 0, 0);
-    QList<MeaningNode *> meanings = m_dataGraph->meanings();
-    foreach (MeaningNode *node, meanings) {
-        if (node->partOfSpeech() == m_modelType)
+    QList<Node *> meanings = m_dataGraph->nodes(IsMeaning());
+    foreach (Node *node, meanings) {
+        if (node->data(POS).toInt() == m_modelType)
             m_meanings.append(node);
     }
     endInsertRows();
 }
-/*
-QModelIndex PartOfSpeechListModel::index(int row, int col, const QModelIndex& parent) const
-{
-    qDebug() << "index " << row;
-    return QAbstractListModel::index(row, col, parent);
-}*/
 
 
  QVariant PartOfSpeechListModel::headerData(int section, Qt::Orientation orientation,
@@ -112,7 +106,7 @@ QModelIndex PartOfSpeechListModel::index(int row, int col, const QModelIndex& pa
         return QString("Row %1").arg(section);
 }
 
-MeaningNode * PartOfSpeechListModel::nodeAt(const QModelIndex &index)
+Node * PartOfSpeechListModel::nodeAt(const QModelIndex &index)
 {
     if (!index.isValid())
         return 0;
@@ -123,7 +117,7 @@ MeaningNode * PartOfSpeechListModel::nodeAt(const QModelIndex &index)
     return m_meanings.at(index.row());
 }
 
-QModelIndex PartOfSpeechListModel::indexForNode(MeaningNode *node)
+QModelIndex PartOfSpeechListModel::indexForNode(Node *node)
 {
     int index = m_meanings.indexOf(node);
     QModelIndex modelIndex;
