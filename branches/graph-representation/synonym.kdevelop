@@ -143,7 +143,7 @@
   </kdevdebugger>
   <kdevtrollproject>
     <run>
-      <mainprogram>/home/serega/devel/synonym</mainprogram>
+      <mainprogram>/home/sergey/devel/graphs/synonym</mainprogram>
       <programargs/>
       <directoryradio>executable</directoryradio>
       <runarguments>
@@ -151,15 +151,15 @@
         <ui/>
       </runarguments>
       <cwd>
-        <synonym>/home/serega/devel/synonym</synonym>
-        <ui>/home/serega/devel/synonym</ui>
+        <synonym>/home/sergey/devel/graphs/synonym</synonym>
+        <ui>/home/sergey/deve/graphs/synonym</ui>
       </cwd>
       <debugarguments>
         <synonym/>
         <ui/>
       </debugarguments>
       <globaldebugarguments/>
-      <globalcwd>/home/serega/devel/synonym</globalcwd>
+      <globalcwd>/home/sergey/devel/graphs/synonym</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <terminal>false</terminal>
       <autocompile>false</autocompile>
@@ -170,7 +170,6 @@
     <general>
       <activedir></activedir>
     </general>
-    <subclassing/>
     <make>
       <abortonerror>true</abortonerror>
       <runmultiplejobs>false</runmultiplejobs>
@@ -185,6 +184,7 @@
       <replacePaths>false</replacePaths>
       <disableDefaultOpts>true</disableDefaultOpts>
     </qmake>
+    <subclassing/>
   </kdevtrollproject>
   <workspace>
     <openfiles/>
@@ -215,10 +215,10 @@
     <EMAIL>sergey.melderis@gmail.com</EMAIL>
     <LICENSE>GPL</LICENSE>
     <LICENSEFILE>COPYING</LICENSEFILE>
-    <QMAKE>/usr/local/Trolltech/Qt-4.2.2/bin/qmake</QMAKE>
+    <QMAKE>/usr/local/Trolltech/Qt-4.3.1/bin/qmake</QMAKE>
     <VERSION>0.1</VERSION>
     <YEAR>2007</YEAR>
-    <dest>/home/serega/devel/synonym</dest>
+    <dest>/home/sergey/deve/graphs/synonym</dest>
   </substmap>
   <cppsupportpart>
     <filetemplates>
