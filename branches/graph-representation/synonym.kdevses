@@ -2,68 +2,68 @@
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
  <DocsAndViews NumberOfDocuments="21" >
-  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/sound/player.cpp" >
+  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphnode.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/mainwindow.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddataloader.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/mainwindow.cpp" >
-   <View0 Encoding="" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/wordnetutil.h" >
+   <View0 Encoding="" line="68" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphcontroller.cpp" >
-   <View0 Encoding="" line="96" Type="Source" />
+  <Doc3 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/partofspeechlistmodel.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddatagraph.h" >
+  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphcontroller.h" >
    <View0 Encoding="" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphcontroller.h" >
-   <View0 Encoding="" line="38" Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphcontroller.cpp" >
+   <View0 Encoding="" line="117" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphnode.cpp" >
-   <View0 Encoding="" line="180" Type="Source" />
+  <Doc6 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/mainwindow.cpp" >
+   <View0 Encoding="" Type="Source" />
   </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddataloader.cpp" >
+  <Doc7 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/layout.h" >
    <View0 Encoding="" Type="Source" />
   </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphscene.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc8 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/layout.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddataloader.h" >
+  <Doc9 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphnode.h" >
    <View0 Encoding="" Type="Source" />
   </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/partofspeechlistmodel.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc10 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddatagraph.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/graphalgorithms.h" >
+  <Doc11 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphscene.h" >
    <View0 Encoding="" Type="Source" />
   </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddatagraph.cpp" >
+  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphscene.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc12>
-  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphscene.cpp" >
+  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphedge.h" >
    <View0 Encoding="" Type="Source" />
   </Doc13>
-  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphnode.h" >
-   <View0 Encoding="" line="105" Type="Source" />
+  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphedge.cpp" >
+   <View0 Encoding="" Type="Source" />
   </Doc14>
-  <Doc15 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphedge.h" >
+  <Doc15 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/mainwindow.h" >
    <View0 Encoding="" Type="Source" />
   </Doc15>
-  <Doc16 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/graphedge.cpp" >
-   <View0 Encoding="" Type="Source" />
+  <Doc16 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddataloader.h" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc16>
-  <Doc17 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/synonym.pro" >
+  <Doc17 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/test/graphtest.h" >
    <View0 Encoding="" Type="Source" />
   </Doc17>
-  <Doc18 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/partofspeechlistmodel.cpp" >
+  <Doc18 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/test/graphtest.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc18>
-  <Doc19 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/layout.cpp" >
-   <View0 Encoding="" Type="Source" />
+  <Doc19 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/graphalgorithms.h" >
+   <View0 Encoding="" line="87" Type="Source" />
   </Doc19>
-  <Doc20 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/ui/layout.h" >
-   <View0 Encoding="" line="113" Type="Source" />
+  <Doc20 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/synonym/src/model/worddatagraph.h" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc20>
  </DocsAndViews>
  <pluginList>
@@ -77,7 +77,7 @@
   </kdevdebugger>
   <kdevastyle>
    <Extensions ext="*.cpp *.h,*.c *.h,*.cxx *.hxx,*.c++ *.h++,*.cc *.hh,*.C *.H,*.diff,*.inl,*.java,*.moc,*.patch,*.tlh,*.xpm" />
-   <AStyle IndentPreprocessors="0" FillCount="4" PadParenthesesOut="1" IndentNamespaces="1" IndentLabels="1" Fill="Tabs" MaxStatement="40" Brackets="Break" MinConditional="-1" IndentBrackets="0" PadParenthesesUn="1" BlockBreak="0" KeepStatements="1" KeepBlocks="1" BlockIfElse="0" IndentSwitches="1" PadOperators="0" FStyle="UserDefined" IndentCases="0" FillEmptyLines="0" BracketsCloseHeaders="0" BlockBreakAll="0" PadParenthesesIn="1" IndentClasses="1" IndentBlocks="0" FillForce="0" />
+   <AStyle IndentPreprocessors="0" FillCount="4" PadParenthesesOut="1" IndentNamespaces="1" IndentLabels="1" Fill="Spaces" MaxStatement="40" Brackets="Linux" MinConditional="-1" IndentBrackets="0" PadParenthesesUn="1" BlockBreak="0" KeepStatements="1" KeepBlocks="1" BlockIfElse="0" IndentSwitches="1" PadOperators="1" FStyle="UserDefined" IndentCases="0" FillEmptyLines="0" BracketsCloseHeaders="0" BlockBreakAll="0" PadParenthesesIn="0" IndentClasses="0" IndentBlocks="0" FillForce="1" />
   </kdevastyle>
   <kdevbookmarks>
    <bookmarks>
