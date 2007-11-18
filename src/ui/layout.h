@@ -156,9 +156,7 @@ private:
     QList<GraphicsNode*> m_nodes;
     QList<GraphicsEdge*> m_edges;
     
-    
     volatile bool m_restart;
-    
     
     struct NodeAnimation {
         NodeAnimation() : firstIndex(0), lastIndex(0) {}
@@ -166,12 +164,14 @@ private:
         QPointF buffer[BUFFER_SIZE];
         volatile uint firstIndex;
         volatile uint lastIndex;
-
-        inline void addPoint(QPointF p) { buffer[lastIndex++] = p; }
-        inline QPointF &  lastPoint()  { return buffer[(lastIndex - 1)]; }
-        QPointF  takeFirstPoint() { return  buffer[firstIndex++]; }
+        QPointF force;
+        
+        inline void addPoint(QPointF p) { buffer[(lastIndex++) % BUFFER_SIZE] = p; }
+        inline QPointF &lastPoint()  { return buffer[(lastIndex - 1) % BUFFER_SIZE]; }
+        QPointF  takeFirstPoint() { return  buffer[(firstIndex++) % BUFFER_SIZE]; }
         inline void reset() { firstIndex = 0; lastIndex = 0;}
         inline int pointCount() const { return lastIndex - firstIndex; } 
+        
     };
         
     QHash<GraphicsNode*, NodeAnimation> m_animations; 

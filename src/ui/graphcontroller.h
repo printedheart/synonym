@@ -54,8 +54,11 @@ public slots:
 private:
     GraphScene *m_scene;
     WordDataLoader *m_loader;
+    WordGraph *m_lastGraph;
 
 
+    void makeConnected(Node *goal);
+    
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > > m_graphHistory;
     
     GraphicsNode * findGraphicsNode(Node *dataNode);
@@ -64,6 +67,8 @@ private:
     
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator
             findInHistory(const QString &word);
+    
+    void assertGraphConnectivityToNode(Node *node);
 };
 
 #endif

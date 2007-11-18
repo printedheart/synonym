@@ -25,7 +25,8 @@
 
 GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
                            GraphicsNode *dest, WordGraph *graph)
-    : m_toolTip(0), m_id(id), m_source(source), m_dest(dest), m_graph(graph), m_directed(false)
+    : m_id(id), m_source(source), m_dest(dest), m_graph(graph), m_directed(false), 
+      m_connector(0), m_pointer(0), m_toolTip(0)     
 {
     m_source->m_edges << this;
     m_dest->m_edges << this;
@@ -38,9 +39,7 @@ GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
 
 GraphicsEdge::~GraphicsEdge()
 {
-    delete m_connector;
-    delete m_pointer;
-    delete m_toolTip;
+    
 }
 
 QString GraphicsEdge::id() const

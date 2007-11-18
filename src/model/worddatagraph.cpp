@@ -33,6 +33,74 @@ WordGraph::~WordGraph()
 }
 
 
+Node *WordGraph::addNode(const QString &nodeId, NodeFactory &factory)
+{
+    if (m_nodes.contains(nodeId))
+        return m_nodes[nodeId];
+    
+    Node *node = factory.createNode(nodeId, this);
+    m_nodes[nodeId] = node;
+    emit nodeAdded(node);
+    return node;
+}
+
+Edge *WordGraph::addEdge(const QString &aNodeId, const QString &bNodeId, EdgeFactory &factory)
+{
+    QString edgeId = aNodeId + "-" +  bNodeId;
+    QString edgeId2 = bNodeId + "-" + aNodeId;
+    bool hasEdge = m_edges.contains(edgeId) || m_edges.contains(edgeId2);
+    bool hasNodes = m_nodes.contains(aNodeId) && m_nodes.contains(bNodeId);
+    Edge *edge = 0;
+    if (!hasEdge && hasNodes) {
+        edge = factory.createEdge(edgeId, m_nodes[aNodeId], m_nodes[bNodeId], this);
+        m_edges[edgeId] = edge;
+        emit edgeAdded(edge);
+    }
+    return edge;
+}
+
+
+
+void WordGraph::disableNode(Node *node)
+{
+    if (!node || !m_nodes.contains(node->id()))
+        return;
+    
+    m_nodes.remove(node->id());
+    m_disabledNodes[node->id()] = node;
+    
+    QSet<Edge*>::iterator iter = node->m_edges.begin();
+    for (; iter != node->m_edges.end(); ++iter) {
+        Edge *edge = *iter;
+        edge->adjacentNode(node)->m_edges.remove(edge);
+    }
+}
+
+void WordGraph::enableNode(Node *node)
+{
+    QString id = node->id();
+    qDebug() << "1 " << node->id();
+    if (!node || !m_disabledNodes.contains(id))
+        return;
+    qDebug() << "2 " << node->id();
+    
+    m_disabledNodes.remove(node->id());
+    m_nodes[node->id()] = node;
+    
+    QSet<Edge*>::iterator iter = node->m_edges.begin();
+    for (; iter != node->m_edges.end(); ++iter) {
+        Edge *edge = *iter;
+        edge->adjacentNode(node)->m_edges.insert(edge);
+    }
+}
+
+void WordGraph::enableAll()
+{
+    NodeIterator iter = m_disabledNodes.begin();
+    for (; iter != m_disabledNodes.end(); ++iter) {
+        enableNode(*iter);
+    }
+}
 
 void WordGraph::removeNode(const QString &nodeId)
 {
@@ -88,28 +156,47 @@ void WordGraph::removeEdge(const QString &id)
 
 void WordGraph::clearAll()
 {
-    foreach (Node *node, m_nodes)
-        delete node;
+    NodeIterator nodeIter = m_nodes.begin();
+    for (; nodeIter != m_nodes.end(); ++nodeIter)
+        delete (*nodeIter);
 
-    foreach (Edge *edge, m_edges)
-        delete edge;
+    EdgeIterator edgeIter = m_edges.begin();
+    for (; edgeIter != m_edges.end(); ++edgeIter)
+        delete (*edgeIter);
 
     m_nodes.clear();
     m_edges.clear();
+    m_disabledNodes.clear();
 }
 
 
 
-QList<GraphicsNode*> WordGraph::nodes() const
+QList<Node*> WordGraph::nodes() const
 {
-    return m_nodes.values();
+    ConstNodeIterator iter = m_nodes.constBegin();
+    QList<Node*> nodes;
+    for (; iter != m_nodes.constEnd(); ++iter) {
+        if (!m_disabledNodes.contains((*iter)->id())) {
+            nodes.append(*iter);
+        }
+    }
+    return nodes;
 }
         
 
 
 QList<Edge*> WordGraph::edges() const
 {
-    return m_edges.values();
+    ConstEdgeIterator iter = m_edges.constBegin();
+    QList<Edge*> edges;
+    for (; iter != m_edges.constEnd(); ++iter) {
+        Edge *edge = *iter;
+        if (m_nodes.contains(edge->source()->id()) 
+            && m_nodes.contains(edge->dest()->id())) {
+            edges.append(edge);
+        }
+    }
+    return edges;
 }
 
 Node* WordGraph::node(const QString &id) const
@@ -127,6 +214,10 @@ Node* WordGraph::centralNode() const
     return node(m_centralNodeId);
 }
 
+bool WordGraph::isEnabled(Node *node) const
+{
+    return m_nodes.contains(node->id());
+}
 
 
 

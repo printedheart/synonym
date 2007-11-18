@@ -30,7 +30,8 @@
 #include <QtSvg>
 
 GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_enableLayout(true), m_restartLayout(false), m_activeNode(0)
+ : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), 
+                  m_enableLayout(true), m_restartLayout(false), m_activeNode(0), m_centralNode(0)
 {
     m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
     m_layout = new ForceDirectedLayout4();
