@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "graphnode.h"
 #include "worddatagraph.h"
+#include "wordnetutil.h"
 #include "graphedge.h"
 #include "graphscene.h"        
 #include <QtGui>
@@ -50,7 +51,7 @@ QSet<GraphicsEdge*> GraphicsNode::edges() const
 
 QSet<GraphicsNode*> GraphicsNode::neighbors() const
 {
-    QSet<GraphicsNode*> set;
+    QSet<GraphicsNode*> set; 
     findNeighbors(this, m_edges.begin(), m_edges.end(), set);
     return set;    
 }
@@ -226,15 +227,14 @@ static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
 int MeaningGraphicsNode::m_radius  = 5;
 
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0)
+    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0)
 {
     setZValue(1);        
 }
 
 MeaningGraphicsNode::~MeaningGraphicsNode()
 {
-    delete m_defItem;
-    delete m_toolTip;
+   
 }
 
 
@@ -371,10 +371,15 @@ void MeaningGraphicsNode::createToolTip()
 }
 
 
-void MeaningGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void MeaningGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mousePressEvent(event);
+    if (m_toolTip->isVisible()) {
+        hideToolTip();   
+        graphScene()->signalMouseHoverLeaved(this);
+    }
+    GraphicsNode::mouseReleaseEvent(event);
 }
+
 
 void MeaningGraphicsNode::adjustToolTipPos()
 {

@@ -22,7 +22,8 @@
 #include "graphnode.h"
 #include "graphedge.h"
 #include <QtCore>                  
-#include "wn.h"        
+#include "wn.h"
+#include "wordnetutil.h"        
 #include <iostream>
 WordDataLoader::WordDataLoader(QObject *parent)
  : QObject(parent)
@@ -37,68 +38,72 @@ WordDataLoader::~WordDataLoader()
 
 WordGraph * WordDataLoader::createWordGraph(const QString &searchWord) 
 {
+    TemplateNodeFactory<WordGraphicsNode> wordFactory;
+    TemplateNodeFactory<MeaningGraphicsNode> meaningFactory;
+    TemplateEdgeFactory<GraphicsEdge> edgeFactory;
+ 
     WordGraph *wordGraph = new WordGraph();
-    Node *wordNode = wordGraph->addNode(searchWord, WordFactory());
+    Node *wordNode = wordGraph->addNode(searchWord, wordFactory);
     wordNode->setData(WORD, searchWord);
+    SynsetPtr synsetToFree;
     
     int searchTypes[8] = { -HYPERPTR ,  -HYPOPTR, /* -SIMPTR ,*/  -ENTAILPTR, -VERBGROUP, -CLASSIFICATION, -CLASS, -PERTPTR, - ANTPTR };
     for (int pos = 1; pos <= NUMPARTS; pos++) {
         for (int type = 0; type < 9; type++) {
         
-            qDebug() << "before findtheinfo_ds" << pos << " " <<  type;
             SynsetPtr synset = findtheinfo_ds(searchWord.toLatin1().data(),
                                             pos, searchTypes[type], ALLSENSES);
-            qDebug() << "after findtheinfo_ds";
-            
+            synsetToFree = synset;
             int relationshipType = searchTypes[type] > 0 ? searchTypes[type] : - searchTypes[type];
             
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
                 Node *meaning = wordGraph->addNode(
-                        QString::number(pos) + QString::number(synset->hereiam), MeaningFactory());
+                        QString::number(pos) + QString::number(synset->hereiam), meaningFactory);
                 meaning->setData(POS, QVariant(pos));
                 meaning->setData(MEANING, synset->defn);
-                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id(), EdgeFactory());
+                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id(), edgeFactory);
     
                 for (int i = 0; i < synset->wcount; i++) {
                     if (searchWord != synset->words[i]) {
-                        Node *word = wordGraph->addNode(synset->words[i], WordFactory());
+                        Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                         word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
-                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id(), EdgeFactory());
+                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id(), edgeFactory);
                         if (edge) edge->setData(RELATIONSHIP, relationshipType);
                             
                     }
                 }
                 
-                    synset = synset->ptrlist;
-                    if (synset) {//while (synset) {
-                        Node *meaning2 = wordGraph->addNode(
-                                QString::number(pos) + QString::number(synset->hereiam), MeaningFactory());
-                        
-                        meaning2->setData(POS, pos);
-                        meaning2->setData(MEANING, synset->defn);
-                        Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), EdgeFactory());
-                        
-                        if (edge) {
-                            edge->setData(RELATIONSHIP, relationshipType);
-                        }
-    
-                        for (int i = 0; i < synset->wcount; i++) {
-                            if (searchWord != synset->words[i]) {
-                                Node *word = wordGraph->addNode(synset->words[i], WordFactory());
-                                word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
-                                Edge *edge = wordGraph->addEdge(meaning2->id(), word->id(), EdgeFactory());
-                            }
-                        }
-                        
-                        synset = synset->nextss;
-                        //synset = synset->ptrlist;
+                synset = synset->ptrlist;
+                while (synset) {
+                    Node *meaning2 = wordGraph->addNode(
+                            QString::number(pos) + QString::number(synset->hereiam), meaningFactory);
+                    
+                    meaning2->setData(POS, pos);
+                    meaning2->setData(MEANING, synset->defn);
+                    Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), edgeFactory);
+                    
+                    if (edge) {
+                        edge->setData(RELATIONSHIP, relationshipType);
                     }
+
+                    for (int i = 0; i < synset->wcount; i++) {
+                        if (searchWord != synset->words[i]) {
+                            Node *word = wordGraph->addNode(synset->words[i], wordFactory);
+                            word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
+                            Edge *edge = wordGraph->addEdge(meaning2->id(), word->id(), edgeFactory);
+                        }
+                    }
+                    
+                    synset = synset->nextss;
+                    //synset = synset->ptrlist;
+                }
                 synset = nextSynset;
             }
         }
     }
+    free_syns(synsetToFree);
     
     return wordGraph;
 }

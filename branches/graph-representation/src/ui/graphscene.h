@@ -44,7 +44,7 @@ public:
 
     QList<GraphicsNode *> graphNodes() const;
 
-    void setLayout(bool enable);
+    
 
     void signalClickEvent(GraphicsNode *graphNode);
     
@@ -58,6 +58,7 @@ public:
     
 public slots:    
     void setActivated(const QString &id);
+    void setLayout(bool enable = true);
     
 signals:
     void nodeClicked(const QString &id);

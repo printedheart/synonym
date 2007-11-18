@@ -24,14 +24,16 @@
  
 #include <QSet>
 #include <QList> 
+#include <QQueue>
+#include <QPair>
  
 template <class V, class Iter, class Container>
-inline void findNeighbors(V *vertex, Iter start, Iter end, Container &container)
+void findNeighbors(V *vertex, Iter start, Iter end, Container &container)
 {
     while (start != end) {
-        if ((*start)->source() == vertex) {
+        if ((void*) (*start)->source() == vertex) {
             container << (*start)->dest();
-        } else if ((*start)->dest() == vertex) {
+        } else if ((void*) (*start)->dest() == vertex) {
             container << (*start)->source();
         }
         start++;
@@ -40,14 +42,14 @@ inline void findNeighbors(V *vertex, Iter start, Iter end, Container &container)
 
 
 template <class V>
-inline bool isReachable(V *from, V *goal)
+bool isReachable(V *from, V *goal)
 {
     QSet<V*> visitSet;
     return isReachableHelper(from, goal, visitSet);    
 } 
        
 template <class V>
-inline bool isReachableHelper(V *from, V *goal, QSet<V*> &visitSet)
+bool isReachableHelper(V *from, V *goal, QSet<V*> &visitSet)
 {
     if (from == goal)
         return true;
@@ -64,12 +66,12 @@ inline bool isReachableHelper(V *from, V *goal, QSet<V*> &visitSet)
                 return true;
         }
     }
-    return false;
+    return false; 
 }
 
 template <class Container, class Iter, typename Predicate>
-inline void filter(Iter start, Iter end, Container &container, Predicate predicate)
-{
+void filter(Iter start, Iter end, Container &container, Predicate predicate)
+{ 
     while (start != end) {
         if (predicate.operator() ((*start))) {
             container << (*start);
@@ -82,7 +84,22 @@ template <class V, class Function>
 void levelOrderScan(V *vertex, Function function)
 {
     QSet<V*> visitSet;
-    levelVisit(vertex, -1, function,  visitSet);
+    QQueue<QPair<V*, int> > vQueue;
+    vQueue.enqueue(qMakePair(vertex, 0));
+    while (!vQueue.isEmpty()) {
+        QPair<V*, int> p = vQueue.dequeue();
+        V *v = p.first;
+        int level = p.second;
+        function(v, level);
+        visitSet.insert(v);
+        QList<V*> neighbors;
+        findNeighbors(v, v->edges().constBegin(), v->edges().constEnd(), neighbors);
+        for (int i = 0; i < neighbors.size(); ++i) {
+            if (!visitSet.contains(neighbors[i])) {
+                vQueue.enqueue(qMakePair(neighbors[i], level + 1));
+            }
+        }
+    }
 }
 
         
@@ -90,7 +107,7 @@ template <class V, class Function>
 void levelVisit(V *vertex, int level, Function function, QSet<V*> &visitSet)
 {
     level++;
-    function.operator() (vertex, level);
+    function(vertex, level);
     visitSet.insert(vertex);
     QList<V*> neighbors;
     findNeighbors(vertex, vertex->edges().constBegin(), vertex->edges().constEnd(), neighbors);
@@ -100,7 +117,7 @@ void levelVisit(V *vertex, int level, Function function, QSet<V*> &visitSet)
             levelVisit(neighbors[i], level, function,  visitSet);
     }
 }
-                     
+
     
             
                 

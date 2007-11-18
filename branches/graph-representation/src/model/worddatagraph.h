@@ -31,14 +31,50 @@
 
 
 
-const int POS            = 111;
-const int MEANING        = 222;
-const int RELATIONSHIP   = 223;
-const int WORD           = 224;
-const int LEVEL          = 225;
+
 
 typedef GraphicsNode Node;
 typedef GraphicsEdge Edge;
+
+
+class NodeFactory
+{
+public:    
+    virtual ~NodeFactory() {}
+    virtual Node *createNode(const QString &id, WordGraph *graph) = 0;
+};
+
+class EdgeFactory
+{
+    public:    
+        virtual ~EdgeFactory() {}
+        virtual Edge *createEdge(const QString &id, Node *source, Node *dest,  WordGraph *graph) = 0;
+};
+
+
+template <class T>
+class TemplateNodeFactory : public NodeFactory
+{
+public:
+    virtual Node *createNode(const QString &id, WordGraph *graph) { 
+        return new T(id, graph);
+    }
+};
+
+template <class T>
+class TemplateEdgeFactory : public EdgeFactory
+{
+public:            
+    virtual Edge *createEdge(const QString &id, Node *source, Node *dest,  WordGraph *graph) {
+        return new T(id, source, dest, graph);
+    }
+};
+
+
+
+
+            
+    
 
 class WordGraph : public QObject
 {
@@ -49,14 +85,17 @@ public:
 
     enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
     
-    template <typename Factory>
-    Node * addNode(const QString &nodeId, Factory factory);
-    
+   
+    Node * addNode(const QString &nodeId, NodeFactory &factory);
     void removeNode(const QString &nodeId);
     void removeNode(Node *node);
     
-    template <typename Factory>
-    Edge * addEdge(const QString &aNodeId, const QString &bNodeId, Factory factory);
+    void disableNode(Node *node);
+    void enableNode(Node *node);
+    void enableAll();
+    bool isEnabled(Node *node) const;
+    
+    Edge *addEdge(const QString &aNodeId, const QString &bNodeId, EdgeFactory &factory);
     
     void removeEdge(const QString &edgeId);
     void removeEdge(Edge *edge);
@@ -67,15 +106,10 @@ public:
     Edge *edge(const QString &id) const;
 
     QList<Edge*> edges() const;
-    QList<GraphicsNode*> nodes() const;
+    QList<Node*> nodes() const;
     
     template <typename Predicate>
-    QList<GraphicsNode*> nodes(Predicate interesting) const
-    {
-        QList<GraphicsNode*> list;
-        filter(m_nodes.constBegin(), m_nodes.constEnd(), list, interesting);
-        return list;
-    }                
+    QList<Node*> nodes(Predicate interesting) const;      
 
     Node* centralNode() const;
     
@@ -89,127 +123,46 @@ signals:
 private:
     QHash<QString, Node*> m_nodes;
     QHash<QString, Edge*> m_edges;
+    typedef QHash<QString, Node*>::iterator NodeIterator;
+    typedef QHash<QString, Node*>::const_iterator ConstNodeIterator;
+    typedef QHash<QString, Edge*>::iterator EdgeIterator;
+    typedef QHash<QString, Edge*>::const_iterator ConstEdgeIterator;
+    QHash<QString, Node*> m_disabledNodes;
     QString m_centralNodeId;
-};
-
-
-
-template <typename Factory>
-Node * WordGraph::addNode(const QString &nodeId, Factory factory)
-{
-    if (m_nodes.contains(nodeId))
-        return m_nodes[nodeId];
     
-    Node *node = factory.operator() (nodeId, this);
-    m_nodes[nodeId] = node;
-    emit nodeAdded(node);
-    return node;
-}
-
-template <typename Factory>
-Edge * WordGraph::addEdge(const QString &aNodeId, const QString &bNodeId, Factory factory)
-{
-    QString edgeId = aNodeId + bNodeId;
-    QString edgeId2 = bNodeId + aNodeId;
-    bool hasEdge = m_edges.contains(edgeId) || m_edges.contains(edgeId2);
-    bool hasNodes = m_nodes.contains(aNodeId) && m_nodes.contains(bNodeId);
-    Edge *edge = 0;
-    if (!hasEdge && hasNodes) {
-        edge = factory.operator() (edgeId, m_nodes[aNodeId], m_nodes[bNodeId], this);
-        m_edges[edgeId] = edge;
-        emit edgeAdded(edge);
-    }
-    return edge;
-}
-
-
-
-class IsMeaning
-{
-public:    
-    bool operator() (Node *node) { return node->data(MEANING).isValid(); }
-};
-
-class IsWord
-{
-public:    
-    bool operator() (Node *node) { return node->data(WORD).isValid(); }
-};
-
-class SetLevel
-{
-public:
-    void operator() (Node *node, int level) { node->setData(LEVEL, level);}
-};
-
-class AlwaysTrue
-{
-public:    
-    bool operator() (void *) { return true; }
+   
 };
 
 
-class VisualFilter
+template <typename Function>
+class EnabledNodePredicateWrapper
 {
-public:    
-    bool operator() (Node *node) {
-        int level = node->data(LEVEL).toInt();
-        if (level > 3) return false;
-        if (level == 3 && IsMeaning() (node)) return false;
-        if (level == 3 && IsWord() (node)) {
-            foreach (Node *neighbor, node->neighbors()) {
-                if (neighbor->edges().size() > 2 
-                    && neighbor->data(LEVEL).toInt() < level 
-                    && hasWordNeighborsWithGreaterLevel(neighbor)) {
-                    return false;
-                }
-            }
-        }    
-            
-        if (level == 2 && IsMeaning() (node)) {
-            foreach (Node *neighbor, node->neighbors()) {
-                if (neighbor->data(LEVEL).toInt() < level && hasWordNeighborsWithGreaterLevel(neighbor)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-    bool hasWordNeighborsWithGreaterLevel(Node *node) {
-        IsWord isWord;
-        int level = node->data(LEVEL).toInt();
-        foreach (Node *neighbor, node->neighbors()) {
-            if (neighbor->data(LEVEL).toInt() > level && isWord(neighbor)) return true;
-        }
-        return false;
-    }
-};
-
-
-class WordFactory
-{
-public:    
-    Node * operator() (const QString &id, WordGraph *graph) {
-        return new WordGraphicsNode(id, graph);
-    }
-};
- 
-class MeaningFactory
-{
-public:     
-    Node * operator() (const QString &id, WordGraph *graph) {
-        return new MeaningGraphicsNode(id, graph);
-    }
-};
-
-class EdgeFactory
-{
-public:    
-    Edge * operator() (const QString &id, Node *source, Node *dest,  WordGraph *graph) {
-        return new GraphicsEdge(id, source, dest, graph);
-    }
-};
+public:            
+    EnabledNodePredicateWrapper(const WordGraph *graph, Function &func) :
+        m_graph(graph), m_function(func) {}
+    
+    EnabledNodePredicateWrapper<Function>(const EnabledNodePredicateWrapper<Function> &other) :
+            m_graph(other.m_graph), m_function(other.m_function) {}
+    
         
+    bool operator() (Node *node) {
+        if (!m_graph->isEnabled(node)) return false;
+        return m_function.operator() (node);        
+    }            
+            
+    const WordGraph *m_graph;        
+    Function &m_function;
+};        
+
+template <typename Predicate>
+QList<Node*> WordGraph::nodes(Predicate interesting) const
+{
+    QList<Node*> list;
+    EnabledNodePredicateWrapper<Predicate> predicate(this, interesting);
+    filter(m_nodes.constBegin(), m_nodes.constEnd(), list, predicate);
+    return list;
+}              
+          
                     
 
 #endif

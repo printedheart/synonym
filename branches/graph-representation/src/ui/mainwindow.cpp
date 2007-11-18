@@ -27,6 +27,7 @@
 #include "partofspeechlistmodel.h"
 #include "pronunciationsoundholder.h"
 #include "player.h"
+#include "wordnetutil.h"
 #include <QtGui>
 #include <QtCore>
 #include <stdlib.h>
@@ -56,6 +57,10 @@ MainWindow::MainWindow()
     QToolBar *toolBar = addToolBar("synonym");
     m_wordLine = new QLineEdit(toolBar);
     toolBar->addWidget(m_wordLine);
+    QPushButton *stopButton = new QPushButton("Stop", this);
+    toolBar->addWidget(stopButton);
+    
+    connect (stopButton, SIGNAL(clicked(bool)), m_scene, SLOT (setLayout(bool)));
 
     connect (m_wordLine, SIGNAL(returnPressed()),
             this, SLOT(callLoadWord()));

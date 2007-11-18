@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "partofspeechlistmodel.h"
 #include "worddatagraph.h"
+#include "wordnetutil.h"
 #include "graphalgorithms.h"
 
 #include <QtCore>
