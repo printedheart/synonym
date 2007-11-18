@@ -133,6 +133,7 @@
       <configGdbScript/>
       <runShellScript/>
       <runGdbScript/>
+      <raiseGDBOnStart>false</raiseGDBOnStart>
     </general>
     <display>
       <staticmembers>false</staticmembers>
@@ -183,6 +184,7 @@
       <savebehaviour>2</savebehaviour>
       <replacePaths>false</replacePaths>
       <disableDefaultOpts>true</disableDefaultOpts>
+      <enableFilenamesOnly>false</enableFilenamesOnly>
     </qmake>
     <subclassing/>
   </kdevtrollproject>
