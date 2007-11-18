@@ -21,7 +21,8 @@ HEADERS = src/model/worddatagraph.h \
         src/sound/pronunciationsoundholder.h  \
         src/sound/pronunciationsoundfactoryimpl.h \
         src/sound/player.h \
-        src/model/graphalgorithms.h
+        src/model/graphalgorithms.h \
+        src/model/wordnetutil.h \
 
 
 SOURCES = src/model/worddatagraph.cpp \
@@ -40,14 +41,15 @@ SOURCES = src/model/worddatagraph.cpp \
         src/ui/wordsoundimpl.cpp \
         src/sound/pronunciationsoundholder.cpp  \
         src/sound/pronunciationsoundfactoryimpl.cpp \
-        src/sound/player.cpp
+        src/sound/player.cpp \
+#        src/test/graphtest.cpp
 
 CONFIG += warn_on \
       thread \
           qt \
       debug \
-      exceptions \
-      rtti
+      rtti 
+# qtestlib
 TARGET = bin/synonym
 
 
