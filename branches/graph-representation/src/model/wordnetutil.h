@@ -103,7 +103,7 @@ public:
         QSet<Node*>::const_iterator end = neighbors.constEnd();
         for (iter = neighbors.constBegin(); iter != end; ++iter) {
             Node *neighbor = *iter;
-            if (neighbor->data (LEVEL).toInt() > level && isWord (neighbor)) return true;
+            if (neighbor->data (LEVEL).toInt() > level && isWord (neighbor) ) return true;
         }
         return false;
     }

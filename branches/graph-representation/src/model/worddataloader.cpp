@@ -36,7 +36,7 @@ WordDataLoader::~WordDataLoader()
 {
 }
 
-WordGraph * WordDataLoader::createWordGraph(const QString &searchWord) 
+WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Relationship::Type> types) 
 {
     TemplateNodeFactory<WordGraphicsNode> wordFactory;
     TemplateNodeFactory<MeaningGraphicsNode> meaningFactory;
@@ -47,14 +47,16 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord)
     wordNode->setData(WORD, searchWord);
     SynsetPtr synsetToFree;
     
-    int searchTypes[8] = { -HYPERPTR ,  -HYPOPTR, /* -SIMPTR ,*/  -ENTAILPTR, -VERBGROUP, -CLASSIFICATION, -CLASS, -PERTPTR, - ANTPTR };
     for (int pos = 1; pos <= NUMPARTS; pos++) {
-        for (int type = 0; type < 9; type++) {
-        
+        foreach (Relationship::Type type, types) {       
+            if (!Relationship::typesForPos(pos).testFlag(type))
+                continue;
+                
+            
             SynsetPtr synset = findtheinfo_ds(searchWord.toLatin1().data(),
-                                            pos, searchTypes[type], ALLSENSES);
+                                            pos, type, ALLSENSES);
             synsetToFree = synset;
-            int relationshipType = searchTypes[type] > 0 ? searchTypes[type] : - searchTypes[type];
+            int relationshipType = type > 0 ? type : - type;
             
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
