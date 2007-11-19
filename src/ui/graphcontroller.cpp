@@ -79,8 +79,10 @@ WordGraph*  GraphController::makeGraph(const QString &word)
             m_lastGraph->clearAll();
             delete m_lastGraph;
         }
-        qDebug() << "load graph"; 
-        m_lastGraph = m_loader->createWordGraph(word);
+        qDebug() << "load graph";
+        QList<Relationship::Type> types;
+        types.append(Relationship::Derivation); 
+        m_lastGraph = m_loader->createWordGraph(word, Relationship::types());
         qDebug() << "loaded graph";            
         centralNode = m_lastGraph->node(word);
         if (!centralNode)
@@ -97,6 +99,7 @@ WordGraph*  GraphController::makeGraph(const QString &word)
     QList<GraphicsNode*> nodes = m_lastGraph->nodes();
     QSet<GraphicsNode*> visualNodes;
     filter (nodes.constBegin(), nodes.constEnd(), visualNodes,  VisualFilter());
+  
     foreach (GraphicsNode *node, nodes) {
         if (!visualNodes.contains(node)) {
             m_lastGraph->disableNode(node);
