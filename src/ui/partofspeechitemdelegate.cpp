@@ -151,6 +151,7 @@ void PartOfSpeechItemView::wheelEvent(QWheelEvent*event)
 }
 
 
+
 void PartOfSpeechItemView::highlightItem(const QModelIndex &index)
 {
     if (index.isValid()) {

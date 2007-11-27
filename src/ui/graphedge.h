@@ -20,6 +20,7 @@
 #ifndef GRAPHEDGE_H
 #define GRAPHEDGE_H
 
+#include "relationship.h"
 #include <QGraphicsItem>
 #include <QPen>
 
@@ -52,6 +53,9 @@ public:
     
     bool directed() const;
     
+    void setRelationship(Relationship::Type type);
+    Relationship::Type relationship() const;
+    
     
     /* QGraphcisItem.  Painting. */
     enum { Type = UserType + 111 };
@@ -75,6 +79,9 @@ private:
     WordGraph *m_graph;
     GraphicsNode *m_source, *m_dest;
     bool m_directed;
+    
+    /* WordNet */
+    Relationship::Type m_type;
     
     /* Representation */
     QPointF m_sourcePoint, m_destPoint;

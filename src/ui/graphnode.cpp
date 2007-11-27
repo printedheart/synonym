@@ -32,6 +32,9 @@ GraphicsNode::GraphicsNode(const QString &id, WordGraph *graph)
     : m_mass(1.0), m_id(id), m_graph(graph)
 {
     m_intermedPos.setX(2.0);
+    
+    setCursor(Qt::PointingHandCursor);
+    setFlag(QGraphicsItem::ItemIsMovable);
 }
 
 GraphicsNode::~GraphicsNode()
@@ -70,11 +73,15 @@ WordGraph * GraphicsNode::graph() const
 
 bool GraphicsNode::advance()
 {
-     if (qAbs(m_newPos.x() - pos().x()) > 0.1 || qAbs(m_newPos.y() - pos().y()) > 0.1) {
-         setPos(m_newPos);
-         return true;
-     }
-
+    qreal tolerance = 0.1;
+//     if (neighbors().size() > 10)
+//         tolerance = 3.0;
+//     if (neighbors().size() > 12)
+//         tolerance = 5.0;
+    if (qAbs(m_newPos.x() - pos().x()) > tolerance || qAbs(m_newPos.y() - pos().y()) > tolerance) {
+        setPos(m_newPos);
+        return true;
+    }
     return false;
 }
 
@@ -152,7 +159,7 @@ QRectF WordGraphicsNode::boundingRect() const
     QFontMetrics metrics(font);
     QRectF rect = metrics.boundingRect(data(WORD).toString());
         
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable) || edges().size() == 0)
         return rect.translated(- rect.width() / 2, rect.height() / 8);
     
     GraphicsEdge *edge = *(edges().begin());
@@ -229,12 +236,12 @@ int MeaningGraphicsNode::m_radius  = 5;
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
     :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0)
 {
-    setZValue(1);        
+    setZValue(1);
+    setAcceptsHoverEvents(true);        
 }
 
 MeaningGraphicsNode::~MeaningGraphicsNode()
 {
-   
 }
 
 
@@ -326,7 +333,7 @@ void MeaningGraphicsNode::createToolTip()
 {
     if (!m_toolTip) {
         m_toolTip = new QGraphicsPathItem(this);
-        m_defItem = new QGraphicsTextItem(m_toolTip, 0);
+        m_defItem = new QGraphicsTextItem(m_toolTip);
     }
            
     // Prepare definition dext
@@ -338,6 +345,10 @@ void MeaningGraphicsNode::createToolTip()
     QString defHtml = definition;
     defHtml.append("<br>-------------------------------<br>");
     defHtml.append(examples);
+    defHtml.append("<br>");
+    defHtml.append(id());
+    defHtml.append("<br>");
+    defHtml.append(data(LEVEL).toString());
     m_defItem->document()->setHtml(defHtml);
     m_defItem->setTextWidth(160);
     QRectF rect = m_defItem->boundingRect();
@@ -373,7 +384,7 @@ void MeaningGraphicsNode::createToolTip()
 
 void MeaningGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (m_toolTip->isVisible()) {
+    if (m_toolTip && m_toolTip->isVisible()) {
         hideToolTip();   
         graphScene()->signalMouseHoverLeaved(this);
     }
@@ -385,5 +396,4 @@ void MeaningGraphicsNode::adjustToolTipPos()
 {
     
 }
-
 

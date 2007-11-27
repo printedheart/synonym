@@ -43,9 +43,7 @@ public:
 
     virtual ~Layout() {};
 
-    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges) = 0;
-    
-    virtual bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart) = 0;
+    virtual bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) = 0;
     
     virtual void stop() {}
 
@@ -118,9 +116,7 @@ public:
     ForceDirectedLayout4();
     ~ForceDirectedLayout4();
 
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
-    
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
+    bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart = false);
     
     void run();
     
@@ -133,12 +129,14 @@ private slots:
         
 
 private:
-    
-    bool layoutSerial(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
+    bool layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
+    bool layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
     
     void prepareLayout(GraphicsNode *rootNode);
     void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
                         QSet<GraphicsNode*> &visitSet);
+    
+    void startThread();
     
     static const int REST_DISTANCE = 100;
 
@@ -150,14 +148,17 @@ private:
     
     volatile bool m_abort;
     QWaitCondition m_aborted;
-        
+    QMutex m_abortMutex;    
+    
     QMutex m_mutex;
     
-    QList<GraphicsNode*> m_nodes;
     QList<GraphicsEdge*> m_edges;
+    GraphicsNode *centralNode;
     
     volatile bool m_restart;
     
+    
+    //Internal structure to hold node animation points.
     struct NodeAnimation {
         NodeAnimation() : firstIndex(0), lastIndex(0) {}
         static const  uint BUFFER_SIZE = 8192;

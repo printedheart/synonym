@@ -67,6 +67,8 @@ private slots:
     void lookUpWordNet(const QString &word);
 
     void playSound(const QString &word);
+    
+    void dockWidgetVisibilityChanged();
 
 private:
     WordGraph *m_currentGraph;    

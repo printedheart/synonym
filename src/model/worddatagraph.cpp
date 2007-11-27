@@ -30,6 +30,7 @@ WordGraph::WordGraph(QObject *parent)
 
 WordGraph::~WordGraph()
 {
+    clearAll();
 }
 
 
@@ -78,11 +79,8 @@ void WordGraph::disableNode(Node *node)
 
 void WordGraph::enableNode(Node *node)
 {
-    QString id = node->id();
-    qDebug() << "1 " << node->id();
-    if (!node || !m_disabledNodes.contains(id))
+    if (!node || !m_disabledNodes.contains(node->id()))
         return;
-    qDebug() << "2 " << node->id();
     
     m_disabledNodes.remove(node->id());
     m_nodes[node->id()] = node;
@@ -97,8 +95,16 @@ void WordGraph::enableNode(Node *node)
 void WordGraph::enableAll()
 {
     NodeIterator iter = m_disabledNodes.begin();
-    for (; iter != m_disabledNodes.end(); ++iter) {
-        enableNode(*iter);
+    while (iter != m_disabledNodes.end()) {
+        Node *node = *iter;
+        iter = m_disabledNodes.erase(iter);
+        m_nodes[node->id()] = node;
+        
+        QSet<Edge*>::iterator iter = node->m_edges.begin();
+        for (; iter != node->m_edges.end(); ++iter) {
+            Edge *edge = *iter;
+            edge->adjacentNode(node)->m_edges.insert(edge);
+        }   
     }
 }
 
@@ -116,9 +122,9 @@ void WordGraph::removeNode(const QString &nodeId)
             m_edges.remove(edge->id());
             delete edge;
             
-            if (!isReachable(neighbor, centralNode())) {
+        /*    if (!isReachable(neighbor, centralNode())) {
                 removeNode(neighbor->id());
-            }
+           } */
         }
         m_nodes.remove(nodeId);
         delete node;
@@ -146,12 +152,12 @@ void WordGraph::removeEdge(const QString &id)
     
     m_edges.remove(id);
     delete edge;
-    if (!isReachable(source, centralNode())) {
-        removeNode(source->id());
-    }
-    if (!isReachable(dest, centralNode())) {
-        removeNode(dest->id());
-    }
+//     if (!isReachable(source, centralNode())) {
+//         removeNode(source->id());
+//     }
+//     if (!isReachable(dest, centralNode())) {
+//         removeNode(dest->id());
+//     }
 }
 
 void WordGraph::clearAll()
@@ -164,6 +170,10 @@ void WordGraph::clearAll()
     for (; edgeIter != m_edges.end(); ++edgeIter)
         delete (*edgeIter);
 
+    nodeIter = m_disabledNodes.begin();
+    for (; nodeIter != m_disabledNodes.end(); ++nodeIter)
+        delete (*nodeIter);
+    
     m_nodes.clear();
     m_edges.clear();
     m_disabledNodes.clear();
@@ -187,12 +197,12 @@ QList<Node*> WordGraph::nodes() const
 
 QList<Edge*> WordGraph::edges() const
 {
-    ConstEdgeIterator iter = m_edges.constBegin();
+    ConstEdgeIterator iter;
+    ConstEdgeIterator end = m_edges.constEnd();
     QList<Edge*> edges;
-    for (; iter != m_edges.constEnd(); ++iter) {
+    for (iter = m_edges.constBegin(); iter != end; ++iter) {
         Edge *edge = *iter;
-        if (m_nodes.contains(edge->source()->id()) 
-            && m_nodes.contains(edge->dest()->id())) {
+        if (isEnabled(edge)) {
             edges.append(edge);
         }
     }
@@ -214,9 +224,19 @@ Node* WordGraph::centralNode() const
     return node(m_centralNodeId);
 }
 
+void WordGraph::setCentralNode(const QString &nodeId)
+{
+    m_centralNodeId = nodeId;
+}
+
 bool WordGraph::isEnabled(Node *node) const
 {
     return m_nodes.contains(node->id());
+}
+
+bool WordGraph::isEnabled(Edge *edge) const
+{
+    return isEnabled(edge->source()) && isEnabled(edge->dest());
 }
 
 

@@ -21,43 +21,57 @@
 #include "relationship.h"
 
 
-//const int Relationship::SIZE = 21;
 
-const QString Relationship::descriptions[SIZE] = 
-{ 
-    "Antonym",
-    "Is a",
-    "Hyponym",
-    "Entails", 
-    "Is similar to",
-    "Is member of",
-    "Is made of",
-    "Is part of",
-    "Member",
-    "Has stuff",
-    "Has part",
-    "Meronym",
-    "Holonym",
-    "Cause",
-    "Participle",
-    "Also see",
-    "Pertains to nound",
-    "Attribute",
-    "Verb group", 
-    "Derivation", 
-    "Domain"
-};
-
-QString Relationship::toString(int relationship)
+QString Relationship::toString(Type type, int pos)
 {
-    if (relationship > 0 && relationship <= SIZE)
-            return descriptions[relationship - 1];
+    static QString descriptions[SIZE] = 
+    { 
+        "undefined",
+        "antonym",
+        "is a",
+        "hyponym",
+        "entails", 
+        "is similar to",
+        "is member of",
+        "is made of",
+        "is part of",
+        "member",
+        "has stuff",
+        "has part",
+        "meronym",
+        "holonym",
+        "cause",
+        "participle",
+        "also see",
+        "pertains to",
+        "attribute",
+        "verb group", 
+        "derivation", 
+        "domain",
+        "domain"
+    };
     
+    if (!typesForPos(pos).testFlag(type)) {
+        return "Undefined";
+    }
+    
+    if (type == Pertains && pos == Adverb) {
+            return "Derived from";
+    }    
+                    
+    
+    for (int i = 0; i < SIZE; i++) {
+        if (typesArray[i] == type) {
+            return descriptions[i];
+        }
+    }
+   
     return QString();
 }
 
 const Relationship::Type Relationship::typesArray[SIZE] = 
 {
+    Undefined,
     Antonym,
     Hypernym,
     Hyponym, 
@@ -78,30 +92,40 @@ const Relationship::Type Relationship::typesArray[SIZE] =
     Attribute,
     VerbGroup,
     Derivation,
-    Classification
+    Classification,
+    Class
+            
+            
 };
 
 QList<Relationship::Type> Relationship::types()
 {
     QList<Type> typesList;
-    for (int i = 0; i < SIZE; ++i) {
+    for (int i = 1; i < SIZE; ++i) {
         typesList.append(typesArray[i]);
     }
     return typesList;
 } 
 
 int Relationship::toSearchType(Type type) {
-    for (int i = 0; i < SIZE; ++i) {
+    if (type == Undefined) {
+        return -1;
+    }
+    for (int i = 1; i < SIZE; ++i) {
         if (typesArray[i] == type) {
-            return i + 1;
+            int searchType = i;
+            if (type == Hypernym) 
+                searchType = -searchType;
+            return searchType;
         }
     }
+    return -1;
 }
 
-const Relationship::Types Relationship::NounTypes = Types(Hypernym | Antonym | Hyponym | Holonym | IsPart | IsMember | IsStuff | Meronym | HasStuff | HasMember | HasPart | Classification | Attribute); 
-const Relationship::Types Relationship::VerbTypes = Types(Hypernym | Antonym | Entailment | Cause | Derivation | Classification);
+const Relationship::Types Relationship::NounTypes = Types(Hypernym | Antonym | Hyponym | Holonym | IsPart | IsMember | IsStuff | Meronym | HasStuff | HasMember | HasPart | Classification | Attribute | Class); 
+const Relationship::Types Relationship::VerbTypes = Types(Hypernym | Antonym | Entailment | Cause | Classification | VerbGroup | Hyponym);
 const Relationship::Types Relationship::AdjectiveTypes = Types(Similar | Antonym | Pertains | Attribute | Classification);
-const Relationship::Types Relationship::AdverbTypes = Types(Antonym | Pertains | Classification);       
+const Relationship::Types Relationship::AdverbTypes = Types(Antonym | Pertains | Classification | Derivation);       
 
 Relationship::Types Relationship::typesForPos(int pos)
 {
@@ -110,5 +134,19 @@ Relationship::Types Relationship::typesForPos(int pos)
         case 2: return VerbTypes;
         case 3: return AdjectiveTypes;
         case 4: return AdverbTypes;
+        default: return Relationship::Types(0);
     }
+}
+
+Relationship::Type Relationship::toType(int intType)
+{
+    if (intType < 0 || intType >= SIZE) {
+        return Undefined;
+    }
+    return typesArray[intType];
+}
+
+bool Relationship::applies(Type type, int forPos)
+{
+    return typesForPos(forPos).testFlag(type);
 }

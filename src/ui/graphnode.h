@@ -97,7 +97,7 @@ class WordGraphicsNode : public GraphicsNode
 {
 public:
     WordGraphicsNode(const QString &id, WordGraph *graph);
-    ~WordGraphicsNode();
+    virtual ~WordGraphicsNode();
 
     int type() const { return PhraseType; }
     
@@ -120,11 +120,11 @@ class MeaningGraphicsNode : public GraphicsNode
 {
 public:
     MeaningGraphicsNode(const QString &id, WordGraph *graph);
+    virtual ~MeaningGraphicsNode();
     
     static void setRadius(int radius) { m_radius = radius; }
     
-    MeaningGraphicsNode(GraphScene *scene);
-    ~MeaningGraphicsNode();
+    
     
     int type() const { return MeaningType; }
     QPainterPath shape() const;

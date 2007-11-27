@@ -65,17 +65,8 @@ void GraphScene::timerEvent(QTimerEvent *event)
 
 void GraphScene::layout()
 {
-    QList<GraphicsNode *> nodes;
-    QList<GraphicsEdge *> edges;
-    foreach (QGraphicsItem *item, items()) {
-        if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
-            GraphicsNode *node = static_cast<GraphicsNode*>(item);
-            nodes << node;
-        } else if(GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
-            edges << edge;
-    }
-
-
+    QList<GraphicsNode*> nodes = graphNodes();
+    QList<GraphicsEdge*> edges = graphEdges();
     bool needsLayout = m_layout->layout(nodes, edges, m_restartLayout);
     if (!needsLayout) {
         killTimer(m_timerId);
@@ -96,6 +87,16 @@ QList<GraphicsNode *> GraphScene::graphNodes() const
         
     }
     return nodes;
+}
+
+QList<GraphicsEdge*> GraphScene::graphEdges() const
+{
+    QList<GraphicsEdge*> edges;
+    foreach (QGraphicsItem *item, items()) {
+        if (GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
+            edges << edge;
+    }
+    return edges;
 }
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
