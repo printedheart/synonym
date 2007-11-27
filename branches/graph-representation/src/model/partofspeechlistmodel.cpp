@@ -24,8 +24,7 @@
 
 #include <QtCore>
 
-PartOfSpeechListModel::PartOfSpeechListModel(
-    WordGraph::PartOfSpeech modelType, QObject *parent) :
+PartOfSpeechListModel::PartOfSpeechListModel(PartOfSpeech modelType, QObject *parent) :
         QAbstractListModel(parent),m_dataGraph(0), m_modelType(modelType) 
 {
 }
@@ -37,27 +36,26 @@ PartOfSpeechListModel::~PartOfSpeechListModel()
 
 void PartOfSpeechListModel::setDataGraph(WordGraph *dataGraph)
 {
-    if (m_dataGraph) {
+    if (m_dataGraph && m_dataGraph != dataGraph) {
         disconnect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
                 this, SLOT(reload()));
         disconnect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
                 this, SLOT(reload()));
     }
 
-
-
-    m_dataGraph = dataGraph;
-
-    connect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
-            this, SLOT(reload()));
-    connect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
-            this, SLOT(reload()));
+    if (m_dataGraph == 0 || m_dataGraph != dataGraph) {
+        m_dataGraph = dataGraph;
+    
+        connect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
+                this, SLOT(reload()));
+        connect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
+                this, SLOT(reload()));
+    }
     reload();
     
 }
 int PartOfSpeechListModel::rowCount(const QModelIndex &parent) const
 {
-   // qDebug() << m_meanings.size();
     return m_meanings.size();
 }
 
@@ -129,7 +127,10 @@ QModelIndex PartOfSpeechListModel::indexForNode(Node *node)
 }
 
         
-
+PartOfSpeech PartOfSpeechListModel::modelType() const
+{
+    return m_modelType;
+}
 
     
 

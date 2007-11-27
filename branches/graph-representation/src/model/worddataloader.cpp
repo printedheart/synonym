@@ -36,8 +36,16 @@ WordDataLoader::~WordDataLoader()
 {
 }
 
-WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Relationship::Type> types) 
+WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Relationship::Type> searchTypes) 
 {
+    static const Relationship::Types useThis(
+            Relationship::IsPart | 
+            Relationship::IsStuff |
+            Relationship::HasStuff | 
+            Relationship::HasPart |
+            Relationship::IsMember |
+            Relationship::HasMember);
+    
     TemplateNodeFactory<WordGraphicsNode> wordFactory;
     TemplateNodeFactory<MeaningGraphicsNode> meaningFactory;
     TemplateEdgeFactory<GraphicsEdge> edgeFactory;
@@ -48,22 +56,20 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Rel
     SynsetPtr synsetToFree;
     
     for (int pos = 1; pos <= NUMPARTS; pos++) {
-        foreach (Relationship::Type type, types) {       
-            if (!Relationship::typesForPos(pos).testFlag(type))
+        foreach (Relationship::Type searchType, searchTypes) {  
+            if (!Relationship::typesForPos(pos).testFlag(searchType))
                 continue;
                 
-            
+            int wnSearchType = Relationship::toSearchType(searchType);
             SynsetPtr synset = findtheinfo_ds(searchWord.toLatin1().data(),
-                                            pos, type, ALLSENSES);
+                                            pos, wnSearchType, ALLSENSES);
             synsetToFree = synset;
-            int relationshipType = type > 0 ? type : - type;
             
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
-                Node *meaning = wordGraph->addNode(
-                        QString::number(pos) + QString::number(synset->hereiam), meaningFactory);
-                meaning->setData(POS, QVariant(pos));
+                Node *meaning = wordGraph->addNode(QString::number(synset->hereiam), meaningFactory);
+                meaning->setData(POS, getpos(synset->pos));
                 meaning->setData(MEANING, synset->defn);
                 Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id(), edgeFactory);
     
@@ -72,24 +78,50 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Rel
                         Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                         word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
                         Edge *edge = wordGraph->addEdge(meaning->id(), word->id(), edgeFactory);
-                        if (edge) edge->setData(RELATIONSHIP, relationshipType);
                             
                     }
                 }
-                
+                Relationship::Type parentSynsetType = Relationship::toType(*synset->ptrtyp);
                 synset = synset->ptrlist;
                 while (synset) {
-                    Node *meaning2 = wordGraph->addNode(
-                            QString::number(pos) + QString::number(synset->hereiam), meaningFactory);
+                    Relationship::Type synsetType = Relationship::toType(*synset->ptrtyp);
+                    Node *meaning2 = wordGraph->addNode(QString::number(synset->hereiam), meaningFactory);
                     
-                    meaning2->setData(POS, pos);
+                    meaning2->setData(POS, getpos(synset->pos));
                     meaning2->setData(MEANING, synset->defn);
                     Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), edgeFactory);
-                    
+                    qDebug() << meaning->id() << "   " << meaning2->id() 
+                             << "  parent : " << Relationship::toString(parentSynsetType, meaning->data(POS).toInt())
+                             << "  synset : " << Relationship::toString(synsetType, meaning->data(POS).toInt()) 
+                             << "  search : " << Relationship::toString(searchType, meaning->data(POS).toInt());
                     if (edge) {
-                        edge->setData(RELATIONSHIP, relationshipType);
+                        if (useThis & searchType) {
+                            if (searchType & Relationship::HasPart)
+                                edge->setRelationship(Relationship::IsPart);
+                            else if (searchType & Relationship::HasStuff)
+                                edge->setRelationship(Relationship::IsStuff);
+                            else if (searchType & Relationship::HasMember)
+                                edge->setRelationship(Relationship::IsMember);
+                            else
+                                edge->setRelationship(searchType);
+                            
+                        } else {
+                            if (searchType & parentSynsetType & synsetType)
+                                edge->setRelationship(searchType);
+                            else if (searchType & synsetType)
+                                edge->setRelationship(searchType);
+                            else if (synsetType & parentSynsetType)
+                                edge->setRelationship(synsetType);
+                            
+                            
+                            else if (Relationship::applies(synsetType, meaning->data(POS).toInt()))
+                                edge->setRelationship(synsetType);
+                            else if (Relationship::applies(parentSynsetType, meaning->data(POS).toInt()))
+                                edge->setRelationship(parentSynsetType);
+                            else 
+                                edge->setRelationship(searchType);
+                        }
                     }
-
                     for (int i = 0; i < synset->wcount; i++) {
                         if (searchWord != synset->words[i]) {
                             Node *word = wordGraph->addNode(synset->words[i], wordFactory);
@@ -99,7 +131,6 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, QList<Rel
                     }
                     
                     synset = synset->nextss;
-                    //synset = synset->ptrlist;
                 }
                 synset = nextSynset;
             }
@@ -117,7 +148,7 @@ QStringList WordDataLoader::words() const
         QFile file;
         for (int i = 1; i < NUMPARTS + 1; i++) {
             QFile file;
-            if (!file.open(indexfps[1], QIODevice::ReadOnly | QIODevice::Text)) {
+            if (!file.open(indexfps[i], QIODevice::ReadOnly | QIODevice::Text)) {
                 qDebug() << "Cannot open file" << file.fileName();
                 continue;
             }
@@ -144,5 +175,4 @@ QStringList WordDataLoader::words() const
 }
 
 
-
-    
+            

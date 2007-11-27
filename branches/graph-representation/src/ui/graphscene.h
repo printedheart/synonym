@@ -42,10 +42,9 @@ public:
 
     void itemMoved();
 
-    QList<GraphicsNode *> graphNodes() const;
-
+    QList<GraphicsNode*> graphNodes() const;
+    QList<GraphicsEdge*> graphEdges() const;
     
-
     void signalClickEvent(GraphicsNode *graphNode);
     
     void signalMouseHovered(GraphicsNode *graphNode);
@@ -84,7 +83,7 @@ private:
     QSvgRenderer *m_soundIconRenderer;
 
     Layout *m_layout;
-    void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode, QSet<GraphicsNode*> &visitSet);
+  //  void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode, QSet<GraphicsNode*> &visitSet);
     
     bool m_restartLayout;    
     GraphicsNode *m_activeNode;

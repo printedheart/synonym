@@ -30,9 +30,12 @@
  */
 
 
-
-
-
+/*
+    I am using typedefs here because application can be potentially extended 
+    to 3D graphs, using OpenGL. The graph itself should not care about actual
+    implementation of nodes. These typedefs can be replaced by abstract classes
+    so the graph code does not change. Perhaps there is better way to do it.
+*/
 typedef GraphicsNode Node;
 typedef GraphicsEdge Edge;
 
@@ -73,20 +76,14 @@ public:
 
 
 
-            
-    
-
 class WordGraph : public QObject
 {
 Q_OBJECT
 public:
     WordGraph(QObject *parent = 0);
     ~WordGraph();
-
-    enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
-    
    
-    Node * addNode(const QString &nodeId, NodeFactory &factory);
+    Node *addNode(const QString &nodeId, NodeFactory &factory);
     void removeNode(const QString &nodeId);
     void removeNode(Node *node);
     
@@ -94,6 +91,7 @@ public:
     void enableNode(Node *node);
     void enableAll();
     bool isEnabled(Node *node) const;
+    bool isEnabled(Edge *edge) const;
     
     Edge *addEdge(const QString &aNodeId, const QString &bNodeId, EdgeFactory &factory);
     
@@ -112,8 +110,7 @@ public:
     QList<Node*> nodes(Predicate interesting) const;      
 
     Node* centralNode() const;
-    
-    void setSelectedNode(Node *node);
+    void setCentralNode(const QString &nodeId);
     
 signals:
     void nodeAdded(Node *node);
@@ -161,9 +158,26 @@ QList<Node*> WordGraph::nodes(Predicate interesting) const
     EnabledNodePredicateWrapper<Predicate> predicate(this, interesting);
     filter(m_nodes.constBegin(), m_nodes.constEnd(), list, predicate);
     return list;
-}              
+} 
+             
+template <typename Function1, typename Function2>
+class FunctionCombiner
+{
+public:                         
+    FunctionCombiner(Function1 func1, Function2 func2):
+        m_func1(func1), m_func2(func2){}
+    
+    FunctionCombiner<Function1,Function2>(const FunctionCombiner<Function1, Function2> &other):
+            m_func1(other.m_func1), m_func2(other.m_func2) {}
+    
+    bool operator() (Node *node) {
+        return m_func1.operator() (node) && m_func2.operator() (node);
+    }
           
-                    
+private:                    
+    Function1 &m_func1;
+    Function2 &m_func2;
+};
 
 #endif
         

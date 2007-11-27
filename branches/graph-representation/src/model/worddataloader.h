@@ -20,6 +20,8 @@
 #ifndef WORDDATALOADER_H
 #define WORDDATALOADER_H
 
+#include "relationship.h"
+
 #include <QObject>
 #include <QStringList>
 class QBuffer;        
@@ -34,13 +36,12 @@ public:
     WordDataLoader(QObject *parent = 0);
     
     ~WordDataLoader();
-     virtual WordGraph * createWordGraph(const QString &searchWord);
+     virtual WordGraph * createWordGraph(const QString &searchWord, QList<Relationship::Type> types);
      
      virtual QStringList words() const;
 
 protected:
     QString m_curWord;
-
 };
 
 #endif

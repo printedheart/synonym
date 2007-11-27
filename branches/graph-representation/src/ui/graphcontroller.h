@@ -21,6 +21,8 @@
 #define GRAPHCONTROLLER_H
 
 #include "worddatagraph.h"
+#include "relationship.h"
+
 #include <QObject>
 #include <QStack>
 #include <QPair>
@@ -48,14 +50,17 @@ public:
 
 
     WordGraph* makeGraph(const QString &word);
+    
+    void setPoses(QList<PartOfSpeech> &poses);
 public slots:
     void soundReady(const QString &word);
     
 private:
     GraphScene *m_scene;
     WordDataLoader *m_loader;
-    WordGraph *m_lastGraph;
+    WordGraph *m_graph;
 
+    QList<PartOfSpeech> m_poses;
 
     void makeConnected(Node *goal);
     
@@ -69,6 +74,8 @@ private:
             findInHistory(const QString &word);
     
     void assertGraphConnectivityToNode(Node *node);
+    
+    
 };
 
 #endif

@@ -24,10 +24,18 @@
 #include <QString>
 #include <QList>
 
+
+enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
+Q_DECLARE_FLAGS(PartsOfSpeech, PartOfSpeech)
+        
+Q_DECLARE_OPERATORS_FOR_FLAGS(PartsOfSpeech)        
+
+
 class Relationship
 {
 public:
-    enum Type { 
+    enum Type {
+        Undefined        = 0, 
         Antonym          = 0x1, 
         Hypernym         = 0x2, 
         Hyponym          = 0x4,  
@@ -48,7 +56,8 @@ public:
         Attribute        = 0x400000,
         VerbGroup        = 0x1000000,
         Derivation       = 0x2000000,
-        Classification   = 0x4000000
+        Classification   = 0x4000000,
+        Class            = 0x10000000
     };
     
     Q_DECLARE_FLAGS(Types, Type)
@@ -66,6 +75,8 @@ public:
     static Types typesForPos(int pos);
     
     
+    static bool applies(Type type, int forPos);
+    
     /**
      * Returns an integer to use for wordnet C api for Type.
      */
@@ -74,23 +85,22 @@ public:
     /**
      * Returns string representation of the relationship.
      */
-    static QString toString(int relationship);
+    static QString toString(Type type, int pos);
     
     /**
      * Returns a list of all possible relationships.
      */
     static QList<Type> types();
     
+    static Type toType(int intType);
+    
 private:    
-    static const int SIZE = 21;    
-    static const QString descriptions[SIZE];
+    static const int SIZE = 23;    
     static const Type typesArray[SIZE];
     
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Relationship::Types)
-
-
 
 
 #endif

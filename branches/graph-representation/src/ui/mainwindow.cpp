@@ -28,6 +28,8 @@
 #include "pronunciationsoundholder.h"
 #include "player.h"
 #include "wordnetutil.h"
+#include "relationship.h"
+
 #include <QtGui>
 #include <QtCore>
 #include <stdlib.h>
@@ -60,7 +62,7 @@ MainWindow::MainWindow()
     QPushButton *stopButton = new QPushButton("Stop", this);
     toolBar->addWidget(stopButton);
     
-    connect (stopButton, SIGNAL(clicked(bool)), m_scene, SLOT (setLayout(bool)));
+ //   connect (stopButton, SIGNAL(clicked(bool)), m_scene, SLOT (setLayout(bool)));
 
     connect (m_wordLine, SIGNAL(returnPressed()),
             this, SLOT(callLoadWord()));
@@ -73,13 +75,12 @@ MainWindow::MainWindow()
 
     // Setup item views.
     QString partsOfSpeechHeaders[4] = { "Nouns", "Verbs", "Adjectives", "Adverbs"};
-    WordGraph::PartOfSpeech partsOfSpeech[4] = { WordGraph::Noun, WordGraph::Verb,
-        WordGraph::Adjective, WordGraph::Adverb};
+    PartOfSpeech partsOfSpeech[4] = { Noun, Verb, Adjective, Adverb};
                                      
     for (int i = 0; i < 4; i++) {
         QDockWidget *dockWidget = new QDockWidget(partsOfSpeechHeaders[i], this);
 
-        PartOfSpeechItemView *view = new PartOfSpeechItemView(this);
+        PartOfSpeechItemView *view = new PartOfSpeechItemView(dockWidget);
         m_posViews[i] = view;
         
         PartOfSpeechListModel *model =
@@ -101,6 +102,9 @@ MainWindow::MainWindow()
                  this, SLOT(nodeActivated(const QModelIndex&)));
         connect (scene, SIGNAL(nodeMouseHoverLeaved(const QString&)),
                  view, SLOT(clearHighlighting()));
+        connect (dockWidget, SIGNAL(visibilityChanged(bool)), 
+                 this, SLOT(dockWidgetVisibilityChanged()));
+        
     }
 
 
@@ -138,7 +142,7 @@ void MainWindow::lookUpWordNet(const QString &word)
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(dataGraph);
 
-    m_soundHolder->findPronunciation(word);
+  //  m_soundHolder->findPronunciation(word);
         
 }
 
@@ -189,4 +193,14 @@ void MainWindow::initCompleter()
     
 
 
-
+void MainWindow::dockWidgetVisibilityChanged()
+{
+    QList<PartOfSpeech> poses;
+    for (int i = 0; i < 4; ++i) {
+        QDockWidget *dock = qobject_cast<QDockWidget*>(m_posViews[i]->parent());
+        if (dock->isVisible()) {
+            poses.append(m_posModels[i]->modelType());
+        }
+    }
+    m_graphController->setPoses(poses);
+}
