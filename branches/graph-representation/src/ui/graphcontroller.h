@@ -52,6 +52,8 @@ public:
     WordGraph* makeGraph(const QString &word);
     
     void setPoses(QList<PartOfSpeech> &poses);
+    
+    void setRelationships(Relationship::Types relationships);
 public slots:
     void soundReady(const QString &word);
     
@@ -61,8 +63,11 @@ private:
     WordGraph *m_graph;
 
     QList<PartOfSpeech> m_poses;
+    Relationship::Types m_relTypes;
 
     void makeConnected(Node *goal);
+    
+    void updateSceneNodes();
     
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > > m_graphHistory;
     

@@ -59,10 +59,19 @@ MainWindow::MainWindow()
     QToolBar *toolBar = addToolBar("synonym");
     m_wordLine = new QLineEdit(toolBar);
     toolBar->addWidget(m_wordLine);
-    QPushButton *stopButton = new QPushButton("Stop", this);
-    toolBar->addWidget(stopButton);
     
- //   connect (stopButton, SIGNAL(clicked(bool)), m_scene, SLOT (setLayout(bool)));
+    addToolBarBreak();
+    QToolBar *relationshipsToolBar = addToolBar("relatinships");
+    QList<Relationship::Type> relationships = Relationship::types();
+    foreach (Relationship::Type type, relationships) {
+        
+        QCheckBox *checkBox = new QCheckBox(Relationship::toString(type), relationshipsToolBar);
+        checkBox->setChecked(true);
+        m_relationshipCheckBoxes.append(qMakePair(type, checkBox));
+        relationshipsToolBar->addWidget(checkBox);
+        connect (checkBox, SIGNAL(stateChanged(int)), this, SLOT(relationshipsChanged(int)));
+    }
+    
 
     connect (m_wordLine, SIGNAL(returnPressed()),
             this, SLOT(callLoadWord()));
@@ -203,4 +212,16 @@ void MainWindow::dockWidgetVisibilityChanged()
         }
     }
     m_graphController->setPoses(poses);
+}
+
+void MainWindow::relationshipsChanged(int)
+{
+    Relationship::Types relationships(0);
+    for (int i = 0; i < m_relationshipCheckBoxes.size(); i++) {
+        QPair<Relationship::Type, QCheckBox*> pair = m_relationshipCheckBoxes[i];
+        if (pair.second->isChecked()) {
+            relationships = relationships | pair.first;
+        }
+    }
+    m_graphController->setRelationships(relationships);
 }

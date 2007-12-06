@@ -242,8 +242,6 @@ void GraphicsEdge::createToolTip()
     m_pointer = new QGraphicsLineItem(this);
     m_pointer->setZValue(3);
     m_connector = new QGraphicsEllipseItem(QRect(-3, -3, 6, 6), m_pointer);
-    m_connector->setPen(pen);
-    m_connector->setBrush(QBrush(Qt::white));        
 }
 
 void GraphicsEdge::setToolTip(const QString &toolTip)
@@ -268,6 +266,9 @@ void GraphicsEdge::adjustToolTipPos()
     pointerPos.setX(toolTipPos.x());
         
     m_pointer->setLine(middle.x(), middle.y(), pointerPos.x(), pointerPos.y());
+    
+    
+    
     m_connector->setPos(m_pointer->mapFromParent(middle));
 }
 

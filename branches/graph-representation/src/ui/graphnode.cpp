@@ -348,7 +348,11 @@ void MeaningGraphicsNode::createToolTip()
     defHtml.append("<br>");
     defHtml.append(id());
     defHtml.append("<br>");
+    defHtml.append("level: ");
     defHtml.append(data(LEVEL).toString());
+    defHtml.append("<br>");
+    defHtml.append("neighbors: ");
+    defHtml.append(QString::number(neighbors().size()));
     m_defItem->document()->setHtml(defHtml);
     m_defItem->setTextWidth(160);
     QRectF rect = m_defItem->boundingRect();

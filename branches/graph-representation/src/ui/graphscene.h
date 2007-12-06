@@ -83,10 +83,10 @@ private:
     QSvgRenderer *m_soundIconRenderer;
 
     Layout *m_layout;
-  //  void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode, QSet<GraphicsNode*> &visitSet);
     
     bool m_restartLayout;    
     GraphicsNode *m_activeNode;
+    
 };
 
 #endif
