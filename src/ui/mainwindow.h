@@ -20,8 +20,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "relationship.h"        
         
 #include <QMainWindow>
+#include <QList>
+#include <QPair>
 class QGraphicsView;
 class QLineEdit;
 class WordGraph;
@@ -33,6 +36,7 @@ class PartOfSpeechItemView;
 class PronunciationSoundHolder;
 class GraphScene;
 class QModelIndex;
+class QCheckBox;
 
 /**
     @author Sergejs <sergey.melderis@gmail.com>
@@ -69,12 +73,16 @@ private slots:
     void playSound(const QString &word);
     
     void dockWidgetVisibilityChanged();
+    
+    void relationshipsChanged(int);
 
 private:
     WordGraph *m_currentGraph;    
     
     
     void initCompleter();
+    
+    QList<QPair<Relationship::Type, QCheckBox*> > m_relationshipCheckBoxes;
    
 
 };

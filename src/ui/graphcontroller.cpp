@@ -47,7 +47,7 @@ GraphController::GraphController(GraphScene *graphScene,
     m_poses.append(Verb);
     m_poses.append(Adjective);
     m_poses.append(Adverb);
-
+    m_relTypes = Relationship::allTypes();
 }
 
 
@@ -78,10 +78,10 @@ WordGraph*  GraphController::makeGraph(const QString &word)
         // Reset current central node
         GraphicsNode *currentCentralNode = m_scene->centralNode();
         currentCentralNode->setMass(1.0);
-        currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable);
+        currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
     } else {
         qDebug() << "load graph";
-        WordGraph *newGraph = m_loader->createWordGraph(word, Relationship::types());
+        WordGraph *newGraph = m_loader->createWordGraph(word, m_relTypes);
         qDebug() << "loaded graph";            
         centralNode = newGraph->node(word);
         if (!centralNode) {
@@ -124,9 +124,9 @@ WordGraph*  GraphController::makeGraph(const QString &word)
     
     QList<GraphicsNode*> finalListOfVisualNodes = m_graph->nodes();
     foreach (GraphicsNode *node, finalListOfVisualNodes) {
-        node->setMass(node->neighbors().size() > 10 ? 0.05 : 1.0);
+      //  node->setMass(node->neighbors().size() > 10 ? 0.05 : 1.0);
         m_scene->addItem(node);
-    }
+    } 
 
     m_scene->setCentralNode(centralNode);
     
@@ -192,10 +192,10 @@ void GraphController::assertGraphConnectivityToNode(Node *goalNode)
 
 void GraphController::setPoses(QList<PartOfSpeech> &poses)
 {
+    m_poses = poses;
     if (!m_graph)
         return;
     
-    m_poses = poses;
     m_graph->enableAll();
     QList<GraphicsNode*> nodes = m_graph->nodes();
     QSet<GraphicsNode*> visualNodes;
@@ -210,7 +210,47 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
         } 
     }
     makeConnected(m_graph->centralNode());
+    updateSceneNodes();
+}
+
+void GraphController::setRelationships(Relationship::Types relTypes)
+{
+    int mInt = m_relTypes;
+    int rInt = relTypes;
+    if (mInt == rInt)
+        return;
     
+    if (!m_graph) {
+        m_relTypes = relTypes;
+        return;
+    }
+    
+    Relationship::Types newTypes = ((~m_relTypes) & relTypes) | (m_relTypes & relTypes);
+    qDebug() << newTypes; 
+    if (newTypes == 0) {
+        return;
+    }
+    
+    m_relTypes = relTypes;
+    QList<Edge*> edges = m_graph->edges();
+    qDebug() << edges.size();
+    QSet<Edge*> filteredEdges;
+    IsInRelationships predicate(m_relTypes);
+    filter(edges.constBegin(), edges.constEnd(), filteredEdges, predicate);
+    qDebug() << filteredEdges.size();
+    foreach (Edge *edge, edges) {
+        if (!filteredEdges.contains(edge)) {
+            m_graph->disableEdge(edge);
+        }
+    }
+    
+    makeConnected(m_graph->centralNode());
+    updateSceneNodes();
+}
+    
+    
+void GraphController::updateSceneNodes()
+{
     QSet<QGraphicsItem*> graphItems;
     QList<GraphicsNode*> filteredNodes = m_graph->nodes();
     QList<GraphicsEdge*> filteredEdges = m_graph->edges();
@@ -243,9 +283,7 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
     m_scene->setLayout(true);
     m_scene->itemMoved();
     
-}
-
-    
+}    
 
 #include "moc_graphcontroller.cpp"
     
