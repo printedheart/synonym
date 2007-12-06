@@ -51,14 +51,15 @@ QString Relationship::toString(Type type, int pos)
         "domain"
     };
     
-    if (!typesForPos(pos).testFlag(type)) {
-        return "Undefined";
+    if (pos != 0) {
+        if (!typesForPos(pos).testFlag(type)) {
+            return "Undefined";
+        }
+        
+        if (type == Pertains && pos == Adverb) {
+                return "Derived from";
+        }    
     }
-    
-    if (type == Pertains && pos == Adverb) {
-            return "Derived from";
-    }    
-                    
     
     for (int i = 0; i < SIZE; i++) {
         if (typesArray[i] == type) {
@@ -112,7 +113,7 @@ int Relationship::toSearchType(Type type) {
         return -1;
     }
     for (int i = 1; i < SIZE; ++i) {
-        if (typesArray[i] == type) {
+        if (typesArray[i] & type) {
             int searchType = i;
             if (type == Hypernym) 
                 searchType = -searchType;
@@ -138,6 +139,11 @@ Relationship::Types Relationship::typesForPos(int pos)
     }
 }
 
+Relationship::Types Relationship::allTypes()
+{
+    return ~Types(0);
+}
+
 Relationship::Type Relationship::toType(int intType)
 {
     if (intType < 0 || intType >= SIZE) {
@@ -149,4 +155,17 @@ Relationship::Type Relationship::toType(int intType)
 bool Relationship::applies(Type type, int forPos)
 {
     return typesForPos(forPos).testFlag(type);
+}
+
+Relationship::Type Relationship::symmetricTo(Type type)
+{
+    switch(type) {
+        case Hypernym: return Hyponym;
+        case Hyponym: return Hypernym;
+        case Meronym: return Holonym;
+        case Holonym: return Meronym;
+        case Antonym: return Antonym;
+        case Similar: return Similar;
+        default: return Undefined;
+    }
 }

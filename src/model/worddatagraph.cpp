@@ -92,6 +92,33 @@ void WordGraph::enableNode(Node *node)
     }
 }
 
+void WordGraph::disableEdge(Edge *edge)
+{
+    if (!edge || !m_edges.contains(edge->id()))
+        return;
+    
+    // If the source node or destination node are disabled then
+    // this edge is implicitely disabled.
+    if (!isEnabled(edge->source()) || !isEnabled(edge->dest()))
+         return;
+    
+    edge->source()->m_edges.remove(edge);
+    edge->dest()->m_edges.remove(edge);
+    m_disabledEdges.insert(edge->id());
+}
+
+void WordGraph::enableEdge(Edge *edge)
+{
+    if (!edge || !m_disabledEdges.contains(edge->id())
+              || !isEnabled(edge->source())
+              || !isEnabled(edge->dest()))
+        return;
+    
+    edge->source()->m_edges.insert(edge);
+    edge->dest()->m_edges.insert(edge);
+    m_disabledEdges.remove(edge->id());
+}
+
 void WordGraph::enableAll()
 {
     NodeIterator iter = m_disabledNodes.begin();
@@ -106,6 +133,7 @@ void WordGraph::enableAll()
             edge->adjacentNode(node)->m_edges.insert(edge);
         }   
     }
+    m_disabledEdges.clear();
 }
 
 void WordGraph::removeNode(const QString &nodeId)
@@ -236,7 +264,7 @@ bool WordGraph::isEnabled(Node *node) const
 
 bool WordGraph::isEnabled(Edge *edge) const
 {
-    return isEnabled(edge->source()) && isEnabled(edge->dest());
+    return isEnabled(edge->source()) && isEnabled(edge->dest()) && !m_disabledEdges.contains(edge->id());
 }
 
 

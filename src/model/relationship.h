@@ -74,6 +74,8 @@ public:
      */
     static Types typesForPos(int pos);
     
+    static Types allTypes();
+    
     
     static bool applies(Type type, int forPos);
     
@@ -85,7 +87,7 @@ public:
     /**
      * Returns string representation of the relationship.
      */
-    static QString toString(Type type, int pos);
+    static QString toString(Type type, int pos = 0);
     
     /**
      * Returns a list of all possible relationships.
@@ -93,6 +95,8 @@ public:
     static QList<Type> types();
     
     static Type toType(int intType);
+    
+    static Type symmetricTo(Type type);
     
 private:    
     static const int SIZE = 23;    
