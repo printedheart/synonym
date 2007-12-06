@@ -74,6 +74,21 @@ public:
 private:        
     QList<PartOfSpeech> m_poses;
 };
+
+class IsInRelationships
+{
+public:    
+    IsInRelationships(Relationship::Types types):
+        m_types(types) {}
+    
+    bool operator() (Edge *edge) {
+        return edge->relationship() == Relationship::Undefined |  m_types.testFlag(edge->relationship());
+    }
+private:    
+    Relationship::Types m_types;
+};
+
+
     
         
 
@@ -102,7 +117,14 @@ public:
                 Node *neighbor = *iter;
                 if (neighbor->data(LEVEL).toInt() < level) {
                     if (node->data(POS) != QVariant() && neighbor->data(POS) != node->data(POS)) return true;
-                    if (neighbor->neighbors().size() > 15) return false;
+                    if (neighbor->neighbors().size() > 15) {
+                        if (IsWord()(neighbor)) {
+                            QList<Node*> wordNodes;
+                            filter(neighbors.constBegin(), neighbors.constEnd(), wordNodes, IsWord());
+                            if (wordNodes.size() < 15) return true;
+                        }
+                        return false;
+                    }
                 }
             }
             
@@ -144,5 +166,7 @@ public:
         return false;
     }
 };
+
+
 
 #endif

@@ -83,23 +83,67 @@ public:
     WordGraph(QObject *parent = 0);
     ~WordGraph();
    
+    /**
+     * Creates new node using the specified NodeFactory and returns it.
+     * If node with id nodeId exists returns an existing node.
+     */
     Node *addNode(const QString &nodeId, NodeFactory &factory);
+    
+    /**
+     * Disables the given node.
+     */
+    void disableNode(Node *node);
+    
+    /**
+     * Enables the gived node. If node is not in the graph the function does nothing.
+     */
+    void enableNode(Node *node);
     void removeNode(const QString &nodeId);
     void removeNode(Node *node);
     
-    void disableNode(Node *node);
-    void enableNode(Node *node);
+    
+    /**
+     * Restores the originaly created graph by enabling all nodes and edges.
+     */
     void enableAll();
+    
+    /**
+     * Returns true if the node is enabled.
+     */
     bool isEnabled(Node *node) const;
+    
+    /**
+     * Returns true if the edge is enabled.
+     */
     bool isEnabled(Edge *edge) const;
     
+    
+    /**
+     * Add new edge to the graph with id (aNodeId + bNodeId) and returns it. 
+     * If edge already exists methods return 0. 
+     */
     Edge *addEdge(const QString &aNodeId, const QString &bNodeId, EdgeFactory &factory);
+    
+    /**
+     * Disables the given edge.
+     */
+    void disableEdge(Edge *edge);
+    
+    /**
+     * Enabled the gived edge. If either source node or destination node 
+     * of this edge are disabled the method does nothing.
+     */
+    void enableEdge(Edge *edge); 
     
     void removeEdge(const QString &edgeId);
     void removeEdge(Edge *edge);
 
+    /**
+     * Cleares all nodes and edges.
+     */
     void clearAll();
 
+    
     Node* node(const QString &id) const;
     Edge *edge(const QString &id) const;
 
@@ -125,6 +169,7 @@ private:
     typedef QHash<QString, Edge*>::iterator EdgeIterator;
     typedef QHash<QString, Edge*>::const_iterator ConstEdgeIterator;
     QHash<QString, Node*> m_disabledNodes;
+    QSet<QString> m_disabledEdges;
     QString m_centralNodeId;
     
    

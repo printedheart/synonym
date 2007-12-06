@@ -1,5 +1,5 @@
  /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
+ *   Copyright (C) 2007 by Sergejs Melderis*
  *   sergey.melderis@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,10 +36,10 @@ public:
     WordDataLoader(QObject *parent = 0);
     
     ~WordDataLoader();
-     virtual WordGraph * createWordGraph(const QString &searchWord, QList<Relationship::Type> types);
+    
+     virtual WordGraph * createWordGraph(const QString &searchWord, Relationship::Types searchTypes);
      
      virtual QStringList words() const;
-
 protected:
     QString m_curWord;
 };
