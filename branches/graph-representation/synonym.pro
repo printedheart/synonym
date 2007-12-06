@@ -23,7 +23,8 @@ HEADERS = src/model/worddatagraph.h \
         src/sound/player.h \
         src/model/graphalgorithms.h \
         src/model/wordnetutil.h \
-
+ \
+ src/model/relationship.h
 
 SOURCES = src/model/worddatagraph.cpp \
         src/model/worddataloader.cpp \
@@ -42,13 +43,15 @@ SOURCES = src/model/worddatagraph.cpp \
         src/sound/pronunciationsoundholder.cpp  \
         src/sound/pronunciationsoundfactoryimpl.cpp \
         src/sound/player.cpp \
-#        src/test/graphtest.cpp
+\ #        src/test/graphtest.cpp
+ src/model/relatiohship.cpp
 
 CONFIG += warn_on \
       thread \
           qt \
       debug \
       rtti 
+ 
 # qtestlib
 TARGET = bin/synonym
 
@@ -58,7 +61,7 @@ xml \
 network \
 gui \
 svg
-CONFIG -= release
+#CONFIG -= release
 
 DESTDIR = .
 
@@ -71,3 +74,5 @@ SOURCES -= src/model/edge.cpp \
 src/model/node.cpp
 HEADERS -= src/model/edge.h \
 src/model/node.h
+
+
