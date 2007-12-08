@@ -20,10 +20,12 @@
 #ifndef NOUNLISTMODEL_H
 #define NOUNLISTMODEL_H
 
+#include "relationship.h"
+#include "worddatagraph.h"
+
 #include <QAbstractListModel>
 #include <QStringList>
-#include "node.h"
-#include "worddatagraph.h"
+
 
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
@@ -32,8 +34,7 @@ class PartOfSpeechListModel : public QAbstractListModel
 {
 Q_OBJECT
 public:
-    PartOfSpeechListModel(
-                  WordGraph::PartOfSpeech modelType, QObject *parent = 0);
+    PartOfSpeechListModel(PartOfSpeech modelType, QObject *parent = 0);
 
     ~PartOfSpeechListModel();
 
@@ -49,14 +50,16 @@ public:
     void setDataGraph(WordGraph *dataGraph);
 
 
-    MeaningNode *nodeAt(const QModelIndex &index);
-    QModelIndex indexForNode(MeaningNode *node);
+    Node *nodeAt(const QModelIndex &index);
+    QModelIndex indexForNode(Node *node);
+    
+    PartOfSpeech modelType() const;
 private:
     WordGraph *m_dataGraph;
 
-    QList<MeaningNode*> m_meanings;
+    QList<Node*> m_meanings;
 
-    WordGraph::PartOfSpeech m_modelType;
+    PartOfSpeech m_modelType;
     QStringList stringList;
 private slots:
     void reload();
