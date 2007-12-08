@@ -19,59 +19,67 @@
  ***************************************************************************/
 #include "graphedge.h"
 #include "graphnode.h"
+#include "wordnetutil.h"
+
 
 #include <math.h>
 #include <QtGui>        
 
-GraphEdge::GraphEdge()
-    : m_toolTip(0)
+GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
+                           GraphicsNode *dest, WordGraph *graph)
+    : m_id(id), m_source(source), m_dest(dest), m_graph(graph), m_directed(false), 
+      m_connector(0), m_pointer(0), m_toolTip(0)     
 {
+    m_source->m_edges << this;
+    m_dest->m_edges << this;
+    
     QColor c;
-    c.setHsv(0.0, 0.0, 140);
+    c.setHsv(0, 0, 140);
     m_pen = QPen(c, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    
+    setAcceptsHoverEvents(true);
+    m_type = Relationship::Undefined;
 }
         
-GraphEdge::GraphEdge(GraphicsNode *sourceNode, GraphicsNode *destNode)
-    :m_source(sourceNode), m_dest(destNode), m_toolTip(0)
+
+
+GraphicsEdge::~GraphicsEdge()
 {
-    m_source->addEdge(this);
-    m_dest->addEdge(this);
-    adjust();
+    // QGraphicsItem claims to delete all its children
+}
+
+QString GraphicsEdge::id() const
+{
+    return m_id;
+}
+
+WordGraph * GraphicsEdge::graph() const
+{
+    return m_graph;
 }
 
 
-GraphEdge::~GraphEdge()
-{
-    delete m_connector;
-    delete m_pointer;
-    delete m_toolTip;
-}
-
-void GraphEdge::setSource(GraphicsNode *source)
-{
-    m_source = source;
-    source->addEdge(this);
-}
-
-GraphicsNode* GraphEdge::source() const
+GraphicsNode* GraphicsEdge::source() const
 {
     return m_source;
 }
 
-
-
-void GraphEdge::setDest(GraphicsNode *dest)
-{
-    m_dest = dest;
-    dest->addEdge(this);
-}
     
-GraphicsNode* GraphEdge::dest() const
+GraphicsNode* GraphicsEdge::dest() const
 {
     return m_dest;
 }
 
-void GraphEdge::adjust()
+GraphicsNode* GraphicsEdge::adjacentNode(GraphicsNode *node) const
+{
+    if (m_source == node)
+        return m_dest;
+    if (m_dest == node)
+        return m_source;
+    return 0;
+}
+
+void GraphicsEdge::adjust()
 {
     if (!m_source || !m_dest)
         return;
@@ -92,7 +100,7 @@ void GraphEdge::adjust()
 
 
 
-QPainterPath GraphEdge::shape() const
+QPainterPath GraphicsEdge::shape() const
 {
    if (!m_source || !m_dest) {
        return QGraphicsItem::shape();
@@ -121,7 +129,7 @@ QPainterPath GraphEdge::shape() const
 }
 
 
-QRectF GraphEdge::boundingRect() const
+QRectF GraphicsEdge::boundingRect() const
 {
     if (!m_source || !m_dest)
         return QRectF();
@@ -136,7 +144,7 @@ QRectF GraphEdge::boundingRect() const
 }
 
 
-void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+void GraphicsEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
     if (!m_source || !m_dest)
         return;
@@ -144,21 +152,32 @@ void GraphEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidg
     QLineF line(m_sourcePoint, m_destPoint);
     painter->setPen(m_pen);
     painter->drawLine(line);
+    
+//     if (relationship() == Relationship::Hypernym) {
+//         QPen pen(m_pen);
+//         pen.setStyle(Qt::SolidLine);
+//         painter->setPen(pen);
+//         QPolygonF triangle;
+//         triangle << QPointF(-7.0, 0.0) << QPointF(7.0, 0.0) << QPointF(0.0, 10.0) << QPointF(-7.0, 0.0);
+//         painter->drawPolygon(triangle);
+//     }
 }
 
-void GraphEdge::setPen(QPen pen)
+void GraphicsEdge::setPen(QPen pen)
 {
     m_pen = pen;
 }
 
-void GraphEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+void GraphicsEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     if (!m_toolTip) {
-        if (!m_toolTipString.isEmpty())
+        if (relationship() != Relationship::Undefined) {
             createToolTip();
+        }
     }
     
     if (m_toolTip) {
+        setZValue(3);
         adjustToolTipPos();        
         m_pointer->setVisible(true);
         m_toolTip->setVisible(true);
@@ -166,9 +185,10 @@ void GraphEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
         m_pointer->update();
     }
 }
-void GraphEdge::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+void GraphicsEdge::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     if (m_toolTip) {
+        setZValue(1);
         m_toolTip->setVisible(false);
         m_pointer->setVisible(false);
         m_toolTip->update();
@@ -176,11 +196,22 @@ void GraphEdge::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     }
 }
 
-void GraphEdge::createToolTip()
+void GraphicsEdge::createToolTip()
 {
-    m_toolTip = new QGraphicsPathItem();
-    scene()->addItem(m_toolTip);
-    QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(m_toolTipString, m_toolTip);
+    
+    int sourcePos = source()->data(POS).toInt();
+    int destPos = dest()->data(POS).toInt();
+    QString text;
+    if (Relationship::applies(relationship(), sourcePos)) {
+        text = Relationship::toString(relationship(), sourcePos);
+    } else if (Relationship::applies(relationship(), destPos)) {
+        text = Relationship::toString(relationship(), destPos);
+    }
+    if (text.isEmpty())
+        return;
+    
+    m_toolTip = new QGraphicsPathItem(this);
+    QGraphicsSimpleTextItem *textItem = new QGraphicsSimpleTextItem(text, m_toolTip);
      
     QRectF rect = textItem->boundingRect();
     rect.setLeft(rect.left() - 5);
@@ -205,22 +236,20 @@ void GraphEdge::createToolTip()
     m_toolTip->setPen(pen);
     m_toolTip->setBrush(QBrush(Qt::white));    
     m_toolTip->setVisible(true);
-    m_toolTip->setZValue(4);
-    textItem->setZValue(5);
+    m_toolTip->setZValue(5);
+    textItem->setZValue(6);
     
     m_pointer = new QGraphicsLineItem(this);
     m_pointer->setZValue(3);
     m_connector = new QGraphicsEllipseItem(QRect(-3, -3, 6, 6), m_pointer);
-    m_connector->setPen(pen);
-    m_connector->setBrush(QBrush(Qt::white));        
 }
 
-void GraphEdge::setToolTip(const QString &toolTip)
+void GraphicsEdge::setToolTip(const QString &toolTip)
 {
     m_toolTipString = toolTip;
 }
 
-void GraphEdge::adjustToolTipPos()
+void GraphicsEdge::adjustToolTipPos()
 {
     QLineF line(m_sourcePoint, m_destPoint);
     QPointF middle = line.pointAt(0.5);
@@ -237,9 +266,37 @@ void GraphEdge::adjustToolTipPos()
     pointerPos.setX(toolTipPos.x());
         
     m_pointer->setLine(middle.x(), middle.y(), pointerPos.x(), pointerPos.y());
+    
+    
+    
     m_connector->setPos(m_pointer->mapFromParent(middle));
 }
 
 
-
+void GraphicsEdge::setRelationship(Relationship::Type type)
+{
+    m_type = type;
+    if (type == Relationship::Undefined) {
+        m_pen.setStyle(Qt::SolidLine);
+    } else {
+        QVector<qreal> dashes;
+        dashes << 10 << 10;
+        m_pen.setDashPattern(dashes); 
+        if (type == Relationship::Antonym) {
+            QColor c;
+            c.setHsv(6, 243, 214);
+            m_pen.setColor(c);
+            m_pen.setWidthF(0.6);
+        } else {
+            QColor c;
+            c.setHsv(0, 0, 140);
+            m_pen.setColor(c);
+        }
+    }
+}
+    
+Relationship::Type GraphicsEdge::relationship() const
+{
+    return m_type;
+}
 

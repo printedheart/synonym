@@ -24,10 +24,12 @@
 #include "partofspeechitemdelegate.h"
 #include "worddatagraph.h"
 #include "worddataloader.h"
-#include "node.h"
 #include "partofspeechlistmodel.h"
 #include "pronunciationsoundholder.h"
 #include "player.h"
+#include "wordnetutil.h"
+#include "relationship.h"
+
 #include <QtGui>
 #include <QtCore>
 #include <stdlib.h>
@@ -57,6 +59,19 @@ MainWindow::MainWindow()
     QToolBar *toolBar = addToolBar("synonym");
     m_wordLine = new QLineEdit(toolBar);
     toolBar->addWidget(m_wordLine);
+    
+    addToolBarBreak();
+    QToolBar *relationshipsToolBar = addToolBar("relatinships");
+    QList<Relationship::Type> relationships = Relationship::types();
+    foreach (Relationship::Type type, relationships) {
+        
+        QCheckBox *checkBox = new QCheckBox(Relationship::toString(type), relationshipsToolBar);
+        checkBox->setChecked(true);
+        m_relationshipCheckBoxes.append(qMakePair(type, checkBox));
+        relationshipsToolBar->addWidget(checkBox);
+        connect (checkBox, SIGNAL(stateChanged(int)), this, SLOT(relationshipsChanged(int)));
+    }
+    
 
     connect (m_wordLine, SIGNAL(returnPressed()),
             this, SLOT(callLoadWord()));
@@ -69,13 +84,12 @@ MainWindow::MainWindow()
 
     // Setup item views.
     QString partsOfSpeechHeaders[4] = { "Nouns", "Verbs", "Adjectives", "Adverbs"};
-    WordGraph::PartOfSpeech partsOfSpeech[4] = { WordGraph::Noun, WordGraph::Verb,
-        WordGraph::Adjective, WordGraph::Adverb};
+    PartOfSpeech partsOfSpeech[4] = { Noun, Verb, Adjective, Adverb};
                                      
     for (int i = 0; i < 4; i++) {
         QDockWidget *dockWidget = new QDockWidget(partsOfSpeechHeaders[i], this);
 
-        PartOfSpeechItemView *view = new PartOfSpeechItemView(this);
+        PartOfSpeechItemView *view = new PartOfSpeechItemView(dockWidget);
         m_posViews[i] = view;
         
         PartOfSpeechListModel *model =
@@ -97,6 +111,9 @@ MainWindow::MainWindow()
                  this, SLOT(nodeActivated(const QModelIndex&)));
         connect (scene, SIGNAL(nodeMouseHoverLeaved(const QString&)),
                  view, SLOT(clearHighlighting()));
+        connect (dockWidget, SIGNAL(visibilityChanged(bool)), 
+                 this, SLOT(dockWidgetVisibilityChanged()));
+        
     }
 
 
@@ -134,7 +151,7 @@ void MainWindow::lookUpWordNet(const QString &word)
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(dataGraph);
 
-    m_soundHolder->findPronunciation(word);
+  //  m_soundHolder->findPronunciation(word);
         
 }
 
@@ -151,7 +168,7 @@ void MainWindow::nodeActivated(const QModelIndex &index)
 {
     PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
             const_cast<QAbstractItemModel*>(index.model()));
-    MeaningNode *node = 0;
+    Node *node = 0;
     node = indexModel->nodeAt(index);
     if (!node) {
         m_scene->setActivated(QString());
@@ -164,51 +181,47 @@ void MainWindow::nodeActivated(const QString &id)
 {
     Node *node = m_currentGraph->node(id);
     if (node) {
-        MeaningNode *meaning = dynamic_cast<MeaningNode*>(node);
-        if (meaning) {
-            QModelIndex nodeIndex = m_posModels[meaning->partOfSpeech() - 1]->indexForNode(meaning);
-            m_posViews[meaning->partOfSpeech() - 1]->highlightItem(nodeIndex);
+        QVariant meaning = node->data(MEANING);
+        if (meaning.isValid()) {
+            int partOfSpeech = node->data(POS).toInt();
+            QModelIndex nodeIndex = m_posModels[partOfSpeech - 1]->indexForNode(node);
+            m_posViews[partOfSpeech - 1]->highlightItem(nodeIndex);
         }
     }
 }
 
 void MainWindow::initCompleter()
 {
-//     if (indexfps) {
-//         QStringList allWords;
-//         QFile file;
-//         for (int i = 1; i < NUMPARTS + 1; i++) {
-//             QFile file;
-//             if (!file.open(indexfps[1], QIODevice::ReadOnly | QIODevice::Text)) {
-//                 qDebug() << "Cannot open file" << file.fileName();
-//                 continue;
-//             }
-//                 
-//             while (!file.atEnd()) {
-//                 QByteArray line = file.readLine();
-//                 if (line.startsWith(' '))
-//                     continue;
-//                 
-//                 QByteArray phraseWithUnderscores =  line.split(' ')[0];
-//                 QList<QByteArray> words = phraseWithUnderscores.split('_');
-//                 QString phrase;
-//                 foreach (QByteArray word, words) {
-//                     phrase.append(word.data());
-//                     phrase.append(' ');
-//                 }
-//                 allWords << phrase.trimmed();
-//             }
-//         }
-//         
-//         allWords.sort();
+
     QStringList words = m_loader->words();   
-        QCompleter *completer = new QCompleter(words, this);
-        completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-        completer->setCaseSensitivity(Qt::CaseInsensitive);
-        m_wordLine->setCompleter(completer);
-    //}
+    QCompleter *completer = new QCompleter(words, this);
+    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_wordLine->setCompleter(completer);
 }
     
 
 
+void MainWindow::dockWidgetVisibilityChanged()
+{
+    QList<PartOfSpeech> poses;
+    for (int i = 0; i < 4; ++i) {
+        QDockWidget *dock = qobject_cast<QDockWidget*>(m_posViews[i]->parent());
+        if (dock->isVisible()) {
+            poses.append(m_posModels[i]->modelType());
+        }
+    }
+    m_graphController->setPoses(poses);
+}
 
+void MainWindow::relationshipsChanged(int)
+{
+    Relationship::Types relationships(0);
+    for (int i = 0; i < m_relationshipCheckBoxes.size(); i++) {
+        QPair<Relationship::Type, QCheckBox*> pair = m_relationshipCheckBoxes[i];
+        if (pair.second->isChecked()) {
+            relationships = relationships | pair.first;
+        }
+    }
+    m_graphController->setRelationships(relationships);
+}
