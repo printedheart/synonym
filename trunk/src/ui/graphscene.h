@@ -25,9 +25,8 @@
 #include <QSet>        
 class Layout;
 class GraphicsNode;
-class GraphEdge;
+class GraphicsEdge;
 class WordGraphicsNode;
-class Node;
 class QSvgRenderer;
 /**
     @author Sergejs <sergey.melderis@gmail.com>
@@ -43,11 +42,10 @@ public:
 
     void itemMoved();
 
-    QList<GraphicsNode *> graphNodes() const;
-
-    void setLayout(bool enable);
-
-    void propogateClickEvent(GraphicsNode *graphNode);
+    QList<GraphicsNode*> graphNodes() const;
+    QList<GraphicsEdge*> graphEdges() const;
+    
+    void signalClickEvent(GraphicsNode *graphNode);
     
     void signalMouseHovered(GraphicsNode *graphNode);
     void signalMouseHoverLeaved(GraphicsNode *graphNode);
@@ -56,8 +54,10 @@ public:
 
     void setCentralNode(GraphicsNode *node);
     GraphicsNode *centralNode() const;
+    
 public slots:    
     void setActivated(const QString &id);
+    void setLayout(bool enable = true);
     
 signals:
     void nodeClicked(const QString &id);
@@ -83,10 +83,10 @@ private:
     QSvgRenderer *m_soundIconRenderer;
 
     Layout *m_layout;
-    void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode, QSet<GraphicsNode*> &visitSet);
     
     bool m_restartLayout;    
     GraphicsNode *m_activeNode;
+    
 };
 
 #endif

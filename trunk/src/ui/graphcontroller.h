@@ -20,6 +20,9 @@
 #ifndef GRAPHCONTROLLER_H
 #define GRAPHCONTROLLER_H
 
+#include "worddatagraph.h"
+#include "relationship.h"
+
 #include <QObject>
 #include <QStack>
 #include <QPair>
@@ -27,17 +30,15 @@
 
 class GraphScene;
 class WordDataLoader;
-class WordGraph;
 class MeaningGraphicsNode;
 class WordGraphicsNode;
-class GraphEdge;
-class Node;
+class GraphicsEdge;
 class GraphicsNode;
 class QGraphicsItem;                     
-class Edge;              
 /**
     @author Sergejs <sergey.melderis@gmail.com>
 */
+
 class GraphController : public QObject
 {
 Q_OBJECT
@@ -49,22 +50,37 @@ public:
 
 
     WordGraph* makeGraph(const QString &word);
+    
+    void setPoses(QList<PartOfSpeech> &poses);
+    
+    void setRelationships(Relationship::Types relationships);
 public slots:
     void soundReady(const QString &word);
     
 private:
     GraphScene *m_scene;
     WordDataLoader *m_loader;
+    WordGraph *m_graph;
 
+    QList<PartOfSpeech> m_poses;
+    Relationship::Types m_relTypes;
 
+    void makeConnected(Node *goal);
+    
+    void updateSceneNodes();
+    
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > > m_graphHistory;
     
-    GraphicsNode* findGraphicsNode(Node *dataNode);
+    GraphicsNode * findGraphicsNode(Node *dataNode);
     
     void addEdge(GraphicsNode *graphNode, Edge *edge);
     
     QList<QPair<WordGraph*, QList<QGraphicsItem*> > >::const_iterator
             findInHistory(const QString &word);
+    
+    void assertGraphConnectivityToNode(Node *node);
+    
+    
 };
 
 #endif

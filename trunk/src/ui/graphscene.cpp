@@ -21,8 +21,6 @@
 #include "graphedge.h"
 #include "graphnode.h"
 #include "layout.h"
-#include "node.h"
-                
 #include "math.h"
                 
 #include <QtGui>
@@ -32,7 +30,8 @@
 #include <QtSvg>
 
 GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), m_enableLayout(true), m_restartLayout(false), m_activeNode(0)
+ : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), 
+                  m_enableLayout(true), m_restartLayout(false), m_activeNode(0), m_centralNode(0)
 {
     m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
     m_layout = new ForceDirectedLayout4();
@@ -66,17 +65,8 @@ void GraphScene::timerEvent(QTimerEvent *event)
 
 void GraphScene::layout()
 {
-    QList<GraphicsNode *> nodes;
-    QList<GraphEdge *> edges;
-    foreach (QGraphicsItem *item, items()) {
-        if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
-            GraphicsNode *node = static_cast<GraphicsNode*>(item);
-            nodes << node;
-        } else if(GraphEdge *edge = qgraphicsitem_cast<GraphEdge *>(item))
-            edges << edge;
-    }
-
-
+    QList<GraphicsNode*> nodes = graphNodes();
+    QList<GraphicsEdge*> edges = graphEdges();
     bool needsLayout = m_layout->layout(nodes, edges, m_restartLayout);
     if (!needsLayout) {
         killTimer(m_timerId);
@@ -97,6 +87,16 @@ QList<GraphicsNode *> GraphScene::graphNodes() const
         
     }
     return nodes;
+}
+
+QList<GraphicsEdge*> GraphScene::graphEdges() const
+{
+    QList<GraphicsEdge*> edges;
+    foreach (QGraphicsItem *item, items()) {
+        if (GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
+            edges << edge;
+    }
+    return edges;
 }
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -137,7 +137,7 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     foreach (QGraphicsItem *item, eventItems) {
         QGraphicsSvgItem *svgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(item);
         if (svgItem) {
-            emit soundButtonClicked(m_centralNode->dataNode()->id());
+            emit soundButtonClicked(m_centralNode->id());
         }
     }
     QGraphicsScene::mousePressEvent(mouseEvent);
@@ -151,11 +151,9 @@ void GraphScene::setLayout(bool enable)
         m_layout->stop();
 }
 
-void GraphScene::propogateClickEvent(GraphicsNode *graphNode)
+void GraphScene::signalClickEvent(GraphicsNode *graphNode)
 {
-    Node *dataNode = graphNode->dataNode();
-    QString id = dataNode->id();
-    emit nodeClicked(id);
+    emit nodeClicked(graphNode->id());
 }
 
 
@@ -199,7 +197,7 @@ void GraphScene::setActivated(const QString &id)
     m_activeNode = 0;
     QList<GraphicsNode*> nodes = graphNodes();
     foreach (GraphicsNode *node, nodes) {
-        if (node->dataNode()->id() == id) {
+        if (node->id() == id) {
             node->setActivated(true);
             m_activeNode = node;
         }
@@ -215,5 +213,7 @@ void GraphScene::signalMouseHoverLeaved(GraphicsNode *graphNode)
 {
     emit nodeMouseHoverLeaved(graphNode->id());
 }
+
+
 
 
