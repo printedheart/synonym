@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -24,153 +24,38 @@
 #include <QtGui>
 #include <QtCore>
 
-#if(0)
+
+
 ForceDirectedLayout::ForceDirectedLayout()
-{}
-
-
-ForceDirectedLayout::~ForceDirectedLayout()
-{}
-
-bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart)
-{
-    return layout(nodes, edges);
-}
-
-bool ForceDirectedLayout::layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges)
-{
-    foreach (GraphicsNode *node, nodes) 
-        node->discardForce();
-    foreach (GraphicsNode *aNode, nodes) {
-        foreach (GraphicsNode *bNode, nodes) {
-            // Find the distance between nodes
-            if (aNode == bNode) continue;
-         bool haveRepulsion = true;
-            QList<GraphicsNode*> _aNeighbors = aNode->neighbors();
-            foreach (GraphicsNode *n, _aNeighbors) {
-                if (n == bNode)
-                    haveRepulsion = false;
-            }
-            if (!haveRepulsion) {
-                continue;
-            }
-            QLineF line(aNode->pos(), bNode->pos());
-            qreal dx = line.dx();
-            qreal dy = line.dy();
-            qreal distance2 = dx * dx + dy * dy;
-            qreal distance = sqrt(distance2);
-            if (distance > 0) {
-                /**********************/
-//                 bool haveCommonNeighbor = false;
-//                 QList<GraphicsNode*> aNeighbors = aNode->neighbors();
-//                 QList<GraphicsNode*> bNeighbors = bNode->neighbors();
-// 
-//                 foreach (GraphicsNode *aNeighbor, aNeighbors) {
-//                     foreach (GraphicsNode *bNeighbor, bNeighbors) {
-//                         if (aNeighbor == bNeighbor) {
-//                             haveCommonNeighbor = true;
-//                             break;
-//                         }
-//                     }
-//                 }
-// 
-//                 /*********************/
-//                 qreal repulsive;
-//                 if (haveCommonNeighbor)
-//                     repulsive = REPULSION * 0.5 * aNode->mass() * bNode->mass() / distance2;
-//                 else
-//                     repulsive =  REPULSION * 2 * aNode->mass() * bNode->mass()  / distance2;
-                qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
-                qreal xvel = repulsive * dx / distance;
-                qreal yvel = repulsive * dy / distance;
-                //qDebug() << xvel << "  " << yvel;
- 
-                aNode->applyForce(- xvel, - yvel);
-                bNode->applyForce( xvel, yvel);
-            }
-        }
-    }
-    
-    foreach (GraphicsEdge *edge, edges) {
-        if (!edge->source() || !edge->dest())
-            continue;
-
-      //  QLineF line(edge->source()->mapToScene(0, 0), edge->dest()->mapToScene(0, 0));
-
-        QLineF line(edge->source()->pos(), edge->dest()->pos());
-        qreal dx = line.dx();
-        qreal dy = line.dy();
-    
-        qreal distance2 = dx * dx + dy * dy;
-        qreal distance = sqrt(distance2);
-        if (distance > 0) {
-    //qDebug() << "Edge distance " << distance;
-            qreal force = -(STIFFNESS * (REST_DISTANCE - distance));
-        
-            edge->source()->applyForce(force * (dx / distance), force * ( dy / distance));
-            edge->dest()->applyForce(-force * (dx / distance), -force * (dy / distance));
-        }
-    }
-
-
-    QGraphicsScene *scene = nodes.first()->scene();
-    QRectF sceneRect = scene->sceneRect();
-    foreach (GraphicsNode *node, nodes) {
-        qreal xvel = node->force().x();
-        qreal yvel = node->force().y();
-        //qDebug() << xvel << "  " << yvel;
-        if (qAbs(xvel) < 0.1 && qAbs(yvel) < 0.1)
-            xvel = yvel = 0;
-
-        QPointF newPos = node->pos() + QPointF(xvel/* * 1.5 */, yvel /* * 1.5 */);
-        newPos.setX(qMin(qMax(newPos.x(), sceneRect.left() + 10), sceneRect.right() - 10));
-        newPos.setY(qMin(qMax(newPos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10));
-        node->setNewPos(newPos);
-    }
-
-
-    bool itemsMoved = false;
-    foreach (GraphicsNode *node, nodes) {
-        if (scene->mouseGrabberItem() != node)
-            if (node->advance())
-                itemsMoved = true;
-    }
-
-
-    return itemsMoved;
-}
-#endif
-
-
-ForceDirectedLayout4::ForceDirectedLayout4()
 {
     m_abort = false;
     centralNode = 0;
     connect (this, SIGNAL(finished()), this, SLOT (wakeUp()));
 }
 
-void ForceDirectedLayout4::wakeUp()
+void ForceDirectedLayout::wakeUp()
 {
     m_aborted.wakeAll();
 }
 
 
-ForceDirectedLayout4::~ForceDirectedLayout4()
+ForceDirectedLayout::~ForceDirectedLayout()
 {}
 
-
-
-void ForceDirectedLayout4::prepareLayout(GraphicsNode *rootNode)
+// Sort of a hack. When algorithm has run through all
+// nodes at least once, then no nodes should have a null point.
+static bool needsPreLayout(GraphicsNode *rootNode)
 {
-    qDebug() << "prepareLayout()" << rootNode->id();
-    rootNode->setPos(0.0, 0.0);
-    rootNode->setFlag(QGraphicsItem::ItemIsMovable, false);
-    QSet<GraphicsNode*> visitSet;
-    layoutNodes(rootNode, 0, visitSet); 
+    foreach (GraphicsNode *node, rootNode->neighbors()) {
+        if (node->pos() == QPointF()) 
+            return true;
+    }
+    return false;
 }
 
-void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
-                                          QSet<GraphicsNode*> &visitSet)
+
+static void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
+                        QSet<GraphicsNode*> &visitSet)
 {
     QSet<GraphicsEdge*> edges = node->edges();
     QSet<GraphicsNode*> neighbors = node->neighbors();
@@ -198,7 +83,8 @@ void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentN
     foreach (GraphicsNode *child, children) {
         visitSet << child;
         
-        QPointF childPos(REST_DISTANCE * cos(phi), REST_DISTANCE * sin(phi));
+        QPointF childPos(ForceDirectedLayout::REST_DISTANCE * cos(phi),
+                         ForceDirectedLayout::REST_DISTANCE * sin(phi));
         childPos += node->scenePos();
         child->setPos(childPos);
         phi += angleIncrement;
@@ -210,7 +96,19 @@ void ForceDirectedLayout4::layoutNodes(GraphicsNode *node, GraphicsNode *parentN
 }
 
 
-bool ForceDirectedLayout4::layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) 
+// This helper method greatly speeds up the layouting algorithm by 
+// arranging nodes in a tree-like layout.
+static void preLayout(GraphicsNode *rootNode)
+{
+    qDebug() << "preLayout()" << rootNode->id();
+    rootNode->setPos(0.0, 0.0);
+    rootNode->setFlag(QGraphicsItem::ItemIsMovable, false);
+    QSet<GraphicsNode*> visitSet;
+    layoutNodes(rootNode, 0, visitSet); 
+}
+
+
+bool ForceDirectedLayout::layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) 
 {
     if (restart) {
         m_abortMutex.lock();
@@ -225,14 +123,14 @@ bool ForceDirectedLayout4::layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdg
     return layoutParallel(nodes, edges);
 }
 
-void ForceDirectedLayout4::stop()
+void ForceDirectedLayout::stop()
 {
     m_abort = true;
 }
 
 
 
-bool ForceDirectedLayout4::layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
+bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
 {
     if (nodes.size() == 0) {
         return false;
@@ -251,7 +149,8 @@ bool ForceDirectedLayout4::layoutParallel(QList<GraphicsNode*> &nodes, QList<Gra
         centralNode = rootNode;
         m_edges = edges;
                 
-        prepareLayout(centralNode);
+        if (needsPreLayout(centralNode))
+            preLayout(centralNode);
         m_animations.clear();
         foreach (GraphicsNode *node, nodes)
             m_animations[node].addPoint(node->pos());
@@ -306,6 +205,9 @@ bool ForceDirectedLayout4::layoutParallel(QList<GraphicsNode*> &nodes, QList<Gra
         return true;
     
     m_mutex.lock();
+    
+    // If there are too many nodes drawing becomes very slow.
+    // To speed up the process we will skip a step or more of the animation.
     int nodesCount = nodes.size();
     int nodesToTake = nodesCount / 20 > 0 ? nodesCount / 20 : 1;
     for (int i = 0; i < nodesCount; i++) {
@@ -334,7 +236,7 @@ bool ForceDirectedLayout4::layoutParallel(QList<GraphicsNode*> &nodes, QList<Gra
     
 }
 
-void ForceDirectedLayout4::run()
+void ForceDirectedLayout::run()
 {
     typedef QHash<GraphicsNode*, NodeAnimation>::iterator AnimationIterator;
     qDebug() << "run()";
@@ -354,10 +256,14 @@ void ForceDirectedLayout4::run()
             GraphicsNode *aNode = aIter.key();
             
             if (m_abort) {
+                m_abortMutex.lock();
                 foreach (NodeAnimation animation, m_animations) {
                     animation.reset();
                 }
+                m_aborted.wakeAll();
+                m_abortMutex.unlock();
                 return;
+                
             }
             AnimationIterator bIter;
             for (bIter = m_animations.begin(); bIter != end; ++bIter) {
@@ -426,8 +332,6 @@ void ForceDirectedLayout4::run()
                 qreal xvel = animation.force.x();
                 qreal yvel = animation.force.y();
                 qreal tolerance = 0.1;
-//                 if (node->neighbors().size() > 10)
-//                     tolerance = 1.0;
                 if (qAbs(xvel) < tolerance && qAbs(yvel) < tolerance)
                     xvel = yvel = 0;
     
@@ -469,7 +373,7 @@ void ForceDirectedLayout4::run()
 }
 
 
-bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
+bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
 {
     QHash<GraphicsNode*, QPointF> resultForces;
     QList<GraphicsNode*>::const_iterator aIter;
@@ -498,9 +402,6 @@ bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graph
     }
     
     foreach (GraphicsEdge *edge, edges) {
-        if (!edge->source() || !edge->dest())
-            continue;
-
         QLineF line(edge->source()->pos(), edge->dest()->pos());
         qreal dx = line.dx();
         qreal dy = line.dy();
@@ -548,7 +449,7 @@ bool ForceDirectedLayout4::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graph
         
 }
 
-void ForceDirectedLayout4::startThread()
+void ForceDirectedLayout::startThread()
 {
     if (!isRunning()) {
         finishedLayout = false;

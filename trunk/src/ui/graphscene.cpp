@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -25,16 +25,16 @@
                 
 #include <QtGui>
 #include <QtCore>
+#include <QtSvg>
                        
 #include <QtDebug>
-#include <QtSvg>
 
 GraphScene::GraphScene(QObject *parent)
  : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), 
                   m_enableLayout(true), m_restartLayout(false), m_activeNode(0), m_centralNode(0)
 {
-    m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
-    m_layout = new ForceDirectedLayout4();
+    //m_soundIconRenderer = new QSvgRenderer(QString("/home/serega/devel/synonym/src/pics/Sound-icon.svg"), this);
+    m_layout = new ForceDirectedLayout();
 
 }
 
@@ -56,9 +56,10 @@ void GraphScene::itemMoved()
 
 void GraphScene::timerEvent(QTimerEvent *event)
 {
+    Q_UNUSED(event);
+    
     if (!m_enableLayout)
         return;
-    Q_UNUSED(event);
     layout();
 }
 
@@ -76,42 +77,41 @@ void GraphScene::layout()
 }  
 
 
-QList<GraphicsNode *> GraphScene::graphNodes() const
+QList<GraphicsNode *> GraphScene::graphNodes()
 {
-    QList<GraphicsNode*> nodes;
-    foreach (QGraphicsItem *item, items()) {
-        if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
-            GraphicsNode *node = static_cast<GraphicsNode*>(item);
-            nodes << node;
+    if (m_nodes.size() == 0) {
+        foreach (QGraphicsItem *item, items()) {
+            if (item->type() == GraphicsNode::PhraseType || item->type() == GraphicsNode::MeaningType) {
+                GraphicsNode *node = static_cast<GraphicsNode*>(item);
+                m_nodes << node;
+            }
         }
-        
     }
-    return nodes;
+    return m_nodes;
 }
 
-QList<GraphicsEdge*> GraphScene::graphEdges() const
+QList<GraphicsEdge*> GraphScene::graphEdges()
 {
-    QList<GraphicsEdge*> edges;
-    foreach (QGraphicsItem *item, items()) {
-        if (GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
-            edges << edge;
+    if (m_edges.size() == 0) {
+        foreach (QGraphicsItem *item, items()) {
+            if (GraphicsEdge *edge = qgraphicsitem_cast<GraphicsEdge *>(item))
+                m_edges << edge;
+        }
     }
-    return edges;
+    return m_edges;
 }
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    QGraphicsScene::mouseReleaseEvent(mouseEvent);
     m_timerInterval = 10;
     if (m_timerId >= 1) {
         killTimer(m_timerId);
         m_timerId = 0;
-        itemMoved();
     }
     
-    if (mouseGrabberItem())
-        itemMoved();
+    itemMoved();
     m_restartLayout = false;
-    QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
 void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -194,12 +194,14 @@ void GraphScene::setActivated(const QString &id)
     if (m_activeNode) {
         m_activeNode->setActivated(false);
     }
+    
     m_activeNode = 0;
     QList<GraphicsNode*> nodes = graphNodes();
     foreach (GraphicsNode *node, nodes) {
         if (node->id() == id) {
             node->setActivated(true);
             m_activeNode = node;
+            break;
         }
     }
 }
@@ -214,6 +216,18 @@ void GraphScene::signalMouseHoverLeaved(GraphicsNode *graphNode)
     emit nodeMouseHoverLeaved(graphNode->id());
 }
 
-
+void GraphScene::addItem(QGraphicsItem *item)
+{
+    QGraphicsScene::addItem(item);
+    m_nodes.clear();
+    m_edges.clear();
+}
+    
+void GraphScene::removeItem(QGraphicsItem *item)
+{
+    QGraphicsScene::removeItem(item);
+    m_nodes.clear();
+    m_edges.clear();
+}
 
 

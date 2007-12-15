@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -42,26 +42,54 @@ public:
 
     void itemMoved();
 
-    QList<GraphicsNode*> graphNodes() const;
-    QList<GraphicsEdge*> graphEdges() const;
+    QList<GraphicsNode*> graphNodes();
+    QList<GraphicsEdge*> graphEdges();
     
+    //  QGraphicsItem(s) are not QObject(s),and cannot emit signals.
+    //  Using the following methods items can notify interested parties about events
+    //  through signals and slots mechanism. We could derive GraphicsNode from QObject
+    //  for that, but we would have to connect/disconnect nodes when we add and remove them.
+    
+    /**
+     * Emits nodeClicked(const QString &id) signal.
+     */
     void signalClickEvent(GraphicsNode *graphNode);
     
+    /**
+     * Emits nodeMouseHovered(const QString &id) signal.
+     */
     void signalMouseHovered(GraphicsNode *graphNode);
+    
+    /**
+     * Emits nodeMouseHoverLeaved(const QString &id) signal.
+     */
     void signalMouseHoverLeaved(GraphicsNode *graphNode);
 
     void displaySoundIcon();
-
+    
     void setCentralNode(GraphicsNode *node);
     GraphicsNode *centralNode() const;
     
-public slots:    
-    void setActivated(const QString &id);
-    void setLayout(bool enable = true);
     
+     /* addItem() and removeItem() are not virtual in 
+     *  QGraphicsScene. GraphScene must be used directly and not
+     * through the QGraphicsScene. We "override" them to manage the cache
+     * of nodes and edges. 
+     */
+    void addItem(QGraphicsItem *item);
+    void removeItem(QGraphicsItem *item);
+public slots:    
+    /**
+     * Mark the node with id as active node.
+     */
+    void setActivated(const QString &id);
+    
+    /**
+     * If enable is true, the scene will schedule layouting of the nodes.
+     */
+    void setLayout(bool enable = true);
 signals:
     void nodeClicked(const QString &id);
-
     void nodeMouseHovered(const QString &id);
     void nodeMouseHoverLeaved(const QString &id);
     
@@ -72,7 +100,7 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void layout();
-       
+    
 private:
     int m_timerId;
     int m_timerInterval;
@@ -87,6 +115,10 @@ private:
     bool m_restartLayout;    
     GraphicsNode *m_activeNode;
     
+    // Nodes and edges we return in nodes() and edges()
+    QList<GraphicsNode*> m_nodes;
+    QList<GraphicsEdge*> m_edges;
 };
 
 #endif
+

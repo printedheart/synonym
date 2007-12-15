@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -26,7 +26,6 @@
 
 #include <cmath>
 #include <QList>
-#include <QLinkedList>
 #include <QThread>
 
 static const double PI = 3.14159265358979323846264338327950288419717;
@@ -43,107 +42,47 @@ public:
 
     virtual ~Layout() {};
 
+    /**
+     * Layouts nodes and edges.
+     * restart indicates that layout should be restarted.
+     */
     virtual bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) = 0;
     
     virtual void stop() {}
-
 };
 
-    
-/*                    
-
-class ForceDirectedLayout : public Layout
-{
-public:
-    ForceDirectedLayout();
-    ~ForceDirectedLayout();
-
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
-
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
-private:
-    static const int REST_DISTANCE = 75;
-
-    static const qreal STIFFNESS = 0.2;
-
-    static const qreal REPULSION = 1000;
-    
-};
-
-// class ForceDirectedLayout2 : public Layout
-// {
-// public:
-//     ForceDirectedLayout2();
-//     ~ForceDirectedLayout2();
-// 
-//     void layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
-//     
-// private:
-//     static const int REST_DISTANCE = 75;
-// 
-//     static const qreal STIFFNESS = 30;
-// 
-//     static const int REPULSION = 1000;
-// };
-// 
-class ForceDirectedLayout3 : public Layout
-{
-public:
-    ForceDirectedLayout3();
-    ~ForceDirectedLayout3();
-
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges);
-
-    bool layout(QList<GraphicsNode*> nodes, QList<GraphicsEdge*> edges, bool restart);
-private:
-    static const int REST_DISTANCE = 75;
-
-    static const qreal STIFFNESS = 0.2;
-
-    static const qreal REPULSION = 5000;
-
-};
-*/
+ 
 
 #include <QMutex>
 #include <QWaitCondition>                 
 
-                 
-class ForceDirectedLayout4 : public QThread, public Layout
+ 
+class ForceDirectedLayout : public QThread, public Layout
 {
 Q_OBJECT
 public:
-    ForceDirectedLayout4();
-    ~ForceDirectedLayout4();
+    ForceDirectedLayout();
+    ~ForceDirectedLayout();
+
+    // TODO: make the following parameters configurable.
+    static const int REST_DISTANCE = 100;
+    static const qreal STIFFNESS = 0.2;
+    static const qreal REPULSION = 3000;
 
     bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart = false);
     
     void run();
-    
-    void stop();
-    
-    volatile bool finishedLayout;
-    
+    void stop();    
 private slots:
+    
     void wakeUp();
-        
-
 private:
     bool layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
     bool layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
     
-    void prepareLayout(GraphicsNode *rootNode);
-    void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
-                        QSet<GraphicsNode*> &visitSet);
-    
     void startThread();
     
-    static const int REST_DISTANCE = 100;
-
-    static const qreal STIFFNESS = 0.2;
-
-    static const qreal REPULSION = 3000;
-    
+    volatile bool finishedLayout;
     volatile bool firstRemoved;
     
     volatile bool m_abort;
@@ -156,7 +95,6 @@ private:
     GraphicsNode *centralNode;
     
     volatile bool m_restart;
-    
     
     //Internal structure to hold node animation points.
     struct NodeAnimation {
@@ -176,18 +114,7 @@ private:
     };
         
     QHash<GraphicsNode*, NodeAnimation> m_animations; 
-
-
 };
 
-
-
-
-
-
-
-
-
-
-
 #endif
+
