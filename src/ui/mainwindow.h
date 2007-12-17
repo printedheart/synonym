@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -39,7 +39,7 @@ class QModelIndex;
 class QCheckBox;
 
 /**
-    @author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs Melderis <sergey.melderis@gmail.com>
 */
 class MainWindow : public QMainWindow
 {
@@ -63,7 +63,6 @@ private:
     PartOfSpeechItemView *m_posViews[4];
     PartOfSpeechListModel *m_posModels[4];
     
-    
     PronunciationSoundHolder *m_soundHolder;
 private slots:
     void callLoadWord();
@@ -74,17 +73,33 @@ private slots:
     
     void dockWidgetVisibilityChanged();
     
-    void relationshipsChanged(int);
-
+    void slotBack();
+    void slotForward();
+    
+    void initCompleter();
+    
+    void createActions();
+    void createMenus();
+    
+    void showConfigDialog();
 private:
     WordGraph *m_currentGraph;    
     
     
-    void initCompleter();
+    
+    void configure();
+    
+    void setNewGraph(WordGraph *graph);
     
     QList<QPair<Relationship::Type, QCheckBox*> > m_relationshipCheckBoxes;
    
+    
+    
+    QMenu *fileMenu;
+    QMenu *m_settingsMenu;
 
+    QAction *quitAct;
+    QAction *m_settingsAct;
 };
 
 #endif
