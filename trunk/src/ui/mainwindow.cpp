@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -22,18 +22,17 @@
 #include "graphscene.h"
 #include "graphcontroller.h"
 #include "partofspeechitemdelegate.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 #include "worddataloader.h"
 #include "partofspeechlistmodel.h"
 #include "pronunciationsoundholder.h"
 #include "player.h"
 #include "wordnetutil.h"
 #include "relationship.h"
+#include "configdialog.h"
 
 #include <QtGui>
 #include <QtCore>
-#include <stdlib.h>
-#include <wn.h>
 
         
 MainWindow::MainWindow()
@@ -43,6 +42,7 @@ MainWindow::MainWindow()
     m_scene = scene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(-500, -600, 1000, 1200);
+    
     m_graphView = new QGraphicsView(scene, this);
     setCentralWidget(m_graphView);
 
@@ -52,26 +52,25 @@ MainWindow::MainWindow()
     m_graphView->setCacheMode(QGraphicsView::CacheBackground);
     m_graphView->setRenderHint(QPainter::Antialiasing);
     m_graphView->setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing);
+    m_graphView->setOptimizationFlag(QGraphicsView::DontClipPainter);
+    
     m_graphView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     m_graphView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     m_graphView->setResizeAnchor(QGraphicsView::AnchorViewCenter);
 
     QToolBar *toolBar = addToolBar("synonym");
+    
+    QPushButton *backButton = new QPushButton("Back", this);
+    QPushButton *forwardButton = new QPushButton("Forward", this);
+    toolBar->addWidget(backButton);
+    toolBar->addWidget(forwardButton);
+    connect (backButton, SIGNAL(clicked()), 
+             this, SLOT(slotBack()));
+    connect (forwardButton, SIGNAL(clicked()), 
+             this, SLOT(slotForward()));
+    
     m_wordLine = new QLineEdit(toolBar);
     toolBar->addWidget(m_wordLine);
-    
-    addToolBarBreak();
-    QToolBar *relationshipsToolBar = addToolBar("relatinships");
-    QList<Relationship::Type> relationships = Relationship::types();
-    foreach (Relationship::Type type, relationships) {
-        
-        QCheckBox *checkBox = new QCheckBox(Relationship::toString(type), relationshipsToolBar);
-        checkBox->setChecked(true);
-        m_relationshipCheckBoxes.append(qMakePair(type, checkBox));
-        relationshipsToolBar->addWidget(checkBox);
-        connect (checkBox, SIGNAL(stateChanged(int)), this, SLOT(relationshipsChanged(int)));
-    }
-    
 
     connect (m_wordLine, SIGNAL(returnPressed()),
             this, SLOT(callLoadWord()));
@@ -127,7 +126,10 @@ MainWindow::MainWindow()
             this, SLOT(playSound(const QString&)));
     
     
-   initCompleter();  
+   createActions();
+   createMenus();
+   //Zack's Rusin advice. http://developer.kde.org/documentation/other/mistakes.html
+   QTimer::singleShot(1000, this, SLOT(initCompleter()));
 }
 
 
@@ -147,9 +149,10 @@ void MainWindow::callLoadWord()
 void MainWindow::lookUpWordNet(const QString &word)
 {
     WordGraph *dataGraph = m_graphController->makeGraph(word);
-    m_currentGraph = dataGraph;
-    for (int i = 0; i < 4; i++)
-        m_posModels[i]->setDataGraph(dataGraph);
+    if (dataGraph) {
+        setNewGraph(dataGraph);
+    }
+    
 
   //  m_soundHolder->findPronunciation(word);
         
@@ -192,7 +195,8 @@ void MainWindow::nodeActivated(const QString &id)
 
 void MainWindow::initCompleter()
 {
-
+    configure();
+    //This could take a second or two to load.
     QStringList words = m_loader->words();   
     QCompleter *completer = new QCompleter(words, this);
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
@@ -214,14 +218,79 @@ void MainWindow::dockWidgetVisibilityChanged()
     m_graphController->setPoses(poses);
 }
 
-void MainWindow::relationshipsChanged(int)
+
+// This is not implemented yet.
+void MainWindow::configure()
 {
-    Relationship::Types relationships(0);
-    for (int i = 0; i < m_relationshipCheckBoxes.size(); i++) {
-        QPair<Relationship::Type, QCheckBox*> pair = m_relationshipCheckBoxes[i];
-        if (pair.second->isChecked()) {
-            relationships = relationships | pair.first;
+    WordGraphicsNode::setFont(QFont("Dejavu Sans", 8, QFont::Normal));
+    
+    
+    QSettings settings("http://code.google.com/p/synonym/", "synonym");
+    if (settings.childGroups().contains("relationships")) {
+        Relationship::Types userTypes;
+        settings.beginGroup("relationships");
+        QStringList keys = settings.childKeys();
+        
+        foreach (Relationship::Type type, Relationship::types()) {
+            QString typeString = Relationship::toString(type);
+            if (keys.contains(typeString) && settings.value(typeString).toBool()) {
+                userTypes |= type;
+            }
         }
+        settings.endGroup();
+        m_graphController->setRelationships(userTypes);
+    } else {
+        m_graphController->setRelationships(Relationship::allTypes());
     }
-    m_graphController->setRelationships(relationships);
+}
+
+void MainWindow::slotBack()
+{
+    WordGraph * graph = m_graphController->previousGraph();
+    if (graph)
+        setNewGraph(graph);
+}
+
+
+void MainWindow::slotForward()
+{
+    WordGraph * graph = m_graphController->nextGraph();
+    if (graph)
+        setNewGraph(graph);
+}
+
+void MainWindow::setNewGraph(WordGraph *graph)
+{
+    m_currentGraph = graph;
+    for (int i = 0; i < 4; i++)
+        m_posModels[i]->setDataGraph(graph);
+}
+
+void MainWindow::createMenus()
+{
+    fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(quitAct);
+    
+    m_settingsMenu = menuBar()->addMenu(tr("&Settings"));
+    m_settingsMenu->addAction(m_settingsAct);
+}
+
+void MainWindow::createActions()
+{
+    quitAct = new QAction(tr("&Quit"), this);
+    quitAct->setShortcut(tr("Ctrl+Q"));
+    quitAct->setStatusTip(tr("Quit the application"));
+    connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
+    
+    m_settingsAct = new QAction(tr("&Settings"), this);
+    m_settingsAct->setStatusTip(tr("Settings"));
+    connect(m_settingsAct, SIGNAL(triggered()), this, SLOT(showConfigDialog()));
+}
+
+void MainWindow::showConfigDialog()
+{
+    ConfigDialog dialog;
+    dialog.exec();
+    if (dialog.settingsChanged())
+        configure();
 }
