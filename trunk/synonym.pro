@@ -3,9 +3,7 @@ TEMPLATE = app
 
 INCLUDEPATH = . src src/ui src/model src/sound
 
-HEADERS = src/model/worddatagraph.h \
-        src/model/edge.h \
-        src/model/node.h \
+HEADERS = src/model/wordgraph.h \
         src/model/worddataloader.h \
         src/model/partofspeechlistmodel.h \
         src/ui/graphnode.h \
@@ -19,15 +17,18 @@ HEADERS = src/model/worddatagraph.h \
         src/ui/wordsoundholder.h \
         src/ui/wordsoundimpl.h \
         src/ui/layout.h \
+        src/ui/configdialog.h \
         src/sound/pronunciationsoundfactory.h \
         src/sound/pronunciationsoundholder.h  \
         src/sound/pronunciationsoundfactoryimpl.h \
-        src/sound/player.h
+        src/sound/player.h \
+        src/model/graphalgorithms.h \
+        src/model/wordnetutil.h \
+        src/model/relationship.h \
+ #        src/test/graphtest.h
+        
 
-
-SOURCES = src/model/worddatagraph.cpp \
-        src/model/edge.cpp \
-        src/model/node.cpp \
+SOURCES = src/model/wordgraph.cpp \
         src/model/worddataloader.cpp \
         src/model/partofspeechlistmodel.cpp \
         src/ui/graphnode.cpp \
@@ -36,21 +37,26 @@ SOURCES = src/model/worddatagraph.cpp \
         src/ui/graphcontroller.cpp \
         src/ui/graphwidget.cpp \
         src/ui/layout.cpp \
-        src/main.cpp \
         src/ui/mainwindow.cpp  \
         src/ui/partofspeechitemdelegate.cpp \
         src/ui/wordsoundholder.cpp \
         src/ui/wordsoundimpl.cpp \
+        src/ui/configdialog.cpp \
         src/sound/pronunciationsoundholder.cpp  \
         src/sound/pronunciationsoundfactoryimpl.cpp \
-        src/sound/player.cpp
+        src/sound/player.cpp \
+        src/model/relatiohship.cpp \
+        src/main.cpp 
+ 
+#        src/test/graphtest.cpp 
 
 CONFIG += warn_on \
-      thread \
-          qt \
+      qt \
       debug \
-      exceptions \
-      rtti
+      rtti \
+#      release 
+#qtestlib
+
 TARGET = bin/synonym
 
 
@@ -59,7 +65,7 @@ xml \
 network \
 gui \
 svg
-CONFIG -= release
+#CONFIG -= release
 
 DESTDIR = .
 
