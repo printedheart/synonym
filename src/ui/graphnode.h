@@ -34,6 +34,7 @@ class QPointF;
 class WordGraph;
 
 
+
 /**
     @author Sergejs <sergey.melderis@gmail.com>
 */
@@ -41,7 +42,10 @@ class GraphicsNode : public QGraphicsItem
 {
 public:
     GraphicsNode(const QString &id, WordGraph *graph);
+    GraphicsNode(const GraphicsNode &o);
     virtual ~GraphicsNode();
+    
+    virtual GraphicsNode *clone() const = 0;
     
     friend class WordGraph;
     friend class GraphicsEdge;
@@ -97,7 +101,10 @@ class WordGraphicsNode : public GraphicsNode
 {
 public:
     WordGraphicsNode(const QString &id, WordGraph *graph);
+    WordGraphicsNode(const WordGraphicsNode &o);
     virtual ~WordGraphicsNode();
+    
+    virtual WordGraphicsNode *clone() const;
 
     int type() const { return PhraseType; }
     
@@ -108,11 +115,13 @@ public:
     bool advance();
 
     void showSoundButton();
+    
+    static void setFont(QFont font);
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    QFont m_font;
+    static QFont m_font;
     QPointF m_mousePressPos;
 };
 
@@ -120,7 +129,10 @@ class MeaningGraphicsNode : public GraphicsNode
 {
 public:
     MeaningGraphicsNode(const QString &id, WordGraph *graph);
+    MeaningGraphicsNode(const MeaningGraphicsNode &other);
     virtual ~MeaningGraphicsNode();
+    
+    virtual MeaningGraphicsNode *clone() const;
     
     static void setRadius(int radius) { m_radius = radius; }
     

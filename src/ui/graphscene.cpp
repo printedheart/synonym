@@ -58,8 +58,9 @@ void GraphScene::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
     
-    if (!m_enableLayout)
+    if (!m_enableLayout) {
         return;
+    }
     layout();
 }
 
@@ -103,15 +104,16 @@ QList<GraphicsEdge*> GraphScene::graphEdges()
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    QGraphicsScene::mouseReleaseEvent(mouseEvent);
+    
     m_timerInterval = 10;
-    if (m_timerId >= 1) {
+    if (m_timerId) {
         killTimer(m_timerId);
         m_timerId = 0;
     }
     
-    itemMoved();
     m_restartLayout = false;
+    itemMoved();
+    QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
 void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)

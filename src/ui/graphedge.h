@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -27,7 +27,7 @@
 class GraphicsNode;
 class WordGraph;
 /**
-    @author Sergejs <sergey.melderis@gmail.com>
+    @author Sergejs Melderis <sergey.melderis@gmail.com>
 */
 
 
@@ -37,6 +37,14 @@ class GraphicsEdge : public QGraphicsItem
 public:
     GraphicsEdge(const QString &id, GraphicsNode *source, 
                  GraphicsNode *dest, WordGraph *graph);
+    
+    GraphicsEdge(const GraphicsEdge &o);
+    
+    /**
+     * Creates a clone of the given edge.
+     */ 
+    GraphicsEdge * clone() const;
+    
     virtual ~GraphicsEdge();
     
     friend class WordGraph;
@@ -49,9 +57,13 @@ public:
     GraphicsNode* source() const;
     GraphicsNode* dest() const;
     
+    /**
+     * Returns a node adjacent to the given node, 
+     * or null if node is not either source od destination.
+     */
     GraphicsNode* adjacentNode(GraphicsNode *node) const;
     
-    bool directed() const;
+    //bool directed() const;
     
     void setRelationship(Relationship::Type type);
     Relationship::Type relationship() const;
@@ -61,6 +73,9 @@ public:
     enum { Type = UserType + 111 };
     int type() const { return Type; }
     
+    /**
+     * Adjusts edge position based on the position of source and destination nodes.
+     */
     void adjust();
     
     virtual QPainterPath shape() const;
