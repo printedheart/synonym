@@ -231,8 +231,9 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
             if (node->advance())
                 itemsMoved = true;
     }
+    //qDebug() << (itemsMoved ? "moved " : " ") << (m_animations.constBegin()->pointCount() > 0 ? "points" : "  ") << (isRunning() ? " running " : " " );
 
-    return itemsMoved || m_animations.constBegin()->pointCount() > 0 ||  isRunning();
+    return itemsMoved || m_animations.constBegin()->pointCount() > 0 ||   isRunning();
     
 }
 
@@ -260,6 +261,7 @@ void ForceDirectedLayout::run()
                 foreach (NodeAnimation animation, m_animations) {
                     animation.reset();
                 }
+                qDebug() << "finished run";
                 m_aborted.wakeAll();
                 m_abortMutex.unlock();
                 return;
@@ -291,8 +293,8 @@ void ForceDirectedLayout::run()
         foreach (GraphicsEdge *edge, m_edges) {
             GraphicsNode *source = edge->source();
             GraphicsNode *dest = edge->dest();
-            if (!source || !dest)
-                continue;
+//             if (!source || !dest)
+//                 continue;
 
             NodeAnimation &sourceAnimation = m_animations[source];
             NodeAnimation &destAnimation = m_animations[dest];
@@ -421,9 +423,9 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
         
     QGraphicsScene *scene = nodes.first()->scene();
     QRectF sceneRect = scene->sceneRect();
-    QList<GraphicsNode*>::const_iterator iter;
-    for (iter = nodes.constBegin(); iter != end; iter++) {
-        GraphicsNode *node = *iter;
+    
+    
+    foreach (GraphicsNode *node, nodes) {
         if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
             continue;
         }
@@ -439,9 +441,9 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
     }
 
     bool itemsMoved = false;
-    for (iter = nodes.constBegin(); iter != end; iter++) {    
-        if (scene->mouseGrabberItem() != *iter)
-            if ((*iter)->advance())
+    foreach (GraphicsNode *node, nodes) {
+        if (scene->mouseGrabberItem() != node)
+            if (node->advance())
                 itemsMoved = true;
     }
 

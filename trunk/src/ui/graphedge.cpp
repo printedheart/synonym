@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -35,17 +35,30 @@ GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
     
     QColor c;
     c.setHsv(0, 0, 140);
-    m_pen = QPen(c, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin);
+    m_pen = QPen(c, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin); 
     
     setAcceptsHoverEvents(true);
     m_type = Relationship::Undefined;
 }
         
 
+GraphicsEdge::GraphicsEdge(const GraphicsEdge &o)
+    : QGraphicsItem(),  m_id(o.id()), m_source(o.source()), m_dest(o.dest()), 
+      m_graph(o.graph()), 
+      m_connector(0), m_pointer(0), m_toolTip(0),
+      m_pen(o.m_pen), m_type(o.relationship())                    
+{
+    setAcceptsHoverEvents(true);
+}
 
 GraphicsEdge::~GraphicsEdge()
 {
     // QGraphicsItem claims to delete all its children
+}
+
+GraphicsEdge * GraphicsEdge::clone() const
+{
+    return new GraphicsEdge(*this);
 }
 
 QString GraphicsEdge::id() const
@@ -81,9 +94,6 @@ GraphicsNode* GraphicsEdge::adjacentNode(GraphicsNode *node) const
 
 void GraphicsEdge::adjust()
 {
-    if (!m_source || !m_dest)
-        return;
-
     qreal nodeRadius = 5.0;
     QLineF line(mapFromItem(m_source, 0, 0), mapFromItem(m_dest, 0, 0));
     qreal length = line.length();
@@ -102,10 +112,6 @@ void GraphicsEdge::adjust()
 
 QPainterPath GraphicsEdge::shape() const
 {
-   if (!m_source || !m_dest) {
-       return QGraphicsItem::shape();
-   }
-    
    //shape() is used for mouse hover events. 
    //We want to make the region a little wider then the line.
    QLineF line(m_sourcePoint, m_destPoint);
@@ -131,9 +137,6 @@ QPainterPath GraphicsEdge::shape() const
 
 QRectF GraphicsEdge::boundingRect() const
 {
-    if (!m_source || !m_dest)
-        return QRectF();
-
     qreal penWidth = 1;
     qreal extra = (penWidth) / 2.0;
 
@@ -146,21 +149,9 @@ QRectF GraphicsEdge::boundingRect() const
 
 void GraphicsEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
 {
-    if (!m_source || !m_dest)
-        return;
-    
     QLineF line(m_sourcePoint, m_destPoint);
     painter->setPen(m_pen);
     painter->drawLine(line);
-    
-//     if (relationship() == Relationship::Hypernym) {
-//         QPen pen(m_pen);
-//         pen.setStyle(Qt::SolidLine);
-//         painter->setPen(pen);
-//         QPolygonF triangle;
-//         triangle << QPointF(-7.0, 0.0) << QPointF(7.0, 0.0) << QPointF(0.0, 10.0) << QPointF(-7.0, 0.0);
-//         painter->drawPolygon(triangle);
-//     }
 }
 
 void GraphicsEdge::setPen(QPen pen)
@@ -259,16 +250,10 @@ void GraphicsEdge::adjustToolTipPos()
     toolTipPos.setY(toolTipPos.y() - 20);
     m_toolTip->setPos(mapFromScene(toolTipPos));
         
-        
-        
     QPointF pointerPos;
     pointerPos.setY(toolTipPos.y() + m_toolTip->path().boundingRect().height() / 2);
     pointerPos.setX(toolTipPos.x());
-        
     m_pointer->setLine(middle.x(), middle.y(), pointerPos.x(), pointerPos.y());
-    
-    
-    
     m_connector->setPos(m_pointer->mapFromParent(middle));
 }
 

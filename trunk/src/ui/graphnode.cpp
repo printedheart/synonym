@@ -18,13 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "graphnode.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 #include "wordnetutil.h"
 #include "graphedge.h"
 #include "graphscene.h"        
 #include <QtGui>
 #include <QtSvg>
-#include <cmath> 
+#include <cmath>
                 
                 
 #include "graphalgorithms.h"                
@@ -40,6 +40,17 @@ GraphicsNode::GraphicsNode(const QString &id, WordGraph *graph)
 GraphicsNode::~GraphicsNode()
 {
 }
+
+GraphicsNode::GraphicsNode(const GraphicsNode &o)
+    : m_id(o.id()), m_graph(o.graph()), m_mass(o.mass()), m_edges(o.edges())
+{
+    setPos(o.pos());
+    setFlags(o.flags());
+    setCursor(o.cursor());
+    setData(LEVEL, o.data(LEVEL));
+}
+
+
 
 QString GraphicsNode::id() const
 {
@@ -74,11 +85,7 @@ WordGraph * GraphicsNode::graph() const
 bool GraphicsNode::advance()
 {
     qreal tolerance = 0.1;
-//     if (neighbors().size() > 10)
-//         tolerance = 3.0;
-//     if (neighbors().size() > 12)
-//         tolerance = 5.0;
-    if (qAbs(m_newPos.x() - pos().x()) > tolerance || qAbs(m_newPos.y() - pos().y()) > tolerance) {
+    if (qAbs(m_newPos.x() - pos().x()) > tolerance && qAbs(m_newPos.y() - pos().y()) > tolerance) {
         setPos(m_newPos);
         return true;
     }
@@ -92,6 +99,9 @@ void GraphicsNode::setNewPos(QPointF newPos)
 
 QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &value)
 {
+    if (!scene())
+        return value;
+    
     switch (change) {
         case ItemPositionChange:
             foreach (GraphicsEdge *edge, m_edges) {
@@ -109,12 +119,12 @@ QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &val
 
 void GraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mouseReleaseEvent(event);
     if (event->button() == Qt::LeftButton) {
         if (event->buttonDownScenePos(Qt::LeftButton) == event->scenePos()) {
             graphScene()->signalClickEvent(this);
         }
     }
+    QGraphicsItem::mouseReleaseEvent(event);
  
 }
 
@@ -129,6 +139,7 @@ GraphScene * GraphicsNode::graphScene() const
 }
         
 
+QFont WordGraphicsNode::m_font = QFont();
 
 /**
     WordGraphicsNode definition
@@ -137,7 +148,18 @@ WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
     :GraphicsNode(id, graph)
 {
     setZValue(2);
-    m_font = QFont("Dejavu Sans", 8, QFont::Normal);
+    
+}
+
+WordGraphicsNode::WordGraphicsNode(const WordGraphicsNode &o)
+    : GraphicsNode(o) 
+{        
+    setData(WORD, o.data(WORD));
+}
+
+WordGraphicsNode * WordGraphicsNode::clone() const
+{
+    return new WordGraphicsNode(*this);
 }
 
 WordGraphicsNode::~WordGraphicsNode()
@@ -221,6 +243,13 @@ void WordGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mousePressEvent(event);
 }
 
+void WordGraphicsNode::setFont(QFont font)
+{
+    m_font = font;
+}
+
+
+
 
 
 
@@ -240,8 +269,23 @@ MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
     setAcceptsHoverEvents(true);        
 }
 
+MeaningGraphicsNode::MeaningGraphicsNode(const MeaningGraphicsNode &o)
+    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0)
+{
+    setZValue(1);
+    setAcceptsHoverEvents(true);
+    setData(POS, o.data(POS));
+    setData(MEANING, o.data(MEANING));
+}
+
 MeaningGraphicsNode::~MeaningGraphicsNode()
 {
+}
+
+
+MeaningGraphicsNode * MeaningGraphicsNode::clone() const
+{
+    return new MeaningGraphicsNode(*this);
 }
 
 
