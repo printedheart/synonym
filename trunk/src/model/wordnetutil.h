@@ -22,7 +22,7 @@
 #define _WORDNETUTIL_H_
 
 #include "relationship.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 
 const int POS            = 111;
 const int MEANING        = 222;
@@ -138,7 +138,7 @@ public:
             }
         }            
         
-        
+                     
         
         if (level == 3 && IsWord() (node)) {
             for (iter = neighbors.constBegin(); iter != end; ++iter) {
@@ -165,6 +165,19 @@ public:
         }
         return false;
     }
+};
+
+
+class MeaningVisualFilter
+{
+public:
+    bool operator() (Node *node) {
+        int level = node->data(LEVEL).toInt();
+        if (level >= 3) return false;
+        if (level == 2 && IsMeaning() (node)) return false;
+        return true;
+    }
+            
 };
 
 

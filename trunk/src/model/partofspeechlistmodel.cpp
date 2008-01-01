@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "partofspeechlistmodel.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 #include "wordnetutil.h"
 #include "graphalgorithms.h"
 
@@ -37,18 +37,18 @@ PartOfSpeechListModel::~PartOfSpeechListModel()
 void PartOfSpeechListModel::setDataGraph(WordGraph *dataGraph)
 {
     if (m_dataGraph && m_dataGraph != dataGraph) {
-        disconnect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
+        disconnect(m_dataGraph, SIGNAL(changed()),
                 this, SLOT(reload()));
-        disconnect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
+        disconnect(m_dataGraph, SIGNAL(changed()),
                 this, SLOT(reload()));
     }
 
     if (m_dataGraph == 0 || m_dataGraph != dataGraph) {
         m_dataGraph = dataGraph;
     
-        connect(m_dataGraph, SIGNAL(nodeAdded(Node *)),
+        connect(m_dataGraph, SIGNAL(changed()),
                 this, SLOT(reload()));
-        connect(m_dataGraph, SIGNAL(nodeRemoved(const QString &)),
+        connect(m_dataGraph, SIGNAL(changed()),
                 this, SLOT(reload()));
     }
     reload();

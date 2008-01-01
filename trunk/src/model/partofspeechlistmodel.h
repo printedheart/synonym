@@ -21,7 +21,7 @@
 #define NOUNLISTMODEL_H
 
 #include "relationship.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 
 #include <QAbstractListModel>
 #include <QStringList>

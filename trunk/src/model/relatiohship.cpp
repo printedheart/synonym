@@ -24,7 +24,7 @@
 
 QString Relationship::toString(Type type, int pos)
 {
-    static QString descriptions[SIZE] = 
+    static QString labels[SIZE] = 
     { 
         "undefined",
         "antonym",
@@ -47,8 +47,9 @@ QString Relationship::toString(Type type, int pos)
         "attribute",
         "verb group", 
         "derivation", 
+        "domain ",
         "domain",
-        "domain"
+        "synonym"
     };
     
     if (pos != 0) {
@@ -63,7 +64,7 @@ QString Relationship::toString(Type type, int pos)
     
     for (int i = 0; i < SIZE; i++) {
         if (typesArray[i] == type) {
-            return descriptions[i];
+            return labels[i];
         }
     }
    
@@ -94,8 +95,8 @@ const Relationship::Type Relationship::typesArray[SIZE] =
     VerbGroup,
     Derivation,
     Classification,
-    Class
-            
+    Class,
+    Syns        
             
 };
 
@@ -126,7 +127,7 @@ int Relationship::toSearchType(Type type) {
 const Relationship::Types Relationship::NounTypes = Types(Hypernym | Antonym | Hyponym | Holonym | IsPart | IsMember | IsStuff | Meronym | HasStuff | HasMember | HasPart | Classification | Attribute | Class); 
 const Relationship::Types Relationship::VerbTypes = Types(Hypernym | Antonym | Entailment | Cause | Classification | VerbGroup | Hyponym);
 const Relationship::Types Relationship::AdjectiveTypes = Types(Similar | Antonym | Pertains | Attribute | Classification);
-const Relationship::Types Relationship::AdverbTypes = Types(Antonym | Pertains | Classification | Derivation);       
+const Relationship::Types Relationship::AdverbTypes = Types(Syns | Antonym | Pertains | Classification | Derivation);       
 
 Relationship::Types Relationship::typesForPos(int pos)
 {

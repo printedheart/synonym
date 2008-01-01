@@ -102,23 +102,11 @@ void levelOrderScan(V *vertex, Function function)
     }
 }
 
-        
-template <class V, class Function>
-void levelVisit(V *vertex, int level, Function function, QSet<V*> &visitSet)
-{
-    level++;
-    function(vertex, level);
-    visitSet.insert(vertex);
-    QList<V*> neighbors;
-    findNeighbors(vertex, vertex->edges().constBegin(), vertex->edges().constEnd(), neighbors);
-    int size = neighbors.size();
-    for (int i = 0; i < size; ++i) {   
-        if (!visitSet.contains(neighbors[i])) 
-            levelVisit(neighbors[i], level, function,  visitSet);
-    }
-}
 
-        
+
+
+
+
 
     
             
