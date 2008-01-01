@@ -57,7 +57,9 @@ public:
         VerbGroup        = 0x1000000,
         Derivation       = 0x2000000,
         Classification   = 0x4000000,
-        Class            = 0x10000000
+        Class            = 0x10000000,
+        Syns             = 0x20000000
+                
     };
     
     Q_DECLARE_FLAGS(Types, Type)
@@ -99,7 +101,7 @@ public:
     static Type symmetricTo(Type type);
     
 private:    
-    static const int SIZE = 23;    
+    static const int SIZE = 24;    
     static const Type typesArray[SIZE];
     
 };

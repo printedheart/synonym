@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "worddataloader.h"
-#include "worddatagraph.h"
+#include "wordgraph.h"
 #include "graphnode.h"
 #include "graphedge.h"
 #include <QtCore>                  
@@ -36,6 +36,10 @@ WordDataLoader::~WordDataLoader()
 {
 }
 
+// I don't understand C WordNet API.
+// The best would be to rewrite it in C++.
+// Jawbone can be used for inspiration. 
+// http://mfwallace.googlepages.com/jawbone.html
 WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relationship::Types searchTypes) 
 {
     static const Relationship::Types useThis(
@@ -53,7 +57,8 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
     WordGraph *wordGraph = new WordGraph();
     Node *wordNode = wordGraph->addNode(searchWord, wordFactory);
     wordNode->setData(WORD, searchWord);
-    SynsetPtr synsetToFree;
+    
+    QList<SynsetPtr> createdSynsets;
     
     QList<Relationship::Type> allTypesList = Relationship::types();
     for (int pos = 1; pos <= NUMPARTS; pos++) {
@@ -62,12 +67,18 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
             if (!Relationship::typesForPos(pos).testFlag(searchType) || !searchTypes.testFlag(searchType))
                 continue;
                 
+            
+            unsigned int defined = is_defined(searchWord.toLatin1().data(), pos);
             int wnSearchType = Relationship::toSearchType(searchType);
+            
+            if (!(defined & bit(wnSearchType))) 
+                continue;
+            
             SynsetPtr synset = findtheinfo_ds(searchWord.toLatin1().data(),
                                             pos, wnSearchType, ALLSENSES);
-            synsetToFree = synset;
+            createdSynsets.append(synset);
             
-            qDebug() << Relationship::toString(searchType, pos);
+            qDebug() << Relationship::toString(searchType, pos) << " " << pos;
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
@@ -84,6 +95,9 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                             
                     }
                 }
+                if (!synset->ptrtyp)
+                    break;
+                
                 Relationship::Type parentSynsetType = Relationship::toType(*synset->ptrtyp);
                 synset = synset->ptrlist;
                 while (synset) {
@@ -123,9 +137,9 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                                 edge->setRelationship(parentSynsetType); 
                             
                             
-                            else if (Relationship::applies(synsetType, meaning->data(POS).toInt()))
+                            else if (Relationship::applies(synsetType, meaning2->data(POS).toInt()))
                                 edge->setRelationship(synsetType);
-                            else if (Relationship::applies(parentSynsetType, meaning->data(POS).toInt()))
+                            else if (Relationship::applies(parentSynsetType, meaning2->data(POS).toInt()))
                                 edge->setRelationship(parentSynsetType);
                             else 
                                 edge->setRelationship(searchType);
@@ -145,9 +159,20 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                 synset = nextSynset;
             }
         }
+        
     }
-//    free_syns(synsetToFree);
     
+    foreach (SynsetPtr synset, createdSynsets) 
+        free_syns(synset);
+    
+    
+    
+    //If there is only one node, meaning that is the central node
+    //we put before doing any search, then we did not find anything.
+    if (wordGraph->nodes().size() == 1) {
+        delete wordGraph;
+        wordGraph = 0;
+    }
     return wordGraph;
 }
 

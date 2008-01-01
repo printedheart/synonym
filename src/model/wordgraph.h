@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs   *
- *   sergey.melderis@gmail.com   *
+ *   Copyright (C) 2007 by Sergejs Melderis                                *
+ *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -26,15 +26,17 @@
 #include <QtCore>
 
 /**
-        @author Sergejs <sergey.melderis@gmail.com>
+  @author Sergejs Melderis <sergey.melderis@gmail.com>
  */
 
 
 /*
+    
     I am using typedefs here because application can be potentially extended 
     to 3D graphs, using OpenGL. The graph itself should not care about actual
     implementation of nodes. These typedefs can be replaced by abstract classes
-    so the graph code does not change. Perhaps there is better way to do it.
+    so the graph code does not change. Perhaps there is better way to do it, 
+    and 
 */
 typedef GraphicsNode Node;
 typedef GraphicsEdge Edge;
@@ -81,7 +83,13 @@ class WordGraph : public QObject
 Q_OBJECT
 public:
     WordGraph(QObject *parent = 0);
+    WordGraph(const WordGraph &o);
     ~WordGraph();
+    
+    /**
+     * Creates a complete clone of this graph.
+     */
+    WordGraph * clone() const;
    
     /**
      * Creates new node using the specified NodeFactory and returns it.
@@ -98,9 +106,12 @@ public:
      * Enables the gived node. If node is not in the graph the function does nothing.
      */
     void enableNode(Node *node);
-    void removeNode(const QString &nodeId);
-    void removeNode(Node *node);
     
+    //TODO Implement methods if we need them.
+    //void removeNode(const QString &nodeId);
+    //void removeNode(Node *node);
+    //void removeEdge(const QString &edgeId);
+    //void removeEdge(Edge *edge);    
     
     /**
      * Restores the originaly created graph by enabling all nodes and edges.
@@ -135,8 +146,6 @@ public:
      */
     void enableEdge(Edge *edge); 
     
-    void removeEdge(const QString &edgeId);
-    void removeEdge(Edge *edge);
 
     /**
      * Cleares all nodes and edges.
@@ -156,10 +165,10 @@ public:
     Node* centralNode() const;
     void setCentralNode(const QString &nodeId);
     
+    void setEnabledSignals(bool enabled);
+    
 signals:
-    void nodeAdded(Node *node);
-    void nodeRemoved(const QString &nodeId);
-    void edgeAdded(Edge *edge);
+    void changed();    
     
 private:
     QHash<QString, Node*> m_nodes;
@@ -168,9 +177,12 @@ private:
     typedef QHash<QString, Node*>::const_iterator ConstNodeIterator;
     typedef QHash<QString, Edge*>::iterator EdgeIterator;
     typedef QHash<QString, Edge*>::const_iterator ConstEdgeIterator;
-    QHash<QString, Node*> m_disabledNodes;
+    QSet<QString> m_disabledNodes;
     QSet<QString> m_disabledEdges;
     QString m_centralNodeId;
+    
+    bool m_signalsEnabled;
+    void signalChange();
     
    
 };
