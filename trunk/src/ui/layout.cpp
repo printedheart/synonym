@@ -35,6 +35,7 @@ ForceDirectedLayout::ForceDirectedLayout()
 
 void ForceDirectedLayout::wakeUp()
 {
+    finishedLayout = true;
     m_aborted.wakeAll();
 }
 
@@ -53,22 +54,20 @@ static bool needsPreLayout(GraphicsNode *rootNode)
     return false;
 }
 
-
-static void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
+static void layoutNodes(GraphicsNode *node,
                         QSet<GraphicsNode*> &visitSet)
 {
-    QSet<GraphicsEdge*> edges = node->edges();
-    QSet<GraphicsNode*> neighbors = node->neighbors();
+    QSet<GraphicsNode*> neighbors = node->outNeighbors();
     
     QList<GraphicsNode*> children;
     foreach (GraphicsNode *neighbor, neighbors) {
-        if (neighbor != parentNode && !visitSet.contains(neighbor) && neighbor->scene())
+        if (!visitSet.contains(neighbor) && neighbor->scene())
             children.append(neighbor);
     }
     
     double angleIncrement;
     double phi = 0.0;
-    if (!parentNode) {
+    if (node->graphScene()->centralNode() == node) {
         angleIncrement = TWO_PI / children.size();
         phi = 0.0;
     } else {
@@ -91,9 +90,10 @@ static void layoutNodes(GraphicsNode *node, GraphicsNode *parentNode,
     }
 
     foreach (GraphicsNode *child, children) {
-        layoutNodes(child, node, visitSet);
+        layoutNodes(child, visitSet);
     } 
 }
+
 
 
 // This helper method greatly speeds up the layouting algorithm by 
@@ -104,7 +104,7 @@ static void preLayout(GraphicsNode *rootNode)
     rootNode->setPos(0.0, 0.0);
     rootNode->setFlag(QGraphicsItem::ItemIsMovable, false);
     QSet<GraphicsNode*> visitSet;
-    layoutNodes(rootNode, 0, visitSet); 
+    layoutNodes(rootNode, visitSet); 
 }
 
 
@@ -201,8 +201,9 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
     } 
     
     
-    if (m_animations.constBegin()->pointCount() < 10 && !finishedLayout)
+    if (m_animations.constBegin()->pointCount() < 10 && !finishedLayout) {
         return true;
+    }
     
     m_mutex.lock();
     
@@ -456,7 +457,7 @@ void ForceDirectedLayout::startThread()
     if (!isRunning()) {
         finishedLayout = false;
         m_abort = false;
-        start(QThread::LowestPriority);
+        start(QThread::HighestPriority);
         //  We want to get some points as soon as possible
         QThread::currentThread()->usleep(10000);
     }
