@@ -170,3 +170,4 @@ Relationship::Type Relationship::symmetricTo(Type type)
         default: return Undefined;
     }
 }
+

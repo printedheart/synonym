@@ -91,6 +91,7 @@ public:
      */
     static QString toString(Type type, int pos = 0);
     
+    
     /**
      * Returns a list of all possible relationships.
      */
