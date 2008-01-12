@@ -161,7 +161,7 @@ WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
 }
 
 WordGraphicsNode::WordGraphicsNode(const WordGraphicsNode &o)
-    : GraphicsNode(o) , m_font(m_font)
+    : GraphicsNode(o) , m_font(o.m_font)
 {        
     setData(WORD, o.data(WORD));
 }
@@ -286,7 +286,7 @@ MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
 }
 
 MeaningGraphicsNode::MeaningGraphicsNode(const MeaningGraphicsNode &o)
-    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), m_boundingRect(o.m_boundingRect)
+    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), m_boundingRect(o.m_boundingRect), m_radius(o.m_radius)
 {
     setZValue(1);
     setAcceptsHoverEvents(true);
