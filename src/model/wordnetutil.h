@@ -167,6 +167,51 @@ public:
     }
 };
 
+class VisualFilterForDFS
+{
+public:    
+    
+    void operator() (Node *node, Node *prev) {
+        int level = node->data(LEVEL).toInt();
+        if (level == 0 || disabledNodes.contains(node)) 
+            return;
+        
+        if (disabledNodes.contains(prev)) {
+            disabledNodes.insert(node);
+        } else {
+            int level = node->data(LEVEL).toInt();
+            QSet<GraphicsNode*> outNeighbors = node->outNeighbors();
+            if (level == 1) {
+                QSet<Node*> meanings;
+                QSet<Node*> words;
+                filter(outNeighbors.constBegin(), outNeighbors.constEnd(), meanings, IsMeaning());
+                filter(outNeighbors.constBegin(), outNeighbors.constEnd(), words, IsWord());
+                if (words.size() > 0) {
+                    disabledNodes.unite(meanings);
+                } else {
+                    Node *lnn = *outNeighbors.constBegin();
+                    foreach (Node *n, outNeighbors) {
+                        if (n->outNeighbors().size() > lnn->outNeighbors().size()) 
+                            lnn = n;
+                    }               
+                    disabledNodes.unite(outNeighbors);
+                    disabledNodes.remove(lnn);
+                }
+                
+            } else if (level == 2) {
+                if (outNeighbors.size() > 15) {
+                    disabledNodes.unite(outNeighbors);
+                }
+            } else {
+                disabledNodes.unite(outNeighbors);
+            }
+        }
+    }
+    
+    QSet<GraphicsNode*> disabledNodes;
+};
+
+
 
 class MeaningVisualFilter
 {
