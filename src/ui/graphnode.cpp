@@ -70,6 +70,16 @@ QSet<GraphicsNode*> GraphicsNode::neighbors() const
     return set;    
 }
 
+QSet<GraphicsNode*> GraphicsNode::outNeighbors() const
+{
+    QSet<GraphicsNode*> set; 
+    foreach (GraphicsEdge *edge, m_edges) {
+        if (edge->source() == this)
+            set << edge->dest();
+    }
+    return set;
+}
+
 
 unsigned int GraphicsNode::degree() const
 {
@@ -84,7 +94,7 @@ WordGraph * GraphicsNode::graph() const
 
 bool GraphicsNode::advance()
 {
-    qreal tolerance = 0.1;
+    qreal tolerance = 0.05;
     if (qAbs(m_newPos.x() - pos().x()) > tolerance && qAbs(m_newPos.y() - pos().y()) > tolerance) {
         setPos(m_newPos);
         return true;
@@ -139,20 +149,19 @@ GraphScene * GraphicsNode::graphScene() const
 }
         
 
-QFont WordGraphicsNode::m_font = QFont();
+QFont WordGraphicsNode::s_font = QFont();
 
 /**
     WordGraphicsNode definition
 */
 WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph)
+    :GraphicsNode(id, graph), m_font(s_font)
 {
     setZValue(2);
-    
 }
 
 WordGraphicsNode::WordGraphicsNode(const WordGraphicsNode &o)
-    : GraphicsNode(o) 
+    : GraphicsNode(o) , m_font(m_font)
 {        
     setData(WORD, o.data(WORD));
 }
@@ -174,33 +183,44 @@ QPainterPath WordGraphicsNode::shape() const
 }
 
 QRectF WordGraphicsNode::boundingRect() const
-{   
-    QFont font = m_font;
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
-        font.setPointSize(m_font.pointSize() * 1.5);
-    QFontMetrics metrics(font);
-    QRectF rect = metrics.boundingRect(data(WORD).toString());
+{
+    if (m_rectf.isNull() || qAbs(pos().x() - m_prevPos.x()) > 2.0) {
+        const_cast<WordGraphicsNode*>(this)->calculateBoundingRect();    
+    }  
+    if (m_font != s_font) {
+        const_cast<WordGraphicsNode*>(this)->m_font = s_font;
+        const_cast<WordGraphicsNode*>(this)->calculateBoundingRect();    
+    }
+    return m_rectf;
+}
+
+void WordGraphicsNode::calculateBoundingRect()
+{
         
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable) || edges().size() == 0)
-        return rect.translated(- rect.width() / 2, rect.height() / 8);
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable)) {
+        QFont font = m_font;
+        font.setPointSize(m_font.pointSize() * 1.5);
+        QFontMetrics metrics(font);
+        QRectF rect = metrics.boundingRect(data(WORD).toString());    
+        m_rectf = rect.translated(- rect.width() / 2, rect.height() / 8);
+    } else {
+        QFontMetrics metrics(m_font);
+        QRectF rect = metrics.boundingRect(data(WORD).toString());    
+        GraphicsEdge *edge = *(edges().begin());
+        GraphicsNode *other = edge->adjacentNode(this);
     
-    GraphicsEdge *edge = *(edges().begin());
-    GraphicsNode *other = 0;
-    if (edge->source() != this)
-        other = edge->source();
-    else
-        other = edge->dest();
-    
-    qreal angle = atan2(other->mapFromScene(pos()).y(), other->mapFromScene(pos()).x());
-    qreal width = rect.width();
-    qreal dx = -width / 2 + (width / 2) * cos(angle); 
-    
-    qreal dy = 0.0;
-    if (angle > 0)
-        dy = (rect.height() / 3) * sin(angle);  
-    
-    rect.translate(dx, dy);
-    return rect;
+        qreal angle = atan2(other->mapFromScene(pos()).y(), other->mapFromScene(pos()).x());
+        qreal width = rect.width();
+        qreal dx = -width / 2 + (width / 2) * cos(angle); 
+        
+        qreal dy = 0.0;
+        if (angle > 0)
+            dy = (rect.height() / 3) * sin(angle);  
+        
+        rect.translate(dx, dy);
+        m_rectf = rect;
+        m_prevPos = pos();        
+    }
 }
 
 void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
@@ -245,13 +265,8 @@ void WordGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void WordGraphicsNode::setFont(QFont font)
 {
-    m_font = font;
+    s_font = font;
 }
-
-
-
-
-
 
 
 /**
@@ -260,17 +275,18 @@ void WordGraphicsNode::setFont(QFont font)
 
 static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
 
-int MeaningGraphicsNode::m_radius  = 5;
+int MeaningGraphicsNode::s_radius  = 5;
 
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0)
+    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0), m_radius(s_radius)
 {
     setZValue(1);
     setAcceptsHoverEvents(true);        
+    calculateBoundingRect();
 }
 
 MeaningGraphicsNode::MeaningGraphicsNode(const MeaningGraphicsNode &o)
-    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0)
+    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), m_boundingRect(o.m_boundingRect)
 {
     setZValue(1);
     setAcceptsHoverEvents(true);
@@ -290,11 +306,10 @@ MeaningGraphicsNode * MeaningGraphicsNode::clone() const
 
 
 QRectF MeaningGraphicsNode::boundingRect() const
-{        
-    qreal adjust = 3;
-    return QRectF(
-                  -m_radius - adjust, -m_radius - adjust,
-                   m_radius * 2 + adjust * 2, m_radius * 2 + adjust * 2);
+{
+    if (m_radius != s_radius) 
+        const_cast<MeaningGraphicsNode*>(this)->calculateBoundingRect();        
+    return m_boundingRect;
 }
 
 
@@ -444,4 +459,13 @@ void MeaningGraphicsNode::adjustToolTipPos()
 {
     
 }
+
+void MeaningGraphicsNode::calculateBoundingRect()
+{
+    qreal adjust = 3;
+    m_boundingRect = QRectF(
+                            -m_radius - adjust, -m_radius - adjust,
+                            m_radius * 2 + adjust * 2, m_radius * 2 + adjust * 2); 
+}
+
 
