@@ -81,6 +81,8 @@ private:
     QList<WordGraph*> m_backHistory;
     QList<WordGraph*> m_forwardHistory;
     
+    void filterGraphNodes();
+    
     void assertGraphConnectivityToNode(Node *node);
     
     
