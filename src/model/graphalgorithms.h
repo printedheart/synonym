@@ -41,6 +41,10 @@ void findNeighbors(V *vertex, Iter start, Iter end, Container &container)
 }
 
 
+
+
+
+
 template <class V>
 bool isReachable(V *from, V *goal)
 {
@@ -81,6 +85,12 @@ void filter(Iter start, Iter end, Container &container, Predicate predicate)
 }
 
 template <class V, class Function>
+void bfs(V *vertex, Function function)
+{
+    levelOrderScan(vertex, function);
+}        
+
+template <class V, class Function>
 void levelOrderScan(V *vertex, Function function)
 {
     QSet<V*> visitSet;
@@ -103,13 +113,25 @@ void levelOrderScan(V *vertex, Function function)
 }
 
 
+template <class V, class Function>
+void depthFirstSearch(V *vertex, Function &function)        
+{
+    QSet<V*> visitSet;
+    depthFirstSearchHelper(vertex, (V*) 0, visitSet, function);
+}
 
-
-
-
-
-    
-            
+template <class V, class Function>
+void depthFirstSearchHelper(V *vertex, V *prev, QSet<V*> &visitSet, Function &function)
+{
+    function(vertex, prev);
+    visitSet.insert(vertex);
+    QSet<V*> outNeighbors = vertex->outNeighbors();
+    foreach (V *n, outNeighbors) {
+        if (!visitSet.contains(n)) {
+            depthFirstSearchHelper(n, vertex, visitSet, function);
+        }
+    }
+}      
                 
     
 #endif
