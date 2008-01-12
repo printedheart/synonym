@@ -13,8 +13,8 @@
     <projectname>synonym</projectname>
     <projectdirectory>.</projectdirectory>
     <absoluteprojectpath>false</absoluteprojectpath>
-    <description/>
-    <defaultencoding/>
+    <description></description>
+    <defaultencoding></defaultencoding>
     <versioncontrol>kdevsubversion</versioncontrol>
   </general>
   <kdevfileview>
@@ -70,7 +70,7 @@
       <resolveIncludePathsUsingMakeExperimental>false</resolveIncludePathsUsingMakeExperimental>
     </codecompletion>
     <creategettersetter>
-      <prefixGet/>
+      <prefixGet></prefixGet>
       <prefixSet>set</prefixSet>
       <prefixVariable>m_,_</prefixVariable>
       <parameterName>theValue</parameterName>
@@ -123,16 +123,17 @@
   </kdevdoctreeview>
   <kdevdebugger>
     <general>
-      <dbgshell/>
+      <dbgshell></dbgshell>
       <breakpoints/>
       <programargs/>
       <gdbpath>/usr/bin/gdb</gdbpath>
       <breakonloadinglibs>true</breakonloadinglibs>
       <separatetty>false</separatetty>
       <floatingtoolbar>false</floatingtoolbar>
-      <configGdbScript/>
-      <runShellScript/>
-      <runGdbScript/>
+      <configGdbScript></configGdbScript>
+      <runShellScript></runShellScript>
+      <runGdbScript></runGdbScript>
+      <raiseGDBOnStart>false</raiseGDBOnStart>
     </general>
     <display>
       <staticmembers>false</staticmembers>
@@ -143,48 +144,54 @@
   </kdevdebugger>
   <kdevtrollproject>
     <run>
-      <mainprogram>/home/serega/devel/synonym</mainprogram>
-      <programargs/>
+      <mainprogram>/home/sergey/devel/graphs/synonym</mainprogram>
+      <programargs></programargs>
       <directoryradio>executable</directoryradio>
       <runarguments>
         <synonym/>
         <ui/>
       </runarguments>
       <cwd>
-        <synonym>/home/serega/devel/synonym</synonym>
-        <ui>/home/serega/devel/synonym</ui>
+        <synonym>/home/sergey/devel/graphs/synonym</synonym>
+        <ui>/home/sergey/deve/graphs/synonym</ui>
       </cwd>
       <debugarguments>
         <synonym/>
         <ui/>
       </debugarguments>
-      <globaldebugarguments/>
-      <globalcwd>/home/serega/devel/synonym</globalcwd>
+      <globaldebugarguments></globaldebugarguments>
+      <globalcwd>/home/sergey/devel/graphs/synonym</globalcwd>
       <useglobalprogram>false</useglobalprogram>
       <terminal>false</terminal>
       <autocompile>false</autocompile>
       <autoinstall>false</autoinstall>
       <autokdesu>false</autokdesu>
-      <envvars/>
+      <envvars>
+        <envvar value="$LD_LIBRARY_PATH:/home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0/lib" name="LD_LIBRARY_PATH" />
+      </envvars>
     </run>
     <general>
       <activedir></activedir>
     </general>
-    <subclassing/>
     <make>
       <abortonerror>true</abortonerror>
-      <runmultiplejobs>false</runmultiplejobs>
-      <numberofjobs>1</numberofjobs>
+      <runmultiplejobs>true</runmultiplejobs>
+      <numberofjobs>3</numberofjobs>
       <dontact>false</dontact>
-      <makebin/>
+      <makebin></makebin>
       <prio>0</prio>
-      <envvars/>
+      <envvars>
+        <envvar value="/usr/lib" name="PYTHON_LIB" />
+        <envvar value="/home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0" name="PYTHONQT_ROOT" />
+      </envvars>
     </make>
     <qmake>
       <savebehaviour>2</savebehaviour>
       <replacePaths>false</replacePaths>
       <disableDefaultOpts>true</disableDefaultOpts>
+      <enableFilenamesOnly>false</enableFilenamesOnly>
     </qmake>
+    <subclassing/>
   </kdevtrollproject>
   <workspace>
     <openfiles/>
@@ -215,10 +222,10 @@
     <EMAIL>sergey.melderis@gmail.com</EMAIL>
     <LICENSE>GPL</LICENSE>
     <LICENSEFILE>COPYING</LICENSEFILE>
-    <QMAKE>/usr/local/Trolltech/Qt-4.2.2/bin/qmake</QMAKE>
+    <QMAKE>/usr/local/Trolltech/Qt-4.3.1/bin/qmake</QMAKE>
     <VERSION>0.1</VERSION>
     <YEAR>2007</YEAR>
-    <dest>/home/serega/devel/synonym</dest>
+    <dest>/home/sergey/deve/graphs/synonym</dest>
   </substmap>
   <cppsupportpart>
     <filetemplates>
@@ -226,4 +233,9 @@
       <implementationsuffix>.cpp</implementationsuffix>
     </filetemplates>
   </cppsupportpart>
+  <ctagspart>
+    <customArguments/>
+    <customTagfilePath>/home/sergey/devel/graphs/trunk/synonym/tags</customTagfilePath>
+    <activeTagsFiles/>
+  </ctagspart>
 </kdevelop>
