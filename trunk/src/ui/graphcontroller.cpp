@@ -21,7 +21,7 @@
 
 
 #include "graphscene.h"
-#include "worddataloader.h"
+#include "iworddataloader.h"
 #include "wordgraph.h"
 #include "graphnode.h"
 #include "graphedge.h"
@@ -79,7 +79,7 @@ static void setNewGraphToScene(GraphScene *scene, WordGraph *graph)
 
 
 GraphController::GraphController(GraphScene *graphScene,
-                                  WordDataLoader *loader, QObject *parent)
+                                  IWordDataLoader *loader, QObject *parent)
     : QObject(parent), m_scene(graphScene), m_loader(loader), m_graph(0)
 {
     srand((unsigned)time(0));

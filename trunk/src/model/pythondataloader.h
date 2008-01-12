@@ -21,17 +21,18 @@
 #define PYTHONDATALOADER_H
 
 #include "relationship.h"
-#include "worddataloader.h"
+#include "iworddataloader.h"
 
 #include "PythonQt.h"
 #include <QObject>
 #include <QStringList>        
+
 class WordGraph;
 class WordGraphDecorator;
 /**
     @author Sergejs <sergey.melderis@gmail.com>
  */
-class PythonDataLoader : public WordDataLoader
+class PythonDataLoader : public QObject, public IWordDataLoader
 {
     Q_OBJECT
     public:

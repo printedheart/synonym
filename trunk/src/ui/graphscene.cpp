@@ -70,6 +70,7 @@ void GraphScene::layout()
     QList<GraphicsNode*> nodes = graphNodes();
     QList<GraphicsEdge*> edges = graphEdges();
     bool needsLayout = m_layout->layout(nodes, edges, m_restartLayout);
+//    qDebug() << "layout() returned " << needsLayout;
     if (!needsLayout) {
         killTimer(m_timerId);
         m_timerId = 0;

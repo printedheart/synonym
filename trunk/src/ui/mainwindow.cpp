@@ -31,6 +31,8 @@
 #include "relationship.h"
 #include "configdialog.h"
 
+#include "pythondataloader.h"
+
 #include <QtGui>
 #include <QtCore>
 
@@ -41,12 +43,12 @@ MainWindow::MainWindow()
     GraphScene *scene = new GraphScene(this);
     m_scene = scene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    scene->setSceneRect(-500, -600, 1000, 1200);
+    scene->setSceneRect(-800, -800, 1600, 1600);
     
     m_graphView = new QGraphicsView(scene, this);
     setCentralWidget(m_graphView);
 
-    m_loader = new WordDataLoader(this);
+    m_loader = new PythonDataLoader(this);
     m_graphController = new GraphController(scene, m_loader);
 
     m_graphView->setCacheMode(QGraphicsView::CacheBackground);
@@ -135,7 +137,7 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-    
+        
 }
 
 void MainWindow::callLoadWord()
@@ -197,11 +199,11 @@ void MainWindow::initCompleter()
 {
     configure();
     //This could take a second or two to load.
-    QStringList words = m_loader->words();   
-    QCompleter *completer = new QCompleter(words, this);
-    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    m_wordLine->setCompleter(completer);
+//     QStringList words = m_loader->words();   
+//     QCompleter *completer = new QCompleter(words, this);
+//     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+//     completer->setCaseSensitivity(Qt::CaseInsensitive);
+//     m_wordLine->setCompleter(completer);
 }
     
 
