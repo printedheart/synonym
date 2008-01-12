@@ -56,6 +56,8 @@ public:
 
     QSet<GraphicsNode*> neighbors() const;
     
+    QSet<GraphicsNode*> outNeighbors() const;
+    
     unsigned int degree() const;
     
     WordGraph * graph() const;
@@ -80,11 +82,14 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) = 0; 
     
     virtual void setActivated(bool /* activated */ ) {} ;
+    
+    GraphScene *graphScene() const;
+    
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     
-    GraphScene *graphScene() const;
+    
 private:    
     QPointF m_newPos;
     QPointF m_intermedPos;
@@ -121,8 +126,14 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    static QFont m_font;
+    static QFont s_font;
+    QFont m_font;
     QPointF m_mousePressPos;
+    
+    void calculateBoundingRect();
+    
+    QRectF m_rectf;
+    QPointF m_prevPos;
 };
 
 class MeaningGraphicsNode : public GraphicsNode
@@ -134,8 +145,7 @@ public:
     
     virtual MeaningGraphicsNode *clone() const;
     
-    static void setRadius(int radius) { m_radius = radius; }
-    
+    static void setRadius(int radius) { s_radius = radius; }
     
     
     int type() const { return MeaningType; }
@@ -159,7 +169,10 @@ private:
     void hideToolTip();
     void adjustToolTipPos();
     
-    static int m_radius;
+    static int s_radius;
+    int m_radius;
+    QRectF m_boundingRect;
+    void calculateBoundingRect();
 };
 
 
