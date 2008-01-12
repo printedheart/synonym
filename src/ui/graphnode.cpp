@@ -228,10 +228,13 @@ void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     Q_UNUSED(widget);
     
     painter->setClipRect(option->exposedRect);
-    QFont font = m_font;
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable)) {
+        QFont font = m_font;
         font.setPointSize(m_font.pointSize() * 1.5);
-    painter->setFont(font);
+        painter->setFont(font);
+    } else {
+        painter->setFont(m_font);
+    }
     painter->setPen(QPen(Qt::black, 1));
     painter->setBrush(Qt::NoBrush);
     painter->drawText(boundingRect(), Qt::AlignCenter, data(WORD).toString());
@@ -286,7 +289,8 @@ MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
 }
 
 MeaningGraphicsNode::MeaningGraphicsNode(const MeaningGraphicsNode &o)
-    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), m_boundingRect(o.m_boundingRect), m_radius(o.m_radius)
+    : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), 
+                   m_boundingRect(o.m_boundingRect), m_radius(o.m_radius)
 {
     setZValue(1);
     setAcceptsHoverEvents(true);
