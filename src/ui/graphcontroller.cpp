@@ -34,7 +34,7 @@
 #include <QtDebug>
 #include <QtGui>
 #include <cmath>        
-                                       
+                                                                              
 
 static const int  HISTORY_SIZE = 10;
 
@@ -97,12 +97,14 @@ GraphController::~GraphController()
 }
 
 
+
 WordGraph*  GraphController::makeGraph(const QString &word)
 {
     if (m_scene->centralNode() && m_scene->centralNode()->id() == word)
         return m_graph;
     
     GraphicsNode *centralNode;
+    qDebug() << "makeGraph(" << word << ")";
     if (m_graph && m_graph->node(word) && IsMeaning()(m_graph->node(word))) {
         m_backHistory.append(m_graph->clone());
         m_graph->setCentralNode(word);
@@ -141,32 +143,48 @@ WordGraph*  GraphController::makeGraph(const QString &word)
     
     centralNode->setMass(10);
     centralNode->setFlag(QGraphicsItem::ItemIsMovable, false); 
-    
-    // Scan the graph from the root and set the level for each node
-    // Apply filter to avoid too many nodes appear on the graph.
-    // Tha latter could make graph not connected, so we make it connected by 
-    // hiding disconnected nodes.
-    levelOrderScan(centralNode, SetLevel());
-    QList<GraphicsNode*> nodes = m_graph->nodes();
-    QSet<GraphicsNode*> visualNodes;
-    
-    if (IsWord() (centralNode)) {
-        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
-                FunctionCombiner<VisualFilter, IsPOS>(VisualFilter(), IsPOS(m_poses)));
-    } else {
-        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
-                FunctionCombiner<MeaningVisualFilter, IsPOS>(MeaningVisualFilter(), IsPOS(m_poses)));
-    }
-  
-    foreach (GraphicsNode *node, nodes) {
-        if (!visualNodes.contains(node)) {
-            m_graph->disableNode(node);
-        } 
-    }
-    makeConnected(centralNode);
+    filterGraphNodes();
     setNewGraphToScene(m_scene, m_graph);
     m_graph->setEnabledSignals(true);
     return m_graph;
+}
+
+void GraphController::filterGraphNodes()
+{
+     // Scan the graph from the root and set the level for each node
+    // Apply filter to avoid too many nodes appear on the graph.
+    
+    Node *centralNode = m_graph->centralNode();
+    levelOrderScan(centralNode, SetLevel());
+    QList<GraphicsNode*> nodes = m_graph->nodes();    
+    IsPOS posPredicate(m_poses);
+    
+    // Use different strategies here. If the central node is word node
+    // we use recursive algorithm. For meaning node we just scant a list of nodes.
+    if (IsWord() (centralNode)) {
+        VisualFilterForDFS filter;
+        depthFirstSearch(centralNode, filter);
+        QSet<GraphicsNode*> disabledNodes = filter.disabledNodes;
+        qDebug() << "disabledNodes " << disabledNodes.size();
+        foreach (GraphicsNode *node, nodes) {
+            if (disabledNodes.contains(node) || !posPredicate(node)) {
+                m_graph->disableNode(node);
+            } 
+        }
+    } else {
+        QSet<Node*> visualNodes;
+        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
+                FunctionCombiner<MeaningVisualFilter, IsPOS>(MeaningVisualFilter(), posPredicate));
+        foreach (Node *node, nodes) {
+            if (!visualNodes.contains(node)) {
+                m_graph->disableNode(node);
+            }
+        }
+    }
+        
+    // The filtering could make graph not connected, so we make it
+    // connected by hiding disconnected nodes.
+    makeConnected(centralNode);
 }
 
 WordGraph * GraphController::previousGraph()
@@ -251,11 +269,9 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
     if (IsWord() (m_graph->centralNode())) {
         filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
                 FunctionCombiner<VisualFilter, IsPOS>(VisualFilter(), IsPOS(m_poses)));
-        qDebug() << "IsWord()";
     } else {
         filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
                 FunctionCombiner<MeaningVisualFilter, IsPOS>(MeaningVisualFilter(), IsPOS(m_poses)));
-        qDebug() << "IsMeaning()";
     }
   
     foreach (GraphicsNode *node, nodes) {
