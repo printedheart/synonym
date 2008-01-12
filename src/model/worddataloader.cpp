@@ -78,7 +78,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                                             pos, wnSearchType, ALLSENSES);
             createdSynsets.append(synset);
             
-            qDebug() << Relationship::toString(searchType, pos) << " " << pos;
+        //    qDebug() << Relationship::toString(searchType, pos) << " " << pos;
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
@@ -107,10 +107,10 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                     meaning2->setData(POS, getpos(synset->pos));
                     meaning2->setData(MEANING, synset->defn);
                     Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), edgeFactory);
-                    qDebug() << meaning->id() << "   " << meaning2->id() 
-                             << "  parent : " << Relationship::toString(parentSynsetType, meaning->data(POS).toInt())
-                             << "  synset : " << Relationship::toString(synsetType, meaning->data(POS).toInt()) 
-                             << "  search : " << Relationship::toString(searchType, meaning->data(POS).toInt());
+//                     qDebug() << meaning->id() << "   " << meaning2->id() 
+//                              << "  parent : " << Relationship::toString(parentSynsetType, meaning->data(POS).toInt())
+//                              << "  synset : " << Relationship::toString(synsetType, meaning->data(POS).toInt()) 
+//                              << "  search : " << Relationship::toString(searchType, meaning->data(POS).toInt());
                     if (edge) {
                         if (useThis & searchType) {
                             if (searchType & Relationship::HasPart)
@@ -146,7 +146,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                         }
                     }
                     for (int i = 0; i < synset->wcount; i++) {
-                        qDebug() << Relationship::toString(searchType, pos) << "  " << synset->words[i];
+                    //    qDebug() << Relationship::toString(searchType, pos) << "  " << synset->words[i];
                         if (searchWord != synset->words[i]) {
                             Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                             word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));

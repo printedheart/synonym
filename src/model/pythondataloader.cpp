@@ -37,7 +37,7 @@
 
 
 PythonDataLoader::PythonDataLoader(QObject *parent)
-    :WordDataLoader(parent)
+    : QObject(parent), IWordDataLoader()
 {
     QFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.pyc").remove();    
     m_graphDecorator = new WordGraphDecorator();
@@ -83,7 +83,7 @@ WordGraph * PythonDataLoader::createWordGraph(const QString &searchWord, Relatio
      
 QStringList PythonDataLoader::words() const
 {
-    return WordDataLoader::words();    
+    return QStringList();
 }
 
 void PythonDataLoader::stdOut(const QString &str)

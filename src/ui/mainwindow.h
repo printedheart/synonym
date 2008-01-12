@@ -28,7 +28,7 @@
 class QGraphicsView;
 class QLineEdit;
 class WordGraph;
-class WordDataLoader;
+class IWordDataLoader;
 class GraphController;
 class QListView;
 class PartOfSpeechListModel;
@@ -47,7 +47,7 @@ Q_OBJECT
 public:
     MainWindow();
 
-    ~MainWindow();
+    virtual ~MainWindow();
     
 public slots:    
     void nodeActivated(const QModelIndex &index);
@@ -55,7 +55,7 @@ public slots:
 private:
     QGraphicsView *m_graphView;
     GraphScene *m_scene;
-    WordDataLoader *m_loader;
+    IWordDataLoader *m_loader;
     GraphController *m_graphController;
        
     QLineEdit *m_wordLine;

@@ -26,7 +26,8 @@ HEADERS = src/model/wordgraph.h \
         src/model/graphalgorithms.h \
         src/model/wordnetutil.h \
         src/model/relationship.h \
-        src/model/pythondataloader.h
+        src/model/pythondataloader.h \
+        src/model/iworddataloader.h
 #        src/test/graphtest.h
 
 

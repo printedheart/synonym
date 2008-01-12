@@ -1,5 +1,5 @@
- /***************************************************************************
- *   Copyright (C) 2007 by Sergejs Melderis*
+/***************************************************************************
+ *   Copyright (C) 2007 by Sergejs   *
  *   sergey.melderis@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,34 +17,26 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef WORDDATALOADER_H
-#define WORDDATALOADER_H
 
-#include "iworddataloader.h"
+#ifndef I_WORDDATALOADER_H
+#define I_WORDDATALOADER_H
+
+
 #include "relationship.h"
 
-#include <QObject>
+
 #include <QStringList>
-class QBuffer;        
+
 class WordGraph;
 
-
-/**
-    @author Sergejs <sergey.melderis@gmail.com>
-*/
-class WordDataLoader : public QObject, public IWordDataLoader
+class IWordDataLoader
 {
-Q_OBJECT
 public:
-    WordDataLoader(QObject *parent = 0);
+    virtual ~IWordDataLoader() {}
     
-    ~WordDataLoader();
-    
-     virtual WordGraph * createWordGraph(const QString &searchWord, Relationship::Types searchTypes);
-     
-     virtual QStringList words() const;
-protected:
-    QString m_curWord;
+    virtual WordGraph * createWordGraph(const QString &searchWord, Relationship::Types searchTypes) = 0;
+    virtual QStringList words() const = 0;
 };
 
 #endif
+

@@ -28,7 +28,7 @@
 #include <QList>
 
 class GraphScene;
-class WordDataLoader;
+class IWordDataLoader;
 class MeaningGraphicsNode;
 class WordGraphicsNode;
 class GraphicsEdge;
@@ -42,7 +42,7 @@ class GraphController : public QObject
 {
 Q_OBJECT
 public:
-    GraphController(GraphScene *graphScene, WordDataLoader *loader,
+    GraphController(GraphScene *graphScene, IWordDataLoader *loader,
                     QObject *parent = 0);
 
     ~GraphController();
@@ -63,7 +63,7 @@ public slots:
     
 private:
     GraphScene *m_scene;
-    WordDataLoader *m_loader;
+    IWordDataLoader *m_loader;
     WordGraph *m_graph;
 
     QList<PartOfSpeech> m_poses;
