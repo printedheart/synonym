@@ -36,13 +36,11 @@ WordDataLoader::~WordDataLoader()
 {
 }
 
-// I don't understand C WordNet API.
-// The best would be to rewrite it in C++.
-// Jawbone can be used for inspiration. 
-// http://mfwallace.googlepages.com/jawbone.html
+// Whatever comes out from Wordnet C API does not always makes sense to me.
+// Python API is much more simple and easier to use.
 WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation::Types searchTypes) 
 {
-    static const Relation::Types useThis(
+    static const Relation::Types watchForTypes(
             Relation::IsPart | 
             Relation::IsStuff |
             Relation::HasStuff | 
@@ -112,7 +110,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
 //                              << "  synset : " << Relation::toString(synsetType, meaning->data(POS).toInt()) 
 //                              << "  search : " << Relation::toString(searchType, meaning->data(POS).toInt());
                     if (edge) {
-                        if (useThis & searchType) {
+                        if (watchForTypes & searchType) {
                             if (searchType & Relation::HasPart)
                                 edge->setrelation(Relation::IsPart);
                             else if (searchType & Relation::HasStuff)
