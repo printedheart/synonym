@@ -45,9 +45,9 @@ void WordGraphDecorator::setEdgeFactory(EdgeFactory *edgeFactory)
     m_edgeFactory = edgeFactory;
 }
     
-void WordGraphDecorator::setRelationshipTypes(Relationship::Types relationshipTypes)
+void WordGraphDecorator::setrelationTypes(Relation::Types relationTypes)
 {
-    m_relationshipTypes = relationshipTypes;
+    m_relationTypes = relationTypes;
 }
  
 WordGraph * WordGraphDecorator::wordGraph() const
@@ -84,27 +84,27 @@ static int getpos(QString &pos)
     return 0;
 }
 
-static Relationship::Type toRelationshipType(QString &pointerType)
+static Relation::Type torelationType(QString &pointerType)
 {
     QString t = pointerType;
-    if (t == "antonym") return Relationship::Antonym;
-    if (t == "hyponym") return Relationship::Hyponym;
-    if (t == "hypernym") return Relationship::Hypernym;
-    if (t == "entailment") return Relationship::Entailment;
-    if (t == "similar") return Relationship::Similar;
-    if (t == "member meronym") return Relationship::IsMember;
-    if (t == "substance meronym") return Relationship::IsStuff;
-    if (t == "part meronym") return Relationship::IsPart;
-    if (t == "member holonym") return Relationship::HasMember;
-    if (t == "substance holonym") return Relationship::HasStuff;
-    if (t == "part holonym") return Relationship::HasPart;
-    if (t == "cause") return Relationship::Cause;
-    if (t == "participle of") return Relationship::Participle;
-    if (t == "also see") return Relationship::SeeAlso;
-    if (t == "pertainym") return Relationship::Pertains;
-    if (t == "attribute") return Relationship::Attribute;
-    if (t == "verb group") return Relationship::VerbGroup;
-    return Relationship::Undefined;
+    if (t == "antonym") return Relation::Antonym;
+    if (t == "hyponym") return Relation::Hyponym;
+    if (t == "hypernym") return Relation::Hypernym;
+    if (t == "entailment") return Relation::Entailment;
+    if (t == "similar") return Relation::Similar;
+    if (t == "member meronym") return Relation::IsMember;
+    if (t == "substance meronym") return Relation::IsStuff;
+    if (t == "part meronym") return Relation::IsPart;
+    if (t == "member holonym") return Relation::HasMember;
+    if (t == "substance holonym") return Relation::HasStuff;
+    if (t == "part holonym") return Relation::HasPart;
+    if (t == "cause") return Relation::Cause;
+    if (t == "participle of") return Relation::Participle;
+    if (t == "also see") return Relation::SeeAlso;
+    if (t == "pertainym") return Relation::Pertains;
+    if (t == "attribute") return Relation::Attribute;
+    if (t == "verb group") return Relation::VerbGroup;
+    return Relation::Undefined;
 }
     
 void WordGraphDecorator::addMeaningNode(WordGraph *wordGraph, QString id, QString meaning, QString pos)
@@ -120,11 +120,11 @@ bool WordGraphDecorator::addEdge(WordGraph *wordGraph, QString id1, QString id2,
     //qDebug() << "addEdge(" << id1 << ",  " << id2 << ", " << pointerType << ")";
     bool success = false;
     if (pointerType != QString()) {
-        Relationship::Type type = toRelationshipType(pointerType); 
-        if ( type != Relationship::Undefined) {
+        Relation::Type type = torelationType(pointerType); 
+        if ( type != Relation::Undefined) {
            Edge *edge = wordGraph->addEdge(id1, id2, *m_edgeFactory);
            if (edge) {
-              edge->setRelationship(type);
+              edge->setrelation(type);
               success = true;
            }
         }

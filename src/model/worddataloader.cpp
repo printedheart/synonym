@@ -40,15 +40,15 @@ WordDataLoader::~WordDataLoader()
 // The best would be to rewrite it in C++.
 // Jawbone can be used for inspiration. 
 // http://mfwallace.googlepages.com/jawbone.html
-WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relationship::Types searchTypes) 
+WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation::Types searchTypes) 
 {
-    static const Relationship::Types useThis(
-            Relationship::IsPart | 
-            Relationship::IsStuff |
-            Relationship::HasStuff | 
-            Relationship::HasPart |
-            Relationship::IsMember |
-            Relationship::HasMember);
+    static const Relation::Types useThis(
+            Relation::IsPart | 
+            Relation::IsStuff |
+            Relation::HasStuff | 
+            Relation::HasPart |
+            Relation::IsMember |
+            Relation::HasMember);
     
     TemplateNodeFactory<WordGraphicsNode> wordFactory;
     TemplateNodeFactory<MeaningGraphicsNode> meaningFactory;
@@ -60,16 +60,16 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
     
     QList<SynsetPtr> createdSynsets;
     
-    QList<Relationship::Type> allTypesList = Relationship::types();
+    QList<Relation::Type> allTypesList = Relation::types();
     for (int pos = 1; pos <= NUMPARTS; pos++) {
         
-        foreach (Relationship::Type searchType, allTypesList) {  
-            if (!Relationship::typesForPos(pos).testFlag(searchType) || !searchTypes.testFlag(searchType))
+        foreach (Relation::Type searchType, allTypesList) {  
+            if (!Relation::typesForPos(pos).testFlag(searchType) || !searchTypes.testFlag(searchType))
                 continue;
                 
             
             unsigned int defined = is_defined(searchWord.toLatin1().data(), pos);
-            int wnSearchType = Relationship::toSearchType(searchType);
+            int wnSearchType = Relation::toSearchType(searchType);
             
             if (!(defined & bit(wnSearchType))) 
                 continue;
@@ -78,7 +78,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                                             pos, wnSearchType, ALLSENSES);
             createdSynsets.append(synset);
             
-        //    qDebug() << Relationship::toString(searchType, pos) << " " << pos;
+        //    qDebug() << Relation::toString(searchType, pos) << " " << pos;
             while (synset) {
                 SynsetPtr nextSynset = synset->nextss;
                 
@@ -98,55 +98,55 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relations
                 if (!synset->ptrtyp)
                     break;
                 
-                Relationship::Type parentSynsetType = Relationship::toType(*synset->ptrtyp);
+                Relation::Type parentSynsetType = Relation::toType(*synset->ptrtyp);
                 synset = synset->ptrlist;
                 while (synset) {
-                    Relationship::Type synsetType = Relationship::toType(*synset->ptrtyp);
+                    Relation::Type synsetType = Relation::toType(*synset->ptrtyp);
                     Node *meaning2 = wordGraph->addNode(QString::number(synset->hereiam), meaningFactory);
                     
                     meaning2->setData(POS, getpos(synset->pos));
                     meaning2->setData(MEANING, synset->defn);
                     Edge *edge = wordGraph->addEdge(meaning->id(), meaning2->id(), edgeFactory);
 //                     qDebug() << meaning->id() << "   " << meaning2->id() 
-//                              << "  parent : " << Relationship::toString(parentSynsetType, meaning->data(POS).toInt())
-//                              << "  synset : " << Relationship::toString(synsetType, meaning->data(POS).toInt()) 
-//                              << "  search : " << Relationship::toString(searchType, meaning->data(POS).toInt());
+//                              << "  parent : " << Relation::toString(parentSynsetType, meaning->data(POS).toInt())
+//                              << "  synset : " << Relation::toString(synsetType, meaning->data(POS).toInt()) 
+//                              << "  search : " << Relation::toString(searchType, meaning->data(POS).toInt());
                     if (edge) {
                         if (useThis & searchType) {
-                            if (searchType & Relationship::HasPart)
-                                edge->setRelationship(Relationship::IsPart);
-                            else if (searchType & Relationship::HasStuff)
-                                edge->setRelationship(Relationship::IsStuff);
-                            else if (searchType & Relationship::HasMember)
-                                edge->setRelationship(Relationship::IsMember);
+                            if (searchType & Relation::HasPart)
+                                edge->setrelation(Relation::IsPart);
+                            else if (searchType & Relation::HasStuff)
+                                edge->setrelation(Relation::IsStuff);
+                            else if (searchType & Relation::HasMember)
+                                edge->setrelation(Relation::IsMember);
                             else
-                                edge->setRelationship(searchType);
+                                edge->setrelation(searchType);
                             
                         } else {
-                            if (searchType & Relationship::Antonym) 
-                                edge->setRelationship(searchType);
+                            if (searchType & Relation::Antonym) 
+                                edge->setrelation(searchType);
                             else if (searchType & parentSynsetType & synsetType)
-                                edge->setRelationship(searchType);
+                                edge->setrelation(searchType);
                             else if  (searchType & parentSynsetType)
-                                edge->setRelationship(searchType);
+                                edge->setrelation(searchType);
                             else if (searchType & synsetType)
-                                edge->setRelationship(searchType);
+                                edge->setrelation(searchType);
                             else if (synsetType & parentSynsetType)
-                                edge->setRelationship(synsetType);
-                            else if (Relationship::symmetricTo(searchType) & parentSynsetType)
-                                edge->setRelationship(parentSynsetType); 
+                                edge->setrelation(synsetType);
+                            else if (Relation::symmetricTo(searchType) & parentSynsetType)
+                                edge->setrelation(parentSynsetType); 
                             
                             
-                            else if (Relationship::applies(synsetType, meaning2->data(POS).toInt()))
-                                edge->setRelationship(synsetType);
-                            else if (Relationship::applies(parentSynsetType, meaning2->data(POS).toInt()))
-                                edge->setRelationship(parentSynsetType);
+                            else if (Relation::applies(synsetType, meaning2->data(POS).toInt()))
+                                edge->setrelation(synsetType);
+                            else if (Relation::applies(parentSynsetType, meaning2->data(POS).toInt()))
+                                edge->setrelation(parentSynsetType);
                             else 
-                                edge->setRelationship(searchType);
+                                edge->setrelation(searchType);
                         }
                     }
                     for (int i = 0; i < synset->wcount; i++) {
-                    //    qDebug() << Relationship::toString(searchType, pos) << "  " << synset->words[i];
+                    //    qDebug() << Relation::toString(searchType, pos) << "  " << synset->words[i];
                         if (searchWord != synset->words[i]) {
                             Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                             word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));

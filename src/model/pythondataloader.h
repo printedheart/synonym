@@ -20,7 +20,7 @@
 #ifndef PYTHONDATALOADER_H
 #define PYTHONDATALOADER_H
 
-#include "relationship.h"
+#include "relation.h"
 #include "iworddataloader.h"
 
 #include "PythonQt.h"
@@ -40,7 +40,7 @@ class PythonDataLoader : public QObject, public IWordDataLoader
     
         ~PythonDataLoader();
     
-        virtual WordGraph * createWordGraph(const QString &searchWord, Relationship::Types searchTypes);
+        virtual WordGraph * createWordGraph(const QString &searchWord, Relation::Types searchTypes);
      
         virtual QStringList words() const;
     

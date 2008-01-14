@@ -6,73 +6,73 @@
    <View0 Encoding="" Type="Source" />
   </Doc0>
   <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphnode.h" >
-   <View0 Encoding="" Type="Source" />
+   <View0 Encoding="" line="40" Type="Source" />
   </Doc1>
   <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphnode.cpp" >
-   <View0 Encoding="" Type="Source" />
+   <View0 Encoding="" line="235" Type="Source" />
   </Doc2>
   <Doc3 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphscene.h" >
-   <View0 Encoding="" Type="Source" />
+   <View0 Encoding="" line="123" Type="Source" />
   </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordnetutil.h" >
+  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/graphalgorithms.h" >
    <View0 Encoding="" Type="Source" />
   </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/graphalgorithms.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphedge.h" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphedge.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc6 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphscene.cpp" >
+   <View0 Encoding="" line="116" Type="Source" />
   </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphedge.cpp" >
+  <Doc7 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphcontroller.h" >
+  <Doc8 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/pythondataloader.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphscene.cpp" >
+  <Doc9 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.py" >
    <View0 Encoding="" Type="Source" />
   </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.cpp" >
+  <Doc10 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/pythondataloader.h" >
    <View0 Encoding="" Type="Source" />
   </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/layout.h" >
+  <Doc11 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraphdecorator.h" >
    <View0 Encoding="" Type="Source" />
   </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/layout.cpp" >
+  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraphdecorator.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc12>
-  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/pythondataloader.cpp" >
+  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.h" >
    <View0 Encoding="" Type="Source" />
   </Doc13>
-  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.py" >
+  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc14>
-  <Doc15 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/pythondataloader.h" >
+  <Doc15 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.h" >
    <View0 Encoding="" Type="Source" />
   </Doc15>
-  <Doc16 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraphdecorator.h" >
+  <Doc16 NumberOfViews="1" URL="file:///usr/local/Trolltech/Qt-4.3.2/include/QtCore/qhash.h" >
    <View0 Encoding="" Type="Source" />
   </Doc16>
-  <Doc17 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraphdecorator.cpp" >
+  <Doc17 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraph.cpp" >
    <View0 Encoding="" Type="Source" />
   </Doc17>
-  <Doc18 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.h" >
+  <Doc18 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphcontroller.h" >
    <View0 Encoding="" Type="Source" />
   </Doc18>
-  <Doc19 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.cpp" >
-   <View0 Encoding="" line="70" Type="Source" />
+  <Doc19 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/iworddataloader.h" >
+   <View0 Encoding="" Type="Source" />
   </Doc19>
-  <Doc20 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc20 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/synonym.pro" >
+   <View0 Encoding="" line="29" Type="Source" />
   </Doc20>
-  <Doc21 NumberOfViews="1" URL="file:///usr/local/Trolltech/Qt-4.3.2/include/QtCore/qhash.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc21>
-  <Doc22 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraph.cpp" >
+  <Doc21 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphedge.cpp" >
    <View0 Encoding="" line="94" Type="Source" />
+  </Doc21>
+  <Doc22 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/layout.cpp" >
+   <View0 Encoding="" line="113" Type="Source" />
   </Doc22>
-  <Doc23 NumberOfViews="1" URL="file:///home/sergey/soft/WordNet-3.0/WordNet-3.0/lib/search.c" >
-   <View0 Encoding="" line="1835" Type="Source" />
+  <Doc23 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/layout.h" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc23>
  </DocsAndViews>
  <pluginList>
@@ -87,9 +87,6 @@
     <breakpoint2 location="/home/sergey/devel/graphs/synonym/src/ui/graphedge.cpp:203" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
      <tracedExpressions/>
     </breakpoint2>
-    <breakpoint3 location="/home/sergey/devel/graphs/trunk/synonym/src/ui/graphnode.cpp:481" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint3>
    </breakpointList>
    <showInternalCommands value="1" />
   </kdevdebugger>

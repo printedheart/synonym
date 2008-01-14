@@ -96,12 +96,12 @@ private:
 
 class QTableWidget;
 
-class RelationshipPage : public SettingsPage
+class relationPage : public SettingsPage
 {
 Q_OBJECT    
 public:    
-    RelationshipPage(QSettings *settings, QWidget *parent = 0);
-    ~RelationshipPage();
+    relationPage(QSettings *settings, QWidget *parent = 0);
+    ~relationPage();
     
     void writeSettings();
     
@@ -109,7 +109,7 @@ private slots:
     void slotTableChanged();
 private:    
     
-    QTableWidget *relationshipTable;
+    QTableWidget *relationTable;
 };
 
 #endif

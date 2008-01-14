@@ -25,9 +25,9 @@ HEADERS = src/model/wordgraph.h \
         src/sound/player.h \
         src/model/graphalgorithms.h \
         src/model/wordnetutil.h \
-        src/model/relationship.h \
         src/model/pythondataloader.h \
-        src/model/iworddataloader.h
+        src/model/iworddataloader.h \
+        src/model/relation.h
 #        src/test/graphtest.h
 
 
@@ -50,9 +50,9 @@ SOURCES = src/model/wordgraph.cpp \
         src/sound/pronunciationsoundholder.cpp  \
         src/sound/pronunciationsoundfactoryimpl.cpp \
         src/sound/player.cpp \
-        src/model/relatiohship.cpp \
         src/main.cpp \
-        src/model/pythondataloader.cpp
+        src/model/pythondataloader.cpp \
+ src/model/relation.cpp
 
 #        src/test/graphtest.cpp 
 
