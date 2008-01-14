@@ -22,7 +22,7 @@
 
 
 #include "wordgraph.h"
-#include "relationship.h"
+#include "relation.h"
 #include <QObject>
 
 class WordGraphDecorator : public QObject
@@ -37,7 +37,7 @@ public:
     void setMeaningNodeFactory(NodeFactory *nodeFactory);
     void setEdgeFactory(EdgeFactory *edgeFactory);
     
-    void setRelationshipTypes(Relationship::Types relationshipTypes);
+    void setrelationTypes(Relation::Types relationTypes);
     
     WordGraph *wordGraph() const;
     
@@ -62,7 +62,7 @@ private:
     NodeFactory *m_meaningNodeFactory;
     EdgeFactory *m_edgeFactory;
     
-    Relationship::Types m_relationshipTypes;
+    Relation::Types m_relationTypes;
 };
 
 #endif

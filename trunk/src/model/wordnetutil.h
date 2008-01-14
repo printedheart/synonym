@@ -21,12 +21,12 @@
 #ifndef _WORDNETUTIL_H_
 #define _WORDNETUTIL_H_
 
-#include "relationship.h"
+#include "relation.h"
 #include "wordgraph.h"
 
 const int POS            = 111;
 const int MEANING        = 222;
-const int RELATIONSHIP   = 223;
+const int relation   = 223;
 const int WORD           = 224;
 const int LEVEL          = 225;
 
@@ -75,17 +75,17 @@ private:
     QList<PartOfSpeech> m_poses;
 };
 
-class IsInRelationships
+class IsInrelations
 {
 public:    
-    IsInRelationships(Relationship::Types types):
+    IsInrelations(Relation::Types types):
         m_types(types) {}
     
     bool operator() (Edge *edge) {
-        return edge->relationship() == Relationship::Undefined |  m_types.testFlag(edge->relationship());
+        return edge->relation() == Relation::Undefined |  m_types.testFlag(edge->relation());
     }
 private:    
-    Relationship::Types m_types;
+    Relation::Types m_types;
 };
 
 

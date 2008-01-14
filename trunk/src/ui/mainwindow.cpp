@@ -28,7 +28,7 @@
 #include "pronunciationsoundholder.h"
 #include "player.h"
 #include "wordnetutil.h"
-#include "relationship.h"
+#include "relation.h"
 #include "configdialog.h"
 
 #include "pythondataloader.h"
@@ -228,21 +228,21 @@ void MainWindow::configure()
     
     
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
-    if (settings.childGroups().contains("relationships")) {
-        Relationship::Types userTypes;
-        settings.beginGroup("relationships");
+    if (settings.childGroups().contains("relations")) {
+        Relation::Types userTypes;
+        settings.beginGroup("relations");
         QStringList keys = settings.childKeys();
         
-        foreach (Relationship::Type type, Relationship::types()) {
-            QString typeString = Relationship::toString(type);
+        foreach (Relation::Type type, Relation::types()) {
+            QString typeString = Relation::toString(type);
             if (keys.contains(typeString) && settings.value(typeString).toBool()) {
                 userTypes |= type;
             }
         }
         settings.endGroup();
-        m_graphController->setRelationships(userTypes);
+        m_graphController->setrelations(userTypes);
     } else {
-        m_graphController->setRelationships(Relationship::allTypes());
+        m_graphController->setrelations(Relation::allTypes());
     }
 }
 

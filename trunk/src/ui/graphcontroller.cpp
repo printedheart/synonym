@@ -87,7 +87,7 @@ GraphController::GraphController(GraphScene *graphScene,
     m_poses.append(Verb);
     m_poses.append(Adjective);
     m_poses.append(Adverb);
-    m_relTypes = Relationship::allTypes();
+    m_relTypes = Relation::allTypes();
 }
 
 
@@ -284,7 +284,7 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
     updateSceneNodes();
 }
 
-void GraphController::setRelationships(Relationship::Types relTypes)
+void GraphController::setrelations(Relation::Types relTypes)
 {
     int mInt = m_relTypes;
     int rInt = relTypes;
@@ -296,7 +296,7 @@ void GraphController::setRelationships(Relationship::Types relTypes)
         return;
     }
     
-    Relationship::Types newTypes = ((~m_relTypes) & relTypes) | (m_relTypes & relTypes);
+    Relation::Types newTypes = ((~m_relTypes) & relTypes) | (m_relTypes & relTypes);
     if (newTypes == 0) {
         return;
     }
@@ -304,7 +304,7 @@ void GraphController::setRelationships(Relationship::Types relTypes)
     m_relTypes = relTypes;
     QList<Edge*> edges = m_graph->edges();
     QSet<Edge*> filteredEdges;
-    IsInRelationships predicate(m_relTypes);
+    IsInrelations predicate(m_relTypes);
     filter(edges.constBegin(), edges.constEnd(), filteredEdges, predicate);
     foreach (Edge *edge, edges) {
         if (!filteredEdges.contains(edge)) {

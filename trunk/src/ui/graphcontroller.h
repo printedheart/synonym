@@ -21,7 +21,7 @@
 #define GRAPHCONTROLLER_H
 
 #include "wordgraph.h"
-#include "relationship.h"
+#include "relation.h"
 
 #include <QObject>
 #include <QPair>
@@ -55,7 +55,7 @@ public:
     
     void setPoses(QList<PartOfSpeech> &poses);
     
-    void setRelationships(Relationship::Types relationships);
+    void setrelations(Relation::Types relations);
 public slots:
     void soundReady(const QString &word);
     
@@ -67,7 +67,7 @@ private:
     WordGraph *m_graph;
 
     QList<PartOfSpeech> m_poses;
-    Relationship::Types m_relTypes;
+    Relation::Types m_relTypes;
 
     void makeConnected(Node *goal);
     

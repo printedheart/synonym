@@ -20,7 +20,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "relationship.h"        
+#include "relation.h"        
         
 #include <QMainWindow>
 #include <QList>
@@ -91,7 +91,7 @@ private:
     
     void setNewGraph(WordGraph *graph);
     
-    QList<QPair<Relationship::Type, QCheckBox*> > m_relationshipCheckBoxes;
+    QList<QPair<Relation::Type, QCheckBox*> > m_relationCheckBoxes;
    
     
     

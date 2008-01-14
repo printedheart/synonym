@@ -38,7 +38,7 @@ GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
     m_pen = QPen(c, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin); 
     
     setAcceptsHoverEvents(true);
-    m_type = Relationship::Undefined;
+    m_type = Relation::Undefined;
 }
         
 
@@ -46,7 +46,7 @@ GraphicsEdge::GraphicsEdge(const GraphicsEdge &o)
     : QGraphicsItem(),  m_id(o.id()), m_source(o.source()), m_dest(o.dest()), 
       m_graph(o.graph()), 
       m_connector(0), m_pointer(0), m_toolTip(0),
-      m_pen(o.m_pen), m_type(o.relationship())                    
+      m_pen(o.m_pen), m_type(o.relation())                    
 {
     setAcceptsHoverEvents(true);
 }
@@ -162,7 +162,7 @@ void GraphicsEdge::setPen(QPen pen)
 void GraphicsEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     if (!m_toolTip) {
-        if (relationship() != Relationship::Undefined) {
+        if (relation() != Relation::Undefined) {
             createToolTip();
         }
     }
@@ -193,10 +193,10 @@ void GraphicsEdge::createToolTip()
     int sourcePos = source()->data(POS).toInt();
     int destPos = dest()->data(POS).toInt();
     QString text;
-    if (Relationship::applies(relationship(), sourcePos)) {
-        text = Relationship::toString(relationship(), sourcePos);
-    } else if (Relationship::applies(relationship(), destPos)) {
-        text = Relationship::toString(relationship(), destPos);
+    if (Relation::applies(relation(), sourcePos)) {
+        text = Relation::toString(relation(), sourcePos);
+    } else if (Relation::applies(relation(), destPos)) {
+        text = Relation::toString(relation(), destPos);
     }
     if (text.isEmpty())
         return;
@@ -258,16 +258,16 @@ void GraphicsEdge::adjustToolTipPos()
 }
 
 
-void GraphicsEdge::setRelationship(Relationship::Type type)
+void GraphicsEdge::setrelation(Relation::Type type)
 {
     m_type = type;
-    if (type == Relationship::Undefined) {
+    if (type == Relation::Undefined) {
         m_pen.setStyle(Qt::SolidLine);
     } else {
         QVector<qreal> dashes;
         dashes << 10 << 10;
         m_pen.setDashPattern(dashes); 
-        if (type == Relationship::Antonym) {
+        if (type == Relation::Antonym) {
             QColor c;
             c.setHsv(6, 243, 214);
             m_pen.setColor(c);
@@ -280,7 +280,7 @@ void GraphicsEdge::setRelationship(Relationship::Type type)
     }
 }
     
-Relationship::Type GraphicsEdge::relationship() const
+Relation::Type GraphicsEdge::relation() const
 {
     return m_type;
 }

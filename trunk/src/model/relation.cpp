@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Sergejs Melderis                                *
- *   sergey.melderis@gmail.com                                             *
+ *   Copyright (C) 2007 by Sergejs   *
+ *   sergey.melderis@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -19,7 +19,6 @@
  ***************************************************************************/
 
 #include "relation.h"
-
 
 
 QString Relation::toString(Type type, int pos)
@@ -58,7 +57,7 @@ QString Relation::toString(Type type, int pos)
         }
         
         if (type == Pertains && pos == Adverb) {
-                return "Derived from";
+            return "Derived from";
         }    
     }
     
@@ -170,4 +169,5 @@ Relation::Type Relation::symmetricTo(Type type)
         default: return Undefined;
     }
 }
+
 

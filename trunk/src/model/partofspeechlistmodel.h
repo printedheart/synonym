@@ -20,7 +20,7 @@
 #ifndef NOUNLISTMODEL_H
 #define NOUNLISTMODEL_H
 
-#include "relationship.h"
+#include "relation.h"
 #include "wordgraph.h"
 
 #include <QAbstractListModel>

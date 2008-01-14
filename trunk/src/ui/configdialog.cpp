@@ -39,7 +39,7 @@
 #include <QtGui>
 #include <QtCore>
 #include "configdialog.h"
-#include "relationship.h"
+#include "relation.h"
 
 SettingsPage::SettingsPage(QSettings *settings,    QWidget *parent)
     : QWidget(parent), m_settings(settings)
@@ -49,7 +49,7 @@ SettingsPage::~SettingsPage()
 {}
 
 
-static void addRelationshipItem(QTableWidget *tableWidget, int row,  QString &item, bool selected)
+static void addrelationItem(QTableWidget *tableWidget, int row,  QString &item, bool selected)
 {
     QTableWidgetItem *keyItem = new QTableWidgetItem(item);
     QTableWidgetItem *valueItem = new QTableWidgetItem();
@@ -61,38 +61,38 @@ static void addRelationshipItem(QTableWidget *tableWidget, int row,  QString &it
 }
 
 
-RelationshipPage::RelationshipPage(QSettings *settings, QWidget *parent)
+relationPage::relationPage(QSettings *settings, QWidget *parent)
     : SettingsPage(settings, parent)
 {
-    relationshipTable = new QTableWidget(Relationship::types().size(), 2, this);
-    relationshipTable->setSortingEnabled(false);
-    QList<Relationship::Type> types = Relationship::types();
+    relationTable = new QTableWidget(Relation::types().size(), 2, this);
+    relationTable->setSortingEnabled(false);
+    QList<Relation::Type> types = Relation::types();
     QStringList typeLabels;
-    foreach (Relationship::Type type, types) 
-        typeLabels << Relationship::toString(type);
+    foreach (Relation::Type type, types) 
+        typeLabels << Relation::toString(type);
     
     int insertRow = 0;
-    if (settings->childGroups().contains("relationships")) {
-        settings->beginGroup("relationships");
+    if (settings->childGroups().contains("relations")) {
+        settings->beginGroup("relations");
         QStringList keys = settings->childKeys();
         foreach (QString rel, keys) {
             if (typeLabels.contains(rel)) {
                 bool selected = settings->value(rel, true).toBool();
-                addRelationshipItem(relationshipTable, insertRow++,  rel, selected);
+                addrelationItem(relationTable, insertRow++,  rel, selected);
             }
         }
     }
     
-    // Verify that no relationship type is missing in the settings.
+    // Verify that no relation type is missing in the settings.
     // If a type is missed add it to the table.
     foreach (QString rel, typeLabels) {
         if (!settings->childKeys().contains(rel)) {
-            addRelationshipItem(relationshipTable, insertRow++, rel, true);
+            addrelationItem(relationTable, insertRow++, rel, true);
         }
     }
     m_settings->endGroup();
     
-    connect(relationshipTable, SIGNAL(cellChanged(int,int)),
+    connect(relationTable, SIGNAL(cellChanged(int,int)),
             this, SLOT(slotTableChanged()));
     
     // Hack to get rid of outline around text label of the checkbox on focus, 
@@ -103,29 +103,29 @@ RelationshipPage::RelationshipPage(QSettings *settings, QWidget *parent)
 
             void drawFocus(QPainter *p, const QStyleOptionViewItem &o, const QRect &r) const {}
     };
-    relationshipTable->setItemDelegateForColumn(1, new CheckBoxDelegate(relationshipTable));
-    relationshipTable->setColumnWidth(1, 30);
+    relationTable->setItemDelegateForColumn(1, new CheckBoxDelegate(relationTable));
+    relationTable->setColumnWidth(1, 30);
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    mainLayout->addWidget(relationshipTable);
+    mainLayout->addWidget(relationTable);
     setLayout(mainLayout);
     
     
 }
 
-RelationshipPage::~RelationshipPage()
+relationPage::~relationPage()
 {}
 
-void RelationshipPage::slotTableChanged()
+void relationPage::slotTableChanged()
 {
     emit settingsChanged(this);
 }
 
-void RelationshipPage::writeSettings()
+void relationPage::writeSettings()
 {
-    m_settings->beginGroup("relationships");
-    for (int row = 0; row < relationshipTable->rowCount(); row++) {
-        QString key = relationshipTable->item(row, 0)->data(Qt::DisplayRole).toString();
-        bool selected = relationshipTable->item(row, 1)->checkState() == Qt::Checked;
+    m_settings->beginGroup("relations");
+    for (int row = 0; row < relationTable->rowCount(); row++) {
+        QString key = relationTable->item(row, 0)->data(Qt::DisplayRole).toString();
+        bool selected = relationTable->item(row, 1)->checkState() == Qt::Checked;
         m_settings->setValue(key, selected);
     }
     qDebug() << "endgroup";
@@ -146,7 +146,7 @@ ConfigDialog::ConfigDialog()
     m_settings =  new QSettings("http://code.google.com/p/synonym/", "synonym");
     
     pagesWidget = new QStackedWidget;
-    pagesWidget->addWidget(new RelationshipPage(m_settings));
+    pagesWidget->addWidget(new relationPage(m_settings));
 
     m_applyButton = new QPushButton(tr("Apply"));
     m_applyButton->setEnabled(false);
@@ -191,10 +191,10 @@ ConfigDialog::ConfigDialog()
 
 void ConfigDialog::createIcons()
 {
-    QListWidgetItem *relationshipButton = new QListWidgetItem(contentsWidget);
-    relationshipButton->setText(tr("Relationships"));
-    relationshipButton->setTextAlignment(Qt::AlignHCenter);
-    relationshipButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    QListWidgetItem *relationButton = new QListWidgetItem(contentsWidget);
+    relationButton->setText(tr("relations"));
+    relationButton->setTextAlignment(Qt::AlignHCenter);
+    relationButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 
     connect(contentsWidget,

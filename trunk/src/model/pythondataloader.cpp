@@ -64,11 +64,11 @@ PythonDataLoader::~PythonDataLoader()
     QFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.pyc").remove();    
 }
     
-WordGraph * PythonDataLoader::createWordGraph(const QString &searchWord, Relationship::Types searchTypes)
+WordGraph * PythonDataLoader::createWordGraph(const QString &searchWord, Relation::Types searchTypes)
 {
     QFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.pyc").remove(); 
     m_mainContext.evalFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.py");
-    m_graphDecorator->setRelationshipTypes(searchTypes);
+    m_graphDecorator->setrelationTypes(searchTypes);
     
     m_mainContext.call("createGraph", QVariantList() << searchWord);
     

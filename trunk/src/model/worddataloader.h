@@ -21,7 +21,7 @@
 #define WORDDATALOADER_H
 
 #include "iworddataloader.h"
-#include "relationship.h"
+#include "relation.h"
 
 #include <QObject>
 #include <QStringList>
@@ -40,7 +40,7 @@ public:
     
     ~WordDataLoader();
     
-     virtual WordGraph * createWordGraph(const QString &searchWord, Relationship::Types searchTypes);
+     virtual WordGraph * createWordGraph(const QString &searchWord, Relation::Types searchTypes);
      
      virtual QStringList words() const;
 protected:
