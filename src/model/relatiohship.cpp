@@ -18,11 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "relationship.h"
+#include "relation.h"
 
 
 
-QString Relationship::toString(Type type, int pos)
+QString Relation::toString(Type type, int pos)
 {
     static QString labels[SIZE] = 
     { 
@@ -71,7 +71,7 @@ QString Relationship::toString(Type type, int pos)
     return QString();
 }
 
-const Relationship::Type Relationship::typesArray[SIZE] = 
+const Relation::Type Relation::typesArray[SIZE] = 
 {
     Undefined,
     Antonym,
@@ -100,7 +100,7 @@ const Relationship::Type Relationship::typesArray[SIZE] =
             
 };
 
-QList<Relationship::Type> Relationship::types()
+QList<Relation::Type> Relation::types()
 {
     QList<Type> typesList;
     for (int i = 1; i < SIZE; ++i) {
@@ -109,7 +109,7 @@ QList<Relationship::Type> Relationship::types()
     return typesList;
 } 
 
-int Relationship::toSearchType(Type type) {
+int Relation::toSearchType(Type type) {
     if (type == Undefined) {
         return -1;
     }
@@ -124,28 +124,28 @@ int Relationship::toSearchType(Type type) {
     return -1;
 }
 
-const Relationship::Types Relationship::NounTypes = Types(Hypernym | Antonym | Hyponym | Holonym | IsPart | IsMember | IsStuff | Meronym | HasStuff | HasMember | HasPart | Classification | Attribute | Class); 
-const Relationship::Types Relationship::VerbTypes = Types(Hypernym | Antonym | Entailment | Cause | Classification | VerbGroup | Hyponym);
-const Relationship::Types Relationship::AdjectiveTypes = Types(Similar | Antonym | Pertains | Attribute | Classification);
-const Relationship::Types Relationship::AdverbTypes = Types(Syns | Antonym | Pertains | Classification | Derivation);       
+const Relation::Types Relation::NounTypes = Types(Hypernym | Antonym | Hyponym | Holonym | IsPart | IsMember | IsStuff | Meronym | HasStuff | HasMember | HasPart | Classification | Attribute | Class); 
+const Relation::Types Relation::VerbTypes = Types(Hypernym | Antonym | Entailment | Cause | Classification | VerbGroup | Hyponym);
+const Relation::Types Relation::AdjectiveTypes = Types(Similar | Antonym | Pertains | Attribute | Classification);
+const Relation::Types Relation::AdverbTypes = Types(Syns | Antonym | Pertains | Classification | Derivation);       
 
-Relationship::Types Relationship::typesForPos(int pos)
+Relation::Types Relation::typesForPos(int pos)
 {
     switch (pos) {
         case 1: return NounTypes;
         case 2: return VerbTypes;
         case 3: return AdjectiveTypes;
         case 4: return AdverbTypes;
-        default: return Relationship::Types(0);
+        default: return Relation::Types(0);
     }
 }
 
-Relationship::Types Relationship::allTypes()
+Relation::Types Relation::allTypes()
 {
     return ~Types(0);
 }
 
-Relationship::Type Relationship::toType(int intType)
+Relation::Type Relation::toType(int intType)
 {
     if (intType < 0 || intType >= SIZE) {
         return Undefined;
@@ -153,12 +153,12 @@ Relationship::Type Relationship::toType(int intType)
     return typesArray[intType];
 }
 
-bool Relationship::applies(Type type, int forPos)
+bool Relation::applies(Type type, int forPos)
 {
     return typesForPos(forPos).testFlag(type);
 }
 
-Relationship::Type Relationship::symmetricTo(Type type)
+Relation::Type Relation::symmetricTo(Type type)
 {
     switch(type) {
         case Hypernym: return Hyponym;
