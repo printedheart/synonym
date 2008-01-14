@@ -100,6 +100,8 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void layout();
+       
+    
     
 private:
     int m_timerId;
@@ -118,6 +120,8 @@ private:
     // Nodes and edges we return in nodes() and edges()
     QList<GraphicsNode*> m_nodes;
     QList<GraphicsEdge*> m_edges;
+    
+    void adjustEdges();
 };
 
 #endif

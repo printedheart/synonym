@@ -73,10 +73,7 @@ void GraphScene::layout()
     if (!needsLayout) {
         killTimer(m_timerId);
         m_timerId = 0;
-        QList<GraphicsEdge*> edges = graphEdges();
-        foreach (GraphicsEdge *edge, edges)
-            edge->adjust();
-        update(sceneRect());
+        adjustEdges();
     }
 
 }  
@@ -108,30 +105,17 @@ QList<GraphicsEdge*> GraphScene::graphEdges()
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    
-    m_timerInterval = 10;
-    if (m_timerId) {
-        killTimer(m_timerId);
-        m_timerId = 0;
-    }
-    
+    QGraphicsScene::mouseReleaseEvent(mouseEvent);
+    adjustEdges();
     m_restartLayout = false;
     itemMoved();
-    QGraphicsScene::mouseReleaseEvent(mouseEvent);
+    
 }
 
 void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if (mouseGrabberItem()) {
         m_restartLayout = true;
-        if (m_timerInterval <= 10) {
-            m_timerInterval = 20;
-            if (m_timerId) {
-                killTimer(m_timerId);
-                m_timerId = 0;
-                itemMoved();
-            }
-        }
     }
 
     QGraphicsScene::mouseMoveEvent(mouseEvent);
@@ -235,5 +219,16 @@ void GraphScene::removeItem(QGraphicsItem *item)
     m_nodes.clear();
     m_edges.clear();
 }
+
+
+void GraphScene::adjustEdges()
+{
+    QList<GraphicsEdge*> edges = graphEdges();
+    foreach (GraphicsEdge *edge, edges)
+        edge->adjust();
+    update(sceneRect());
+}
+
+
 
 
