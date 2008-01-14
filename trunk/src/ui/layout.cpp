@@ -111,12 +111,12 @@ static void preLayout(GraphicsNode *rootNode)
 bool ForceDirectedLayout::layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) 
 {
     if (restart) {
-        m_abortMutex.lock();
-        if (isRunning()) {
+       // m_abortMutex.lock();
+        //if (isRunning()) {
             stop();
-            m_aborted.wait(&m_abortMutex);
-        }
-        m_abortMutex.unlock();
+          //  m_aborted.wait(&m_abortMutex, 500);
+        //}
+        //m_abortMutex.unlock();
         return layoutSerial(nodes, edges);
     }
     m_abort = false;
