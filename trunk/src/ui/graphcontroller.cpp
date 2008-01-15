@@ -115,11 +115,12 @@ WordGraph*  GraphController::makeGraph(const QString &word)
         currentCentralNode->setMass(1.0);
         currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
     } else {
-        WordGraph *newGraph = m_loader->createWordGraph(word, m_relTypes);
+        QString searchWord = QString(word).replace(' ', "_");
+        WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
         if (!newGraph)
             return m_graph;
         
-        centralNode = newGraph->node(word);
+        centralNode = newGraph->node(searchWord);
         if (!centralNode) {
             delete newGraph;
             return m_graph; 
@@ -129,7 +130,7 @@ WordGraph*  GraphController::makeGraph(const QString &word)
             m_backHistory.append(m_graph);
         
         m_graph = newGraph;
-        m_graph->setCentralNode(word);
+        m_graph->setCentralNode(searchWord);
     } 
     
     if (m_backHistory.size() > HISTORY_SIZE) {
