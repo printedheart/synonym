@@ -184,7 +184,7 @@ QPainterPath WordGraphicsNode::shape() const
 
 QRectF WordGraphicsNode::boundingRect() const
 {
-    if (m_rectf.isNull() || qAbs(pos().x() - m_prevPos.x()) > 2.0) {
+    if (m_rectf.isNull() || qAbs(pos().x() - m_prevPos.x()) > 1.0) {
         const_cast<WordGraphicsNode*>(this)->calculateBoundingRect();    
     }  
     if (m_font != s_font) {
@@ -410,6 +410,7 @@ void MeaningGraphicsNode::createToolTip()
     defHtml.append("<br>-------------------------------<br>");
     defHtml.append(examples);
     defHtml.append("<br>");
+    /* Debugging info
     defHtml.append(id());
     defHtml.append("<br>");
     defHtml.append("level: ");
@@ -417,6 +418,8 @@ void MeaningGraphicsNode::createToolTip()
     defHtml.append("<br>");
     defHtml.append("neighbors: ");
     defHtml.append(QString::number(neighbors().size()));
+    */
+    
     m_defItem->document()->setHtml(defHtml);
     m_defItem->setTextWidth(160);
     QRectF rect = m_defItem->boundingRect();
@@ -459,11 +462,6 @@ void MeaningGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     GraphicsNode::mouseReleaseEvent(event);
 }
 
-
-void MeaningGraphicsNode::adjustToolTipPos()
-{
-    
-}
 
 void MeaningGraphicsNode::calculateBoundingRect()
 {
