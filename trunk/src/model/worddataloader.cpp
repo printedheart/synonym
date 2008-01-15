@@ -83,13 +83,13 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
                 Node *meaning = wordGraph->addNode(QString::number(synset->hereiam), meaningFactory);
                 meaning->setData(POS, getpos(synset->pos));
                 meaning->setData(MEANING, synset->defn);
-                Edge *edge = wordGraph->addEdge(wordNode->id(), meaning->id(), edgeFactory);
+                wordGraph->addEdge(wordNode->id(), meaning->id(), edgeFactory);
     
                 for (int i = 0; i < synset->wcount; i++) {
                     if (searchWord != synset->words[i]) {
                         Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                         word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
-                        Edge *edge = wordGraph->addEdge(meaning->id(), word->id(), edgeFactory);
+                        wordGraph->addEdge(meaning->id(), word->id(), edgeFactory);
                             
                     }
                 }
@@ -148,7 +148,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
                         if (searchWord != synset->words[i]) {
                             Node *word = wordGraph->addNode(synset->words[i], wordFactory);
                             word->setData(WORD, QString(synset->words[i]).replace(QChar('_'), QChar(' ')));
-                            Edge *edge = wordGraph->addEdge(meaning2->id(), word->id(), edgeFactory);
+                            wordGraph->addEdge(meaning2->id(), word->id(), edgeFactory);
                         }
                     }
                     
@@ -209,3 +209,5 @@ QStringList WordDataLoader::words() const
 
 
             
+
+

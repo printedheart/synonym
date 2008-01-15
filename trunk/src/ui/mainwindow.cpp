@@ -25,8 +25,6 @@
 #include "wordgraph.h"
 #include "worddataloader.h"
 #include "partofspeechlistmodel.h"
-#include "pronunciationsoundholder.h"
-#include "player.h"
 #include "wordnetutil.h"
 #include "relation.h"
 #include "configdialog.h"
@@ -48,7 +46,7 @@ MainWindow::MainWindow()
     m_graphView = new QGraphicsView(scene, this);
     setCentralWidget(m_graphView);
 
-    m_loader = new PythonDataLoader(this);
+    m_loader = new WordDataLoader(this);
     m_graphController = new GraphController(scene, m_loader);
 
     m_graphView->setCacheMode(QGraphicsView::CacheBackground);
@@ -117,16 +115,6 @@ MainWindow::MainWindow()
         
     }
 
-
-
-    //Sound setup
-    m_soundHolder = new PronunciationSoundHolder(this);
-    connect (m_soundHolder, SIGNAL(soundReady(const QString&)),
-             m_graphController, SLOT(soundReady(const QString&)));
-
-    connect(m_scene, SIGNAL(soundButtonClicked(const QString&)),
-            this, SLOT(playSound(const QString&)));
-    
     
    createActions();
    createMenus();
@@ -158,15 +146,6 @@ void MainWindow::lookUpWordNet(const QString &word)
 
   //  m_soundHolder->findPronunciation(word);
         
-}
-
-void MainWindow::playSound(const QString &word)
-{
-    Player player;
-    QIODevice *sound = m_soundHolder->pronunciationSound(word);
-    if (sound) {
-        player.play(sound);
-    }
 }
 
 void MainWindow::nodeActivated(const QModelIndex &index)

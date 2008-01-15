@@ -33,7 +33,6 @@ class GraphController;
 class QListView;
 class PartOfSpeechListModel;
 class PartOfSpeechItemView;
-class PronunciationSoundHolder;
 class GraphScene;
 class QModelIndex;
 class QCheckBox;
@@ -63,13 +62,12 @@ private:
     PartOfSpeechItemView *m_posViews[4];
     PartOfSpeechListModel *m_posModels[4];
     
-    PronunciationSoundHolder *m_soundHolder;
 private slots:
     void callLoadWord();
 
     void lookUpWordNet(const QString &word);
 
-    void playSound(const QString &word);
+    //void playSound(const QString &word);
     
     void dockWidgetVisibilityChanged();
     

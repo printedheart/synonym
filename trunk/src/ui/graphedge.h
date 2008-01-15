@@ -91,21 +91,26 @@ protected:
 private:
     /* Graph */
     QString m_id;
+    
+    GraphicsNode *m_source;
+    GraphicsNode *m_dest;
     WordGraph *m_graph;
-    GraphicsNode *m_source, *m_dest;
+    
     bool m_directed;
     
-    /* WordNet */
-    Relation::Type m_type;
-    
-    /* Representation */
-    QPointF m_sourcePoint, m_destPoint;
-    QPen m_pen;
     
     /* Tooltips */
     QGraphicsPathItem *m_toolTip;
     QGraphicsLineItem *m_pointer;
     QGraphicsEllipseItem *m_connector;
+    
+    /* Representation */
+    QPointF m_sourcePoint, m_destPoint;
+    QPen m_pen;
+    
+    /* WordNet */
+    Relation::Type m_type;
+            
     QString m_toolTipString;
     void createToolTip();
     void adjustToolTipPos();

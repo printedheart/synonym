@@ -101,7 +101,7 @@ relationPage::relationPage(QSettings *settings, QWidget *parent)
         public:
             CheckBoxDelegate(QObject *parent) : QItemDelegate(parent) {}
 
-            void drawFocus(QPainter *p, const QStyleOptionViewItem &o, const QRect &r) const {}
+            void drawFocus(QPainter * /*p*/, const QStyleOptionViewItem & /*o*/, const QRect &/*r*/) const {}
     };
     relationTable->setItemDelegateForColumn(1, new CheckBoxDelegate(relationTable));
     relationTable->setColumnWidth(1, 30);

@@ -56,6 +56,7 @@ void PartOfSpeechListModel::setDataGraph(WordGraph *dataGraph)
 }
 int PartOfSpeechListModel::rowCount(const QModelIndex &parent) const
 {
+    Q_UNUSED(parent);
     return m_meanings.size();
 }
 

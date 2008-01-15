@@ -31,7 +31,7 @@
 
 GraphScene::GraphScene(QObject *parent)
  : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), 
-                  m_enableLayout(true), m_restartLayout(false), m_activeNode(0), m_centralNode(0)
+                  m_enableLayout(true), m_restartLayout(false),  m_centralNode(0), m_activeNode(0)
 {
     m_layout = new ForceDirectedLayout();
 

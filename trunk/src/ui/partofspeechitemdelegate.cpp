@@ -37,6 +37,7 @@ PartOfSpeechItemDelegate::~PartOfSpeechItemDelegate()
 
 QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    Q_UNUSED(option);
     QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
     QFontMetricsF fontMetrics(view->fontMetrics());
     QString str = index.data().toString().trimmed();
@@ -60,7 +61,7 @@ QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, con
                 
         } while (enoughSpace && words.size() > 0);
     }
-    return QSize(width, boundingRect.height() * times - times + 1);
+    return QSize(width, qRound(boundingRect.height() * times) - times + 1);
 }
         
 void PartOfSpeechItemDelegate::paint(QPainter *painter,
