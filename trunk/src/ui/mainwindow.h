@@ -75,6 +75,7 @@ private slots:
     void slotForward();
     
     void initCompleter();
+    void completerLoaderFinished();
     
     void createActions();
     void createMenus();
@@ -83,15 +84,9 @@ private slots:
 private:
     WordGraph *m_currentGraph;    
     
-    
-    
     void configure();
     
     void setNewGraph(WordGraph *graph);
-    
-    QList<QPair<Relation::Type, QCheckBox*> > m_relationCheckBoxes;
-   
-    
     
     QMenu *fileMenu;
     QMenu *m_settingsMenu;
