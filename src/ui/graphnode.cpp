@@ -29,7 +29,7 @@
                 
 #include "graphalgorithms.h"                
 GraphicsNode::GraphicsNode(const QString &id, WordGraph *graph)
-    : m_mass(1.0), m_id(id), m_graph(graph)
+    : QGraphicsItem(), m_id(id), m_graph(graph), m_mass(1.0) 
 {
     m_intermedPos.setX(2.0);
     
@@ -42,7 +42,7 @@ GraphicsNode::~GraphicsNode()
 }
 
 GraphicsNode::GraphicsNode(const GraphicsNode &o)
-    : m_id(o.id()), m_graph(o.graph()), m_mass(o.mass()), m_edges(o.edges())
+    : QGraphicsItem(), m_id(o.id()), m_graph(o.graph()), m_mass(o.mass()), m_edges(o.edges())
 {
     setPos(o.pos());
     setFlags(o.flags());
@@ -199,7 +199,7 @@ void WordGraphicsNode::calculateBoundingRect()
         
     if (!flags().testFlag(QGraphicsItem::ItemIsMovable)) {
         QFont font = m_font;
-        font.setPointSize(m_font.pointSize() * 1.5);
+        font.setPointSize(qRound(m_font.pointSize() * 1.5));
         QFontMetrics metrics(font);
         QRectF rect = metrics.boundingRect(data(WORD).toString());    
         m_rectf = rect.translated(- rect.width() / 2, rect.height() / 8);
@@ -230,7 +230,7 @@ void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     painter->setClipRect(option->exposedRect);
     if (!flags().testFlag(QGraphicsItem::ItemIsMovable)) {
         QFont font = m_font;
-        font.setPointSize(m_font.pointSize() * 1.5);
+        font.setPointSize(qRound(m_font.pointSize() * 1.5));
         painter->setFont(font);
     } else {
         painter->setFont(m_font);
@@ -281,7 +281,7 @@ static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
 int MeaningGraphicsNode::s_radius  = 5;
 
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0), m_radius(s_radius)
+    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0), m_radius(s_radius), m_boundingRect(QRect())
 {
     setZValue(1);
     setAcceptsHoverEvents(true);        
@@ -290,7 +290,7 @@ MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
 
 MeaningGraphicsNode::MeaningGraphicsNode(const MeaningGraphicsNode &o)
     : GraphicsNode(o), m_toolTip(0), m_defItem(0), m_pointer(0), 
-                   m_boundingRect(o.m_boundingRect), m_radius(o.m_radius)
+                   m_radius(o.m_radius), m_boundingRect(o.m_boundingRect)
 {
     setZValue(1);
     setAcceptsHoverEvents(true);
@@ -388,6 +388,7 @@ void MeaningGraphicsNode::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void MeaningGraphicsNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
+    Q_UNUSED(event);
     hideToolTip();   
     graphScene()->signalMouseHoverLeaved(this);
 }

@@ -108,13 +108,14 @@ private:
     int m_timerInterval;
 
     bool m_enableLayout;
-
+    bool m_restartLayout;    
+    
     GraphicsNode *m_centralNode;
     QSvgRenderer *m_soundIconRenderer;
 
     Layout *m_layout;
     
-    bool m_restartLayout;    
+    
     GraphicsNode *m_activeNode;
     
     // Nodes and edges we return in nodes() and edges()

@@ -93,12 +93,15 @@ protected:
 private:    
     QPointF m_newPos;
     QPointF m_intermedPos;
-    double m_mass;
-    QSet<GraphicsEdge*> m_edges;
+    
+    
     
     QString m_id;
     WordGraph *m_graph;
     
+    double m_mass;
+    
+    QSet<GraphicsEdge*> m_edges;
 };
 
 

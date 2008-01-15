@@ -27,8 +27,8 @@
 
 GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
                            GraphicsNode *dest, WordGraph *graph)
-    : m_id(id), m_source(source), m_dest(dest), m_graph(graph), m_directed(false), 
-      m_connector(0), m_pointer(0), m_toolTip(0)     
+    : m_id(id),  m_source(source), m_dest(dest), m_graph(graph), m_directed(false), 
+           m_toolTip(0), m_pointer(0), m_connector(0)     
 {
     m_source->m_edges << this;
     m_dest->m_edges << this;
@@ -43,9 +43,10 @@ GraphicsEdge::GraphicsEdge(const QString &id, GraphicsNode *source,
         
 
 GraphicsEdge::GraphicsEdge(const GraphicsEdge &o)
-    : QGraphicsItem(),  m_id(o.id()), m_source(o.source()), m_dest(o.dest()), 
-      m_graph(o.graph()), 
-      m_connector(0), m_pointer(0), m_toolTip(0),
+    : QGraphicsItem(),  m_id(o.id()), 
+      m_source(o.source()), m_dest(o.dest()), m_graph(o.graph()),  
+      m_directed(o.m_directed),         
+      m_toolTip(0), m_pointer(0), m_connector(0),
       m_pen(o.m_pen), m_type(o.relation())                    
 {
     setAcceptsHoverEvents(true);
@@ -161,6 +162,7 @@ void GraphicsEdge::setPen(QPen pen)
 
 void GraphicsEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+    Q_UNUSED(event);
     if (!m_toolTip) {
         if (relation() != Relation::Undefined) {
             createToolTip();
@@ -178,6 +180,7 @@ void GraphicsEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 }
 void GraphicsEdge::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
+    Q_UNUSED(event);
     if (m_toolTip) {
         setZValue(1);
         m_toolTip->setVisible(false);

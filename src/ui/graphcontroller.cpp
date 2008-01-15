@@ -235,6 +235,7 @@ void GraphController::makeConnected(Node *goal)
 
 void GraphController::soundReady(const QString &word)
 {
+    Q_UNUSED(word);
 /*   WordGraph *wordGraph = m_graphHistory.back().first;
    Node *node = wordGraph->centralNode();
    if (node && node->data(WORD).toString() == word) {

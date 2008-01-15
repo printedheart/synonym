@@ -24,6 +24,8 @@
 #include <QtGui>
 #include <QtCore>
 
+static const double PI = 3.14159265358979323846264338327950288419717;
+static double TWO_PI = 2.0 * PI;
 
 
 ForceDirectedLayout::ForceDirectedLayout()
@@ -246,7 +248,6 @@ void ForceDirectedLayout::run()
     Q_ASSERT_X(scene != 0, "test scene ",  m_animations.begin().key()->id().toLatin1().data());
     bool done = false;
     int count = 0;
-    int nodesCount = m_animations.size();
     while (!done) {
         done = true;
         finishedLayout = false;

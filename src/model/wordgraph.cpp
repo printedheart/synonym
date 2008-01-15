@@ -28,7 +28,7 @@ WordGraph::WordGraph(QObject *parent)
 }
 
 WordGraph::WordGraph(const WordGraph &o)
-    : m_disabledNodes(o.m_disabledNodes), m_disabledEdges(o.m_disabledEdges),
+    : QObject(o.parent()), m_disabledNodes(o.m_disabledNodes), m_disabledEdges(o.m_disabledEdges),
      m_centralNodeId(o.m_centralNodeId), m_signalsEnabled(false)                
 {
     ConstNodeIterator nodeIterEnd = o.m_nodes.constEnd();
