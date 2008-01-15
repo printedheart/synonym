@@ -54,7 +54,7 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
  
     WordGraph *wordGraph = new WordGraph();
     Node *wordNode = wordGraph->addNode(searchWord, wordFactory);
-    wordNode->setData(WORD, searchWord);
+    wordNode->setData(WORD, QString(searchWord).replace('_', ' '));
     
     QList<SynsetPtr> createdSynsets;
     

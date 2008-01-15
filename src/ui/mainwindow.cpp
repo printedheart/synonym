@@ -57,27 +57,32 @@ MainWindow::MainWindow()
     m_graphView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     m_graphView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     m_graphView->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    
+    
+    
 
     QToolBar *toolBar = addToolBar("synonym");
     
-    QPushButton *backButton = new QPushButton("Back", this);
-    QPushButton *forwardButton = new QPushButton("Forward", this);
+    QPushButton *backButton = new QPushButton("Back", toolBar);
+    QPushButton *forwardButton = new QPushButton("Forward", toolBar);
     toolBar->addWidget(backButton);
     toolBar->addWidget(forwardButton);
-    connect (backButton, SIGNAL(clicked()), 
-             this, SLOT(slotBack()));
-    connect (forwardButton, SIGNAL(clicked()), 
-             this, SLOT(slotForward()));
+    toolBar->addSeparator();
+    connect (backButton, SIGNAL(clicked()), this, SLOT(slotBack()));
+    connect (forwardButton, SIGNAL(clicked()), this, SLOT(slotForward()));
     
     m_wordLine = new QLineEdit(toolBar);
+    m_wordLine->setFixedWidth(300);
     toolBar->addWidget(m_wordLine);
-
-    connect (m_wordLine, SIGNAL(returnPressed()),
-            this, SLOT(callLoadWord()));
-    connect (scene, SIGNAL(nodeClicked(const QString &)),
-            this, SLOT(lookUpWordNet(const QString&)));
-    connect (scene, SIGNAL(nodeMouseHovered(const QString&)),
-             this, SLOT(nodeActivated(const QString&)));
+    QPushButton *searchButton = new QPushButton(tr("Search"), toolBar);
+    toolBar->addWidget(searchButton);
+    addToolBar(" ");
+    
+    
+    connect(searchButton, SIGNAL(clicked()), this, SLOT(callLoadWord()));
+    connect (m_wordLine, SIGNAL(returnPressed()), this, SLOT(callLoadWord()));
+    connect (scene, SIGNAL(nodeClicked(const QString &)),this, SLOT(lookUpWordNet(const QString&)));
+    connect (scene, SIGNAL(nodeMouseHovered(const QString&)),this, SLOT(nodeActivated(const QString&)));
 
 
 
@@ -142,9 +147,6 @@ void MainWindow::lookUpWordNet(const QString &word)
     if (dataGraph) {
         setNewGraph(dataGraph);
     }
-    
-
-  //  m_soundHolder->findPronunciation(word);
         
 }
 
