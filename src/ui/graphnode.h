@@ -170,7 +170,6 @@ private:
     void createToolTip();
     void showToolTip(const QPointF &pos);
     void hideToolTip();
-    void adjustToolTipPos();
     
     static int s_radius;
     int m_radius;
