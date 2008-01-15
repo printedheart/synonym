@@ -276,7 +276,7 @@ void WordGraphicsNode::setFont(QFont font)
     MeaningGraphicsNode definition
 */
 
-static const QColor colors[4] = { Qt::red, Qt::green, Qt::blue, Qt::yellow };
+static const QColor colors[4] = { QColor(213, 28, 8), QColor(152, 169, 47), QColor(222, 172, 47), QColor(86, 20, 122) };
 
 int MeaningGraphicsNode::s_radius  = 5;
 
