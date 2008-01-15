@@ -158,21 +158,10 @@ ConfigDialog::ConfigDialog()
     connect(m_applyButton, SIGNAL(clicked()), this, SLOT(applySettings()));
     connect(closeButton, SIGNAL(clicked()), this, SLOT(close()));
 
-//     QHBoxLayout *horizontalLayout = new QHBoxLayout;
-//     horizontalLayout->addWidget(contentsWidget);
-//     horizontalLayout->addWidget(pagesWidget, 1);
-// 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->addStretch(1);
     buttonsLayout->addWidget(m_applyButton);
     buttonsLayout->addWidget(closeButton);
-// 
-//     QVBoxLayout *mainLayout = new QVBoxLayout;
-//     mainLayout->addLayout(horizontalLayout);
-//     mainLayout->addStretch(1);
-//     mainLayout->addSpacing(12);
-//     mainLayout->addLayout(buttonsLayout);
-//     setLayout(mainLayout);
     
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->addWidget(contentsWidget, 0, 0, 2, 1);
