@@ -174,17 +174,43 @@ void MainWindow::nodeActivated(const QString &id)
     }
 }
 
+class CompleterLoader : public QThread
+{
+Q_OBJECT
+public: 
+    CompleterLoader(QObject *parent, IWordDataLoader *loader):
+        QThread(parent), m_loader(loader) {}
+    void run() {
+        words = m_loader->words();
+    }
+               
+    QStringList words;
+    IWordDataLoader *m_loader;
+};
+
 void MainWindow::initCompleter()
 {
     configure();
     //This could take a second or two to load.
-//     QStringList words = m_loader->words();   
-//     QCompleter *completer = new QCompleter(words, this);
-//     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-//     completer->setCaseSensitivity(Qt::CaseInsensitive);
-//     m_wordLine->setCompleter(completer);
+    
+    CompleterLoader *l = new CompleterLoader(this, m_loader);
+    l->setObjectName("completerloader");
+    connect (l, SIGNAL(finished()), this, SLOT(completerLoaderFinished()));
+    l->start();
 }
     
+void MainWindow::completerLoaderFinished()
+{
+    CompleterLoader *l = findChild<CompleterLoader*>("completerloader");
+    QStringList words = l->words;
+    l->words.clear();
+    delete l;   
+    
+    QCompleter *completer = new QCompleter(words, this);
+    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_wordLine->setCompleter(completer);
+}    
 
 
 void MainWindow::dockWidgetVisibilityChanged()
@@ -275,3 +301,8 @@ void MainWindow::showConfigDialog()
     if (dialog.settingsChanged())
         configure();
 }
+
+#include "mainwindow.moc"
+                 
+                 
+                 
