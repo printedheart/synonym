@@ -36,6 +36,7 @@ class PartOfSpeechItemView;
 class GraphScene;
 class QModelIndex;
 class QCheckBox;
+class Layout;
 
 /**
     @author Sergejs Melderis <sergey.melderis@gmail.com>
@@ -81,8 +82,11 @@ private slots:
     void createMenus();
     
     void showConfigDialog();
+    
 private:
     WordGraph *m_currentGraph;    
+    Layout *m_layout;
+    
     
     void configure();
     

@@ -1,7 +1,9 @@
 TEMPLATE = app
 
 
-INCLUDEPATH = . src src/ui src/model 
+INCLUDEPATH = . src src/ui src/model
+
+FORMS = src/ui/displayconfig.ui 
 
 HEADERS = src/model/wordgraph.h \
         src/model/worddataloader.h \
@@ -18,12 +20,13 @@ HEADERS = src/model/wordgraph.h \
 #        src/ui/wordsoundholder.h \
 #        src/ui/wordsoundimpl.h \
         src/ui/layout.h \
-        src/ui/configdialog.h \
+        src/ui/configdialog.h \ 
+#        src/ui/ui_displayconfig.h \
         src/model/graphalgorithms.h \
         src/model/wordnetutil.h \
-        src/model/pythondataloader.h \
+#        src/model/pythondataloader.h \
         src/model/iworddataloader.h \
-        src/model/relation.h
+        src/model/relation.h 
 #        src/test/graphtest.h
 
 
@@ -44,16 +47,16 @@ SOURCES = src/model/wordgraph.cpp \
 #        src/ui/wordsoundimpl.cpp \
         src/ui/configdialog.cpp \
         src/main.cpp \
-        src/model/pythondataloader.cpp \
-        src/model/relation.cpp
+#        src/model/pythondataloader.cpp \
+        src/model/relation.cpp 
 
 #        src/test/graphtest.cpp 
 
 CONFIG += warn_on \
       qt \
-      debug \
       rtti \
-#      release 
+      thread \
+      release 
 #qtestlib
 
 TARGET = bin/synonym
@@ -68,15 +71,23 @@ svg
 
 DESTDIR = .
 
-INCLUDEPATH += /usr/include/kde 
-INCLUDEPATH += /usr/local/WordNet-3.0/include
-INCLUDEPATH += /home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0/src
-INCLUDEPATH += /usr/include/python2.5
 
+
+
+# This is only when we use python to load wordnet
+#INCLUDEPATH += /home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0/src
+#INCLUDEPATH += /usr/include/python2.5
+#LIBS += -L$(PYTHONQT_ROOT)/lib -lPythonQt
+#LIBS += -L$(PYTHON_LIB) -lpython2.5
+
+
+INCLUDEPATH += /usr/local/WordNet-3.0/include
 LIBS += -L/usr/local/WordNet-3.0/lib \
 -lWN
 
-LIBS += -L$(PYTHONQT_ROOT)/lib -lPythonQt
-LIBS += -L$(PYTHON_LIB) -lpython2.5
-#RESOURCES += src/synonym.qrc
+
+RESOURCES += src/synonym.qrc
+
+DEFINES = QT_NO_DEBUG_OUTPUT
+
 

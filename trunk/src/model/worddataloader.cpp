@@ -160,9 +160,9 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
         
     }
     
-    foreach (SynsetPtr synset, createdSynsets) 
-        free_syns(synset);
-    
+     foreach (SynsetPtr synset, createdSynsets) 
+         free_syns(synset);
+     
     
     
     //If there is only one node, meaning that is the central node

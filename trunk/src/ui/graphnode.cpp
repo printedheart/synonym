@@ -149,13 +149,12 @@ GraphScene * GraphicsNode::graphScene() const
 }
         
 
-QFont WordGraphicsNode::s_font = QFont();
 
 /**
     WordGraphicsNode definition
 */
 WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph), m_font(s_font)
+    :GraphicsNode(id, graph)
 {
     setZValue(2);
 }
@@ -187,10 +186,6 @@ QRectF WordGraphicsNode::boundingRect() const
     if (m_rectf.isNull() || qAbs(pos().x() - m_prevPos.x()) > 1.0) {
         const_cast<WordGraphicsNode*>(this)->calculateBoundingRect();    
     }  
-    if (m_font != s_font) {
-        const_cast<WordGraphicsNode*>(this)->m_font = s_font;
-        const_cast<WordGraphicsNode*>(this)->calculateBoundingRect();    
-    }
     return m_rectf;
 }
 
@@ -266,22 +261,23 @@ void WordGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsItem::mousePressEvent(event);
 }
 
-void WordGraphicsNode::setFont(QFont font)
+void WordGraphicsNode::setFont(const QFont &font)
 {
-    s_font = font;
+    m_font = font;
+    calculateBoundingRect();
 }
+
 
 
 /**
     MeaningGraphicsNode definition
 */
 
-static const QColor colors[4] = { QColor(213, 28, 8), QColor(152, 169, 47), QColor(222, 172, 47), QColor(86, 20, 122) };
-
-int MeaningGraphicsNode::s_radius  = 5;
+static const QColor DEFAULT_COLORS[4] = { QColor(213, 28, 8), QColor(152, 169, 47), QColor(222, 172, 47), QColor(86, 20, 122) };
+static const int DEFAULT_RADIUS = 5;
 
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)
-    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0), m_radius(s_radius), m_boundingRect(QRect())
+    :GraphicsNode(id, graph), m_toolTip(0), m_defItem(0), m_pointer(0), m_radius(DEFAULT_RADIUS), m_boundingRect(QRect())
 {
     setZValue(1);
     setAcceptsHoverEvents(true);        
@@ -311,8 +307,6 @@ MeaningGraphicsNode * MeaningGraphicsNode::clone() const
 
 QRectF MeaningGraphicsNode::boundingRect() const
 {
-    if (m_radius != s_radius) 
-        const_cast<MeaningGraphicsNode*>(this)->calculateBoundingRect();        
     return m_boundingRect;
 }
 
@@ -328,7 +322,7 @@ void MeaningGraphicsNode::paint(QPainter *painter, const QStyleOptionGraphicsIte
 {
     Q_UNUSED(widget);
     painter->setClipRect( option->exposedRect );
-    painter->setBrush(QBrush(colors[data(POS).toInt() - 1]));
+    painter->setBrush(QBrush(circleColor()));
     painter->setPen(Qt::black);
     painter->drawEllipse(-m_radius, -m_radius, 2 * m_radius, 2 * m_radius);
 }
@@ -470,5 +464,25 @@ void MeaningGraphicsNode::calculateBoundingRect()
                             -m_radius - adjust, -m_radius - adjust,
                             m_radius * 2 + adjust * 2, m_radius * 2 + adjust * 2); 
 }
+
+QColor MeaningGraphicsNode::circleColor() const
+{
+    if (m_color.isValid())
+        return m_color;
+    return DEFAULT_COLORS[data(POS).toInt() - 1];
+}
+
+void MeaningGraphicsNode::setCircleColor(const QColor &color)
+{
+    m_color = color;
+}
+
+void MeaningGraphicsNode::setCircleRadius(int radius)
+{
+    m_radius = radius;
+    calculateBoundingRect();        
+}
+
+
 
 

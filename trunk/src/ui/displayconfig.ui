@@ -1,0 +1,356 @@
+<ui version="4.0" >
+ <class>DisplayPageUi</class>
+ <widget class="QWidget" name="DisplayPageUi" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>878</width>
+    <height>697</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" >
+   <item>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="maximumSize" >
+      <size>
+       <width>16777215</width>
+       <height>150</height>
+      </size>
+     </property>
+     <property name="currentIndex" >
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="fontTab" >
+      <attribute name="title" >
+       <string>Fonts</string>
+      </attribute>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QWidget" native="1" name="widget" >
+         <layout class="QHBoxLayout" >
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>61</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize" >
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text" >
+             <string>Font</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFontComboBox" name="fontComboBox" />
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" native="1" name="widget_2" >
+         <layout class="QHBoxLayout" >
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_5" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string>Font size</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="fontSizeSpinBox" >
+            <property name="minimum" >
+             <number>8</number>
+            </property>
+            <property name="maximum" >
+             <number>16</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_3" >
+      <attribute name="title" >
+       <string>Circles</string>
+      </attribute>
+      <layout class="QHBoxLayout" >
+       <item>
+        <widget class="QGroupBox" name="groupBox_2" >
+         <property name="title" >
+          <string>Circle size</string>
+         </property>
+         <layout class="QVBoxLayout" >
+          <item>
+           <widget class="QSlider" name="circleSizeSlider" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimum" >
+             <number>3</number>
+            </property>
+            <property name="maximum" >
+             <number>10</number>
+            </property>
+            <property name="value" >
+             <number>5</number>
+            </property>
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox" >
+         <property name="title" >
+          <string>Part of Speech Colors</string>
+         </property>
+         <layout class="QGridLayout" >
+          <item row="0" column="0" >
+           <widget class="QPushButton" name="nounColorButton" >
+            <property name="styleSheet" >
+             <string>background-color: #d51c08</string>
+            </property>
+            <property name="text" >
+             <string>Nouns</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" >
+           <widget class="QPushButton" name="adjColorButton" >
+            <property name="styleSheet" >
+             <string>background-color: #deac2f</string>
+            </property>
+            <property name="text" >
+             <string>Adjectives</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" >
+           <widget class="QPushButton" name="advColorButton" >
+            <property name="styleSheet" >
+             <string>background-color: #56147a</string>
+            </property>
+            <property name="text" >
+             <string>Adverbs</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" >
+           <widget class="QPushButton" name="verbColorButton" >
+            <property name="styleSheet" >
+             <string>background-color: #98a92f</string>
+            </property>
+            <property name="text" >
+             <string>Verbs</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2" >
+      <attribute name="title" >
+       <string>Edges</string>
+      </attribute>
+      <layout class="QGridLayout" >
+       <item row="0" column="0" >
+        <widget class="QLabel" name="label" >
+         <property name="text" >
+          <string>Edge length</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>50</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="2" >
+        <widget class="QSlider" name="edgeLenghSlider" >
+         <property name="minimum" >
+          <number>40</number>
+         </property>
+         <property name="maximum" >
+          <number>130</number>
+         </property>
+         <property name="singleStep" >
+          <number>5</number>
+         </property>
+         <property name="sliderPosition" >
+          <number>100</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" >
+        <widget class="QLabel" name="label_2" >
+         <property name="text" >
+          <string>Edge width</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>50</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="2" >
+        <widget class="QSlider" name="edgeWidthSlider" >
+         <property name="minimum" >
+          <number>3</number>
+         </property>
+         <property name="maximum" >
+          <number>20</number>
+         </property>
+         <property name="value" >
+          <number>5</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance" >
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" >
+        <widget class="QLabel" name="label_3" >
+         <property name="text" >
+          <string>Line contranst</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1" >
+        <spacer>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType" >
+          <enum>QSizePolicy::Maximum</enum>
+         </property>
+         <property name="sizeHint" >
+          <size>
+           <width>50</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="2" >
+        <widget class="QSlider" name="lineContrastSlider" >
+         <property name="maximum" >
+          <number>255</number>
+         </property>
+         <property name="value" >
+          <number>140</number>
+         </property>
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance" >
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGraphicsView" name="graphicsView" />
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

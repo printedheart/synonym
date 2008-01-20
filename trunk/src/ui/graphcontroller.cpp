@@ -51,7 +51,7 @@ static void disturbLayout(WordGraph *graph)
         double y = node->pos().y() - (qrand() % 30) * sign;
         node->setPos(x, y); 
     }
-}
+}  
 
 static void setNewGraphToScene(GraphScene *scene, WordGraph *graph)
 {
@@ -75,7 +75,24 @@ static void setNewGraphToScene(GraphScene *scene, WordGraph *graph)
     scene->setCentralNode(graph->centralNode());
     scene->setLayout(true);
     scene->itemMoved();
-}    
+}   
+ 
+static void adjustMass(WordGraph *graph)
+{
+    QList<GraphicsNode*> nodes = graph->nodes();
+    foreach (GraphicsNode *node, nodes) {
+        if (IsMeaning() (node)) {
+            QSet<GraphicsNode*> neighbors = node->neighbors();
+            if (neighbors.size() > 6) {
+                foreach (GraphicsNode *neighbor, neighbors) {
+                    if (neighbor != graph->centralNode()) {
+                        neighbor->setMass(0.7);
+                    }
+                }
+            }
+        }
+    }
+} 
 
 
 GraphController::GraphController(GraphScene *graphScene,
@@ -100,51 +117,53 @@ GraphController::~GraphController()
 
 WordGraph*  GraphController::makeGraph(const QString &word)
 {
-    if (m_scene->centralNode() && m_scene->centralNode()->id() == word)
-        return m_graph;
-    
-    GraphicsNode *centralNode;
-    qDebug() << "makeGraph(" << word << ")";
-    if (m_graph && m_graph->node(word) && IsMeaning()(m_graph->node(word))) {
-        m_backHistory.append(m_graph->clone());
-        m_graph->setCentralNode(word);
-        centralNode = m_graph->node(word);
-        m_graph->enableAll();     
-        // Reset current central node
-        GraphicsNode *currentCentralNode = m_scene->centralNode();
-        currentCentralNode->setMass(1.0);
-        currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
-    } else {
-        QString searchWord = QString(word).replace(' ', "_");
-        WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
-        if (!newGraph)
-            return m_graph;
+    if (!m_scene->centralNode() || m_scene->centralNode()->id() != word) {
+        GraphicsNode *centralNode;
+        qDebug() << "makeGraph(" << word << ")";
+        if (m_graph && m_graph->node(word) && IsMeaning()(m_graph->node(word))) {
+            m_backHistory.append(m_graph->clone());
+            m_graph->setCentralNode(word);
+            centralNode = m_graph->node(word);
+            m_graph->enableAll();     
+            // Reset current central node
+            GraphicsNode *currentCentralNode = m_scene->centralNode();
+            currentCentralNode->setMass(1.0);
+            currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
+        } else {
+            QString searchWord = QString(word).replace(' ', "_");
+            WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
+            if (!newGraph)
+                return m_graph;
+            
+            centralNode = newGraph->node(searchWord);
+            if (!centralNode) {
+                delete newGraph;
+                return m_graph; 
+            }
+            
+            if (m_graph)
+                m_backHistory.append(m_graph);
+            
+            m_graph = newGraph;
+            m_graph->setCentralNode(searchWord);
+        } 
         
-        centralNode = newGraph->node(searchWord);
-        if (!centralNode) {
-            delete newGraph;
-            return m_graph; 
+        if (m_backHistory.size() > HISTORY_SIZE) {
+            WordGraph *graph = m_backHistory.takeFirst();
+            delete graph;
         }
+        foreach (WordGraph *g, m_forwardHistory) {
+            g->deleteLater();
+        }
+        m_forwardHistory.clear();
         
-        if (m_graph)
-            m_backHistory.append(m_graph);
-        
-        m_graph = newGraph;
-        m_graph->setCentralNode(searchWord);
-    } 
-    
-    if (m_backHistory.size() > HISTORY_SIZE) {
-        WordGraph *graph = m_backHistory.takeFirst();
-        delete graph;
+        centralNode->setMass(10);
+        centralNode->setFlag(QGraphicsItem::ItemIsMovable, false); 
+        filterGraphNodes();
+        adjustMass(m_graph);
     }
-    foreach (WordGraph *g, m_forwardHistory) {
-        g->deleteLater();
-    }
-    m_forwardHistory.clear();
     
-    centralNode->setMass(10);
-    centralNode->setFlag(QGraphicsItem::ItemIsMovable, false); 
-    filterGraphNodes();
+    applyUserSettings();
     setNewGraphToScene(m_scene, m_graph);
     m_graph->setEnabledSignals(true);
     return m_graph;
@@ -197,6 +216,7 @@ WordGraph * GraphController::previousGraph()
     m_forwardHistory.append(m_graph);
     m_graph = lastGraph;
     disturbLayout(m_graph);
+    applyUserSettings();
     setNewGraphToScene(m_scene, m_graph);
     return m_graph;
 }
@@ -211,6 +231,7 @@ WordGraph * GraphController::nextGraph()
     m_backHistory.append(m_graph);
     m_graph = lastGraph;
     disturbLayout(m_graph);
+    applyUserSettings();
     setNewGraphToScene(m_scene, m_graph);
     return m_graph;
 }
@@ -265,24 +286,9 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
     
     m_graph->setEnabledSignals(false);
     m_graph->enableAll();
-    QList<GraphicsNode*> nodes = m_graph->nodes();
-    QSet<GraphicsNode*> visualNodes;
-    
-    if (IsWord() (m_graph->centralNode())) {
-        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
-                FunctionCombiner<VisualFilter, IsPOS>(VisualFilter(), IsPOS(m_poses)));
-    } else {
-        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
-                FunctionCombiner<MeaningVisualFilter, IsPOS>(MeaningVisualFilter(), IsPOS(m_poses)));
-    }
-  
-    foreach (GraphicsNode *node, nodes) {
-        if (!visualNodes.contains(node)) {
-            m_graph->disableNode(node);
-        } 
-    }
+    filterGraphNodes();
     m_graph->setEnabledSignals(true);
-    makeConnected(m_graph->centralNode());
+    applyUserSettings();
     updateSceneNodes();
 }
 
@@ -315,6 +321,7 @@ void GraphController::setrelations(Relation::Types relTypes)
     }
     
     makeConnected(m_graph->centralNode());
+    applyUserSettings();
     updateSceneNodes();
 }
     
@@ -353,6 +360,53 @@ void GraphController::updateSceneNodes()
     }
     m_scene->setLayout(true);
     m_scene->itemMoved();
+}
+
+
+void GraphController::applyUserSettings()
+{
+    QSettings settings("http://code.google.com/p/synonym/", "synonym");
+    if (!settings.childGroups().contains("display"))
+        return;
+    
+    settings.beginGroup("display");
+    
+    //word nodes
+    QFont font;
+    font.setFamily(settings.value("Font Family").toString());
+    font.setPointSize(settings.value("Font Size").toInt());
+    QList<Node*> wordNodes = m_graph->nodes(IsWord());
+    for (int i = 0; i < wordNodes.size(); i++) {
+        WordGraphicsNode *wordNode = static_cast<WordGraphicsNode*>(wordNodes[i]);
+        wordNode->setFont(font);
+    }
+    
+    // meaning nodes
+    const QColor posColors[4] = {
+        QColor(settings.value("Noun Color").toString().trimmed()), 
+        QColor(settings.value("Verb Color").toString().trimmed()),
+        QColor(settings.value("Adjective Color").toString().trimmed()),
+        QColor(settings.value("Adberb Color").toString().trimmed())
+    };
+    int circleRadius = settings.value("Circle Radius").toInt();                     
+    QList<Node*> meaningNodes = m_graph->nodes(IsMeaning());
+    for (int i = 0; i < meaningNodes.size(); i++) {
+        MeaningGraphicsNode *meaningNode = static_cast<MeaningGraphicsNode*>(meaningNodes[i]);
+        QColor c = posColors[meaningNode->data(POS).toInt() - 1];
+        if (c.isValid())
+            meaningNode->setCircleColor(c);
+        // else invalid, node will use static default
+        meaningNode->setCircleRadius(circleRadius);
+    }
+    
+    // edges
+    double edgeWidth = (double) settings.value("Edge Width").toInt() / 10;
+    int edgeLineContrast = settings.value("Edge Contrast").toInt();
+    QList<Edge*> edges = m_graph->edges();
+    foreach (Edge *edge, edges) {
+        edge->setLineWidth(edgeWidth);
+        edge->setLineContrast(edgeLineContrast);
+    }
 }
     
 

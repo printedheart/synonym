@@ -30,14 +30,6 @@
  */
 
 
-/*
-    
-    I am using typedefs here because application can be potentially extended 
-    to 3D graphs, using OpenGL. The graph itself should not care about actual
-    implementation of nodes. These typedefs can be replaced by abstract classes
-    so the graph code does not change. Perhaps there is better way to do it, 
-    and 
-*/
 typedef GraphicsNode Node;
 typedef GraphicsEdge Edge;
 

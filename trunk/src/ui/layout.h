@@ -47,7 +47,14 @@ public:
     virtual bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) = 0;
     
     virtual void stop() {}
+    
+    virtual void setRestDistance(int distance) { m_restDistance = distance; }
+    
+protected:    
+    int m_restDistance;
 };
+
+
 
  
 
@@ -59,7 +66,7 @@ class ForceDirectedLayout : public QThread, public Layout
 {
 Q_OBJECT
 public:
-    ForceDirectedLayout();
+    ForceDirectedLayout(QObject *parent = 0);
     ~ForceDirectedLayout();
 
     // TODO: make the following parameters configurable.
@@ -75,6 +82,9 @@ private slots:
     
     void wakeUp();
 private:
+    void preLayout(GraphicsNode *rootNode);
+    void layoutNodes(GraphicsNode *node, QSet<GraphicsNode*> &visitSet);
+    
     bool layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
     bool layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
     

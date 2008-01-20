@@ -155,9 +155,18 @@ void GraphicsEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QW
     painter->drawLine(line);
 }
 
-void GraphicsEdge::setPen(QPen pen)
+
+void GraphicsEdge::setLineWidth(double width)
 {
-    m_pen = pen;
+    m_pen.setWidthF(width);
+}
+
+
+void GraphicsEdge::setLineContrast(int value)
+{
+    QColor color;
+    color.setHsv(0, 0, value);
+    m_pen.setColor(color);
 }
 
 void GraphicsEdge::hoverEnterEvent(QGraphicsSceneHoverEvent *event)

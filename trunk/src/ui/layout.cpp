@@ -28,10 +28,12 @@ static const double PI = 3.14159265358979323846264338327950288419717;
 static double TWO_PI = 2.0 * PI;
 
 
-ForceDirectedLayout::ForceDirectedLayout()
+ForceDirectedLayout::ForceDirectedLayout(QObject *parent)
+    :QThread(parent)
 {
     m_abort = false;
     centralNode = 0;
+    m_restDistance = 100;
     connect (this, SIGNAL(finished()), this, SLOT (wakeUp()));
 }
 
@@ -56,7 +58,7 @@ static bool needsPreLayout(GraphicsNode *rootNode)
     return false;
 }
 
-static void layoutNodes(GraphicsNode *node,
+void ForceDirectedLayout::layoutNodes(GraphicsNode *node,
                         QSet<GraphicsNode*> &visitSet)
 {
     QSet<GraphicsNode*> neighbors = node->outNeighbors();
@@ -84,8 +86,8 @@ static void layoutNodes(GraphicsNode *node,
     foreach (GraphicsNode *child, children) {
         visitSet << child;
         
-        QPointF childPos(ForceDirectedLayout::REST_DISTANCE * cos(phi),
-                         ForceDirectedLayout::REST_DISTANCE * sin(phi));
+        QPointF childPos(m_restDistance * cos(phi),
+                         m_restDistance * sin(phi));
         childPos += node->scenePos();
         child->setPos(childPos);
         phi += angleIncrement;
@@ -100,7 +102,7 @@ static void layoutNodes(GraphicsNode *node,
 
 // This helper method greatly speeds up the layouting algorithm by 
 // arranging nodes in a tree-like layout.
-static void preLayout(GraphicsNode *rootNode)
+void ForceDirectedLayout::preLayout(GraphicsNode *rootNode)
 {
     qDebug() << "preLayout()" << rootNode->id();
     rootNode->setPos(0.0, 0.0);
@@ -312,7 +314,7 @@ void ForceDirectedLayout::run()
             if (source->neighbors().size() > 10 || dest->neighbors().size() > 10)
                 sizeCoeff = 0.8;
             if (distance > 0) {
-                qreal force = -(STIFFNESS * sizeCoeff * (REST_DISTANCE - distance));
+                qreal force = -(STIFFNESS * sizeCoeff * (m_restDistance - distance));
         
                 sourceAnimation.force += QPointF(force * (dx / distance), force * ( dy / distance));
                 destAnimation.force += QPointF(-force * (dx / distance), -force * (dy / distance));
@@ -416,7 +418,7 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
         if (edge->source()->neighbors().size() > 10 || edge->dest()->neighbors().size() > 10)
             sizeCoeff = 0.8;
         if (distance > 0) {
-            qreal force = -(STIFFNESS * sizeCoeff * (REST_DISTANCE - distance));
+            qreal force = -(STIFFNESS * sizeCoeff * (m_restDistance - distance));
         
             resultForces[edge->source()] += QPointF(force * (dx / distance), force * ( dy / distance));
             resultForces[edge->dest()] += QPointF(-force * (dx / distance), -force * (dy / distance));
