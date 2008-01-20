@@ -36,7 +36,7 @@ class GraphScene : public QGraphicsScene
 {
 Q_OBJECT
 public:
-    GraphScene(QObject *parent = 0);
+    GraphScene(Layout *layout, QObject *parent = 0);
 
     ~GraphScene();
 
@@ -104,6 +104,8 @@ protected:
     
     
 private:
+    Layout *m_layout;
+    
     int m_timerId;
     int m_timerInterval;
 
@@ -113,7 +115,7 @@ private:
     GraphicsNode *m_centralNode;
     QSvgRenderer *m_soundIconRenderer;
 
-    Layout *m_layout;
+    
     
     
     GraphicsNode *m_activeNode;

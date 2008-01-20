@@ -29,11 +29,10 @@
                        
 #include <QtDebug>
 
-GraphScene::GraphScene(QObject *parent)
- : QGraphicsScene(parent), m_timerId(0), m_timerInterval(10), 
+GraphScene::GraphScene(Layout *layout, QObject *parent)
+ : QGraphicsScene(parent), m_layout(layout),  m_timerId(0), m_timerInterval(10), 
                   m_enableLayout(true), m_restartLayout(false),  m_centralNode(0), m_activeNode(0)
 {
-    m_layout = new ForceDirectedLayout();
 
 }
 

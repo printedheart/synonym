@@ -28,17 +28,19 @@
 #include "wordnetutil.h"
 #include "relation.h"
 #include "configdialog.h"
+#include "layout.h"
 
-#include "pythondataloader.h"
+//#include "pythondataloader.h"
 
 #include <QtGui>
 #include <QtCore>
 
         
 MainWindow::MainWindow()
- : QMainWindow()
+ : QMainWindow(), m_currentGraph(0)
 {
-    GraphScene *scene = new GraphScene(this);
+    m_layout = new ForceDirectedLayout();
+    GraphScene *scene = new GraphScene(m_layout, this);
     m_scene = scene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     scene->setSceneRect(-800, -800, 1600, 1600);
@@ -58,8 +60,6 @@ MainWindow::MainWindow()
     m_graphView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     m_graphView->setResizeAnchor(QGraphicsView::AnchorViewCenter);
     
-    
-    
 
     QToolBar *toolBar = addToolBar("synonym");
     
@@ -71,15 +71,16 @@ MainWindow::MainWindow()
     connect (backButton, SIGNAL(clicked()), this, SLOT(slotBack()));
     connect (forwardButton, SIGNAL(clicked()), this, SLOT(slotForward()));
     
+    QLabel *label = new QLabel(" Enter a Word: ", toolBar);
+    toolBar->addWidget(label);
     m_wordLine = new QLineEdit(toolBar);
+    m_wordLine->setObjectName("inputline");
     m_wordLine->setFixedWidth(300);
     toolBar->addWidget(m_wordLine);
-    QPushButton *searchButton = new QPushButton(tr("Search"), toolBar);
-    toolBar->addWidget(searchButton);
+    QAction *searchAct = toolBar->addAction(QIcon(":pics/synonymicon3.png"), "Search");
     addToolBar(" ");
     
-    
-    connect(searchButton, SIGNAL(clicked()), this, SLOT(callLoadWord()));
+    connect (searchAct, SIGNAL(triggered()), this, SLOT(callLoadWord()));
     connect (m_wordLine, SIGNAL(returnPressed()), this, SLOT(callLoadWord()));
     connect (scene, SIGNAL(nodeClicked(const QString &)),this, SLOT(lookUpWordNet(const QString&)));
     connect (scene, SIGNAL(nodeMouseHovered(const QString&)),this, SLOT(nodeActivated(const QString&)));
@@ -123,8 +124,9 @@ MainWindow::MainWindow()
     
    createActions();
    createMenus();
+   
    //Zack's Rusin advice. http://developer.kde.org/documentation/other/mistakes.html
-   QTimer::singleShot(1000, this, SLOT(initCompleter()));
+   QTimer::singleShot(0, this, SLOT(initCompleter()));
 }
 
 
@@ -193,8 +195,8 @@ public:
 void MainWindow::initCompleter()
 {
     configure();
-    //This could take a second or two to load.
     
+    //This could take a second or two to load.
     CompleterLoader *l = new CompleterLoader(this, m_loader);
     l->setObjectName("completerloader");
     connect (l, SIGNAL(finished()), this, SLOT(completerLoaderFinished()));
@@ -205,13 +207,12 @@ void MainWindow::completerLoaderFinished()
 {
     CompleterLoader *l = findChild<CompleterLoader*>("completerloader");
     QStringList words = l->words;
-    l->words.clear();
     delete l;   
     
     QCompleter *completer = new QCompleter(words, this);
     completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
-    m_wordLine->setCompleter(completer);
+    m_wordLine->setCompleter(completer);    
 }    
 
 
@@ -228,12 +229,8 @@ void MainWindow::dockWidgetVisibilityChanged()
 }
 
 
-// This is not implemented yet.
 void MainWindow::configure()
-{
-    WordGraphicsNode::setFont(QFont("Dejavu Sans", 8, QFont::Normal));
-    
-    
+{    
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     if (settings.childGroups().contains("relations")) {
         Relation::Types userTypes;
@@ -250,6 +247,11 @@ void MainWindow::configure()
         m_graphController->setrelations(userTypes);
     } else {
         m_graphController->setrelations(Relation::allTypes());
+    }
+    if (settings.childGroups().contains("display")) {
+        settings.beginGroup("display");
+        int edgeRestDistance = settings.value("Edge Length").toInt();
+        m_layout->setRestDistance(edgeRestDistance);
     }
 }
 
@@ -298,10 +300,14 @@ void MainWindow::createActions()
 
 void MainWindow::showConfigDialog()
 {
-    ConfigDialog dialog;
+    ConfigDialog dialog(m_loader);
     dialog.exec();
     if (dialog.settingsChanged())
         configure();
+    if (m_currentGraph) {
+        m_graphController->makeGraph(m_currentGraph->centralNode()->id());
+    }
+        
 }
 
 #include "mainwindow.moc"

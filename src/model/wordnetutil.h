@@ -188,6 +188,11 @@ public:
                 filter(outNeighbors.constBegin(), outNeighbors.constEnd(), words, IsWord());
                 if (words.size() > 0) {
                     disabledNodes.unite(meanings);
+                    while (words.size() > 13) {
+                        Node *first = *words.begin();
+                        disabledNodes.insert(first);
+                        words.remove(first);
+                    }
                 } else {
                     Node *lnn = *outNeighbors.constBegin();
                     foreach (Node *n, outNeighbors) {

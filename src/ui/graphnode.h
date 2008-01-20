@@ -94,8 +94,6 @@ private:
     QPointF m_newPos;
     QPointF m_intermedPos;
     
-    
-    
     QString m_id;
     WordGraph *m_graph;
     
@@ -124,12 +122,11 @@ public:
 
     void showSoundButton();
     
-    static void setFont(QFont font);
+    void setFont(const QFont &font);
 protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    static QFont s_font;
     QFont m_font;
     QPointF m_mousePressPos;
     
@@ -148,11 +145,11 @@ public:
     
     virtual MeaningGraphicsNode *clone() const;
     
-    static void setRadius(int radius) { s_radius = radius; }
-    
+    void setCircleRadius(int radius);
+    void setCircleColor(const QColor &color);
     
     int type() const { return MeaningType; }
-    QPainterPath shape() const;
+    virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
     
@@ -171,11 +168,16 @@ private:
     void showToolTip(const QPointF &pos);
     void hideToolTip();
     
-    static int s_radius;
     int m_radius;
     QRectF m_boundingRect;
     void calculateBoundingRect();
+    
+    QColor m_color;
+    QColor circleColor() const;
 };
+
+
+
 
 
 #endif

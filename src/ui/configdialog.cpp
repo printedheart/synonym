@@ -40,6 +40,12 @@
 #include <QtCore>
 #include "configdialog.h"
 #include "relation.h"
+#include "graphscene.h"
+#include "layout.h"
+#include "graphcontroller.h"
+
+
+
 
 SettingsPage::SettingsPage(QSettings *settings,    QWidget *parent)
     : QWidget(parent), m_settings(settings)
@@ -61,7 +67,7 @@ static void addrelationItem(QTableWidget *tableWidget, int row,  QString &item, 
 }
 
 
-relationPage::relationPage(QSettings *settings, QWidget *parent)
+RelationPage::RelationPage(QSettings *settings, QWidget *parent)
     : SettingsPage(settings, parent)
 {
     relationTable = new QTableWidget(Relation::types().size(), 2, this);
@@ -81,6 +87,7 @@ relationPage::relationPage(QSettings *settings, QWidget *parent)
                 addrelationItem(relationTable, insertRow++,  rel, selected);
             }
         }
+        m_settings->endGroup();
     }
     
     // Verify that no relation type is missing in the settings.
@@ -90,7 +97,7 @@ relationPage::relationPage(QSettings *settings, QWidget *parent)
             addrelationItem(relationTable, insertRow++, rel, true);
         }
     }
-    m_settings->endGroup();
+    
     
     connect(relationTable, SIGNAL(cellChanged(int,int)),
             this, SLOT(slotTableChanged()));
@@ -112,15 +119,15 @@ relationPage::relationPage(QSettings *settings, QWidget *parent)
     
 }
 
-relationPage::~relationPage()
+RelationPage::~RelationPage()
 {}
 
-void relationPage::slotTableChanged()
+void RelationPage::slotTableChanged()
 {
     emit settingsChanged(this);
 }
 
-void relationPage::writeSettings()
+void RelationPage::writeSettings()
 {
     m_settings->beginGroup("relations");
     for (int row = 0; row < relationTable->rowCount(); row++) {
@@ -128,12 +135,199 @@ void relationPage::writeSettings()
         bool selected = relationTable->item(row, 1)->checkState() == Qt::Checked;
         m_settings->setValue(key, selected);
     }
-    qDebug() << "endgroup";
     m_settings->endGroup();    
 }
 
 
-ConfigDialog::ConfigDialog()
+DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget *parent)
+    : SettingsPage(settings, parent)
+{
+    ui.setupUi(this);
+    m_layout = new ForceDirectedLayout(this->parent());
+    m_graphScene = new GraphScene(m_layout, this);
+    m_graphScene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    m_graphScene->setSceneRect(-500, -500, 1000, 1000);
+    ui.graphicsView->setScene(m_graphScene);
+    ui.graphicsView->setInteractive(false);
+    ui.graphicsView->setRenderHint(QPainter::Antialiasing);
+    ui.graphicsView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    
+    connect (ui.fontComboBox, SIGNAL(currentFontChanged(const QFont&)), this, SLOT(fontChanged()));
+    connect (ui.fontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(fontChanged()));
+    connect (ui.circleSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(circleSizeChanged(int)));
+    
+    connect (ui.nounColorButton, SIGNAL(clicked()), this, SLOT(chooseNounColor()));
+    connect (ui.verbColorButton, SIGNAL(clicked()), this, SLOT(chooseVerbColor()));
+    connect (ui.adjColorButton, SIGNAL(clicked()), this, SLOT(chooseAdjColor()));
+    connect (ui.advColorButton, SIGNAL(clicked()), this, SLOT(chooseAdvColor()));
+    
+    connect (ui.edgeWidthSlider, SIGNAL(valueChanged(int)), this, SLOT(edgeWidthChanged(int)));
+    connect (ui.edgeLenghSlider, SIGNAL(valueChanged(int)), this, SLOT(edgeLenghChanged(int)));
+    connect (ui.lineContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(edgeContrastChanged(int)));
+    
+    if (m_settings->childGroups().contains("display"))
+        initializeFromSettings();
+    
+    controller = new GraphController(m_graphScene, loader,  this);
+    
+    QTimer::singleShot(100, this, SLOT(loadWord()));
+}
+
+DisplayPage::~DisplayPage()
+{
+    m_layout->stop();   
+}
+static void setBackgroundColorToButton(const QColor &color, QPushButton *button)
+{
+    if (color.isValid())
+        button->setStyleSheet("background-color: " + color.name());
+}
+
+void DisplayPage::initializeFromSettings()
+{
+    m_settings->beginGroup("display");
+    QFont font;
+    font.setFamily(m_settings->value("Font Family").toString());
+    ui.fontComboBox->setCurrentFont(font);
+    ui.fontSizeSpinBox->setValue(m_settings->value("Font Size").toInt());
+    ui.circleSizeSlider->setValue(m_settings->value("Circle Radius").toInt());
+    
+    setBackgroundColorToButton(QColor(m_settings->value("Noun Color").toString().trimmed()), ui.nounColorButton);
+    setBackgroundColorToButton(QColor(m_settings->value("Verb Color").toString().trimmed()), ui.verbColorButton);
+    setBackgroundColorToButton(QColor(m_settings->value("Adjective Color").toString().trimmed()), ui.adjColorButton);
+    setBackgroundColorToButton(QColor(m_settings->value("Adverb Color").toString().trimmed()), ui.advColorButton);
+    
+    ui.edgeLenghSlider->setValue(m_settings->value("Edge Length").toInt());
+    ui.edgeWidthSlider->setValue(m_settings->value("Edge Width").toInt());
+    ui.lineContrastSlider->setValue(m_settings->value("Edge Contrast").toInt());
+    m_settings->endGroup();    
+}
+
+void DisplayPage::loadWord()
+{
+    controller->makeGraph("word");
+}
+
+void DisplayPage::updatePreview()
+{
+    m_graphScene->update(m_graphScene->sceneRect());
+}
+
+void DisplayPage::fontChanged()
+{
+    QFont font = ui.fontComboBox->currentFont();
+    font.setPointSize(ui.fontSizeSpinBox->value());
+    QList<GraphicsNode*> nodes = m_graphScene->graphNodes();
+    foreach (GraphicsNode *node, nodes) {
+        if (WordGraphicsNode *wordNode = dynamic_cast<WordGraphicsNode*>(node)) {
+            wordNode->setFont(font);
+        }
+    }
+    updatePreview();
+    emit settingsChanged(this);
+}
+
+
+void DisplayPage::setColorToMeaningNodes(const QList<GraphicsNode*> &nodes, PartOfSpeech pos, const QColor &color)
+{
+    foreach (GraphicsNode *node, nodes) {
+        if (node->data(POS) == pos) {
+            static_cast<MeaningGraphicsNode*>(node)->setCircleColor(color);
+        }
+    }
+    updatePreview();
+    emit settingsChanged(this);
+}
+
+void DisplayPage::chooseAndSetColor(QPushButton *button, PartOfSpeech pos)
+{
+    QColor color = QColorDialog::getColor(QColor(button->styleSheet().section(':', 1, -1).trimmed()));
+    if (!color.isValid())
+        return;
+    setBackgroundColorToButton(color, button);
+    setColorToMeaningNodes(m_graphScene->graphNodes(), pos, color);
+}
+
+void DisplayPage::chooseNounColor()
+{
+    chooseAndSetColor(ui.nounColorButton, Noun);
+}
+    
+void DisplayPage::chooseVerbColor()
+{
+    chooseAndSetColor(ui.verbColorButton, Verb);
+}
+    
+
+void DisplayPage::chooseAdjColor()
+{
+    chooseAndSetColor(ui.adjColorButton, Adjective);
+}
+    
+void DisplayPage::chooseAdvColor()
+{
+    chooseAndSetColor(ui.advColorButton, Adverb);
+}
+
+
+void DisplayPage::circleSizeChanged(int value)
+{
+    QList<GraphicsNode*> nodes = m_graphScene->graphNodes();
+    foreach (GraphicsNode *node, nodes) {
+        if (MeaningGraphicsNode *meaningNode = dynamic_cast<MeaningGraphicsNode*>(node)) {
+            meaningNode->setCircleRadius(value);
+        }
+    } 
+    updatePreview();
+    emit settingsChanged(this);
+}
+
+
+void DisplayPage::edgeLenghChanged(int value)
+{
+    m_layout->setRestDistance(value);
+    m_graphScene->itemMoved();
+    emit settingsChanged(this);
+}
+
+
+void DisplayPage::edgeWidthChanged(int value)
+{
+    QList<GraphicsEdge*> edges = m_graphScene->graphEdges();
+    foreach (GraphicsEdge *edge, edges)
+        edge->setLineWidth((double) value / 10);
+    updatePreview();
+    emit settingsChanged(this);
+}
+
+
+void DisplayPage::edgeContrastChanged(int value)
+{
+    QList<GraphicsEdge*> edges = m_graphScene->graphEdges();
+    foreach (GraphicsEdge *edge, edges)
+        edge->setLineContrast(value);
+    updatePreview();
+    emit settingsChanged(this);
+}
+
+void DisplayPage::writeSettings()
+{
+    m_settings->beginGroup("display");
+    m_settings->setValue("Font Family",  ui.fontComboBox->currentFont().family());
+    m_settings->setValue("Font Size", ui.fontSizeSpinBox->value());
+    m_settings->setValue("Circle Radius", ui.circleSizeSlider->value());
+    m_settings->setValue("Noun Color", QVariant(ui.nounColorButton->styleSheet().section(':', 1, -1)));
+    m_settings->setValue("Verb Color", ui.verbColorButton->styleSheet().section(':', 1, -1));
+    m_settings->setValue("Adjective Color", ui.adjColorButton->styleSheet().section(':', 1, -1));
+    m_settings->setValue("Adverb Color", ui.advColorButton->styleSheet().section(':', 1, -1));
+    m_settings->setValue("Edge Length", ui.edgeLenghSlider->value());
+    m_settings->setValue("Edge Width", ui.edgeWidthSlider->value());
+    m_settings->setValue("Edge Contrast", ui.lineContrastSlider->value());
+    m_settings->endGroup();
+}
+
+
+ConfigDialog::ConfigDialog(IWordDataLoader *loader)
     : m_settingsChanged(false)
 {
     contentsWidget = new QListWidget;
@@ -146,7 +340,8 @@ ConfigDialog::ConfigDialog()
     m_settings =  new QSettings("http://code.google.com/p/synonym/", "synonym");
     
     pagesWidget = new QStackedWidget;
-    pagesWidget->addWidget(new relationPage(m_settings));
+    pagesWidget->addWidget(new RelationPage(m_settings));
+    pagesWidget->addWidget(new DisplayPage(m_settings, loader));
 
     m_applyButton = new QPushButton(tr("Apply"));
     m_applyButton->setEnabled(false);
@@ -181,11 +376,18 @@ ConfigDialog::ConfigDialog()
 void ConfigDialog::createIcons()
 {
     QListWidgetItem *relationButton = new QListWidgetItem(contentsWidget);
-    relationButton->setText(tr("relations"));
+    relationButton->setText(tr("Relations"));
     relationButton->setTextAlignment(Qt::AlignHCenter);
     relationButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
 
+    QListWidgetItem *displayButton = new QListWidgetItem(contentsWidget);
+    displayButton->setText(tr("Display"));
+    displayButton->setTextAlignment(Qt::AlignHCenter);
+    displayButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
+    
+    
     connect(contentsWidget,
             SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
                    this, SLOT(changePage(QListWidgetItem *, QListWidgetItem*)));

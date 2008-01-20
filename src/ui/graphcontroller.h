@@ -85,7 +85,7 @@ private:
     
     void assertGraphConnectivityToNode(Node *node);
     
-    
+    void applyUserSettings();
 };
 
 #endif

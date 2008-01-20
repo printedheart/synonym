@@ -39,6 +39,8 @@
 #ifndef CONFIGDIALOG_H
 #define CONFIGDIALOG_H
 
+#include "wordnetutil.h"
+
 #include <QDialog>
 
 class QListWidget;
@@ -65,12 +67,14 @@ protected:
 };
 
 
+class IWordDataLoader;
+
 class ConfigDialog : public QDialog
 {
 Q_OBJECT
 
 public:
-    ConfigDialog();
+    ConfigDialog(IWordDataLoader *loader);
 
     bool settingsChanged();
 public slots:
@@ -96,12 +100,12 @@ private:
 
 class QTableWidget;
 
-class relationPage : public SettingsPage
+class RelationPage : public SettingsPage
 {
 Q_OBJECT    
 public:    
-    relationPage(QSettings *settings, QWidget *parent = 0);
-    ~relationPage();
+    RelationPage(QSettings *settings, QWidget *parent = 0);
+    ~RelationPage();
     
     void writeSettings();
     
@@ -112,4 +116,47 @@ private:
     QTableWidget *relationTable;
 };
 
+class GraphScene;
+class Layout;
+class GraphController;
+
+#include "ui_displayconfig.h"
+
+class DisplayPage : public SettingsPage
+{
+Q_OBJECT
+public:            
+    DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget *parent = 0);
+    ~DisplayPage();
+    
+    void writeSettings();
+        
+private slots:    
+    void fontChanged();
+    void circleSizeChanged(int value);
+    
+    void chooseNounColor();
+    void chooseVerbColor();
+    void chooseAdjColor();
+    void chooseAdvColor();
+    
+    void edgeLenghChanged(int value);
+    void edgeWidthChanged(int value);
+    void edgeContrastChanged(int value);
+    
+    void loadWord();
+    
+private:    
+    GraphScene *m_graphScene;    
+    Layout *m_layout;
+    GraphController *controller;
+    Ui::DisplayPageUi ui;
+    
+    void chooseAndSetColor(QPushButton *button, PartOfSpeech pos);
+    void setColorToMeaningNodes(const QList<GraphicsNode*> &nodes, PartOfSpeech pos, const QColor &color);
+    void updatePreview();
+    void initializeFromSettings();
+    
+    
+};
 #endif

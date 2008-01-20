@@ -82,7 +82,10 @@ public:
     virtual QRectF boundingRect() const;
     
     void setToolTip(const QString &toolTip);
-    void setPen(QPen pan);
+    
+    void setLineWidth(double width);
+    void setLineContrast(int value);
+    
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
