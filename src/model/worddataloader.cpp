@@ -112,35 +112,35 @@ WordGraph * WordDataLoader::createWordGraph(const QString &searchWord, Relation:
                     if (edge) {
                         if (watchForTypes & searchType) {
                             if (searchType & Relation::HasPart)
-                                edge->setrelation(Relation::IsPart);
+                                edge->setRelation(Relation::IsPart);
                             else if (searchType & Relation::HasStuff)
-                                edge->setrelation(Relation::IsStuff);
+                                edge->setRelation(Relation::IsStuff);
                             else if (searchType & Relation::HasMember)
-                                edge->setrelation(Relation::IsMember);
+                                edge->setRelation(Relation::IsMember);
                             else
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                             
                         } else {
                             if (searchType & Relation::Antonym) 
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                             else if (searchType & parentSynsetType & synsetType)
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                             else if  (searchType & parentSynsetType)
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                             else if (searchType & synsetType)
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                             else if (synsetType & parentSynsetType)
-                                edge->setrelation(synsetType);
+                                edge->setRelation(synsetType);
                             else if (Relation::symmetricTo(searchType) & parentSynsetType)
-                                edge->setrelation(parentSynsetType); 
+                                edge->setRelation(parentSynsetType); 
                             
                             
                             else if (Relation::applies(synsetType, meaning2->data(POS).toInt()))
-                                edge->setrelation(synsetType);
+                                edge->setRelation(synsetType);
                             else if (Relation::applies(parentSynsetType, meaning2->data(POS).toInt()))
-                                edge->setrelation(parentSynsetType);
+                                edge->setRelation(parentSynsetType);
                             else 
-                                edge->setrelation(searchType);
+                                edge->setRelation(searchType);
                         }
                     }
                     for (int i = 0; i < synset->wcount; i++) {

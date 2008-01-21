@@ -63,9 +63,8 @@ public:
      */
     GraphicsNode* adjacentNode(GraphicsNode *node) const;
     
-    //bool directed() const;
     
-    void setrelation(Relation::Type type);
+    void setRelation(Relation::Type type);
     Relation::Type relation() const;
     
     

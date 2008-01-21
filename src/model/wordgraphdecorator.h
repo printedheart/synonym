@@ -37,7 +37,7 @@ public:
     void setMeaningNodeFactory(NodeFactory *nodeFactory);
     void setEdgeFactory(EdgeFactory *edgeFactory);
     
-    void setrelationTypes(Relation::Types relationTypes);
+    void setRelationTypes(Relation::Types relationTypes);
     
     WordGraph *wordGraph() const;
     

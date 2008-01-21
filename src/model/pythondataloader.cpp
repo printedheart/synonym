@@ -68,7 +68,7 @@ WordGraph * PythonDataLoader::createWordGraph(const QString &searchWord, Relatio
 {
     QFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.pyc").remove(); 
     m_mainContext.evalFile("/home/sergey/devel/graphs/trunk/synonym/src/scripts/loadgraph.py");
-    m_graphDecorator->setrelationTypes(searchTypes);
+    m_graphDecorator->setRelationTypes(searchTypes);
     
     m_mainContext.call("createGraph", QVariantList() << searchWord);
     

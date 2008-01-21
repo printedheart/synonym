@@ -270,7 +270,7 @@ void GraphicsEdge::adjustToolTipPos()
 }
 
 
-void GraphicsEdge::setrelation(Relation::Type type)
+void GraphicsEdge::setRelation(Relation::Type type)
 {
     m_type = type;
     if (type == Relation::Undefined) {

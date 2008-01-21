@@ -45,7 +45,7 @@ void WordGraphDecorator::setEdgeFactory(EdgeFactory *edgeFactory)
     m_edgeFactory = edgeFactory;
 }
     
-void WordGraphDecorator::setrelationTypes(Relation::Types relationTypes)
+void WordGraphDecorator::setRelationTypes(Relation::Types relationTypes)
 {
     m_relationTypes = relationTypes;
 }
@@ -84,7 +84,7 @@ static int getpos(QString &pos)
     return 0;
 }
 
-static Relation::Type torelationType(QString &pointerType)
+static Relation::Type toRelationType(QString &pointerType)
 {
     QString t = pointerType;
     if (t == "antonym") return Relation::Antonym;
@@ -120,11 +120,11 @@ bool WordGraphDecorator::addEdge(WordGraph *wordGraph, QString id1, QString id2,
     //qDebug() << "addEdge(" << id1 << ",  " << id2 << ", " << pointerType << ")";
     bool success = false;
     if (pointerType != QString()) {
-        Relation::Type type = torelationType(pointerType); 
+        Relation::Type type = toRelationType(pointerType); 
         if ( type != Relation::Undefined) {
            Edge *edge = wordGraph->addEdge(id1, id2, *m_edgeFactory);
            if (edge) {
-              edge->setrelation(type);
+              edge->setRelation(type);
               success = true;
            }
         }
