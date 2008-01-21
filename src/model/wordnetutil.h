@@ -181,7 +181,9 @@ public:
         } else {
             int level = node->data(LEVEL).toInt();
             QSet<GraphicsNode*> outNeighbors = node->outNeighbors();
-            if (level == 1) {
+            // If node outneighbors are both words and meanings we will
+            // show only words.
+            if (level == 1 || level == 2) {
                 QSet<Node*> meanings;
                 QSet<Node*> words;
                 filter(outNeighbors.constBegin(), outNeighbors.constEnd(), meanings, IsMeaning());
@@ -203,11 +205,7 @@ public:
                     disabledNodes.remove(lnn);
                 }
                 
-            } else if (level == 2) {
-                if (outNeighbors.size() > 15) {
-                    disabledNodes.unite(outNeighbors);
-                }
-            } else {
+            } else { // Never show more then 3 levels.
                 disabledNodes.unite(outNeighbors);
             }
         }
