@@ -26,7 +26,7 @@
 
 const int POS            = 111;
 const int MEANING        = 222;
-const int relation   = 223;
+const int Relation       = 223;
 const int WORD           = 224;
 const int LEVEL          = 225;
 

@@ -3,24 +3,10 @@ from PythonQt import *
 import sys
 sys.path.append('/usr/lib/python2.5/site-packages')
 
-
 from nltk.wordnet import *
 
-
-#class WordGraph:
-    #def addWordNode(self, word):
-        #print word
-        
-    #def addMeaningNode(self, nodeId, gloss, pos):
-        #print nodeId
-            
-    #def addEdge(self, nodeId1, nodeId2, relationType=''):
-        #print nodeId1, nodeId2
-                
-
-    #def setCentralNode(self, nodeId):
-        #print "set central node", nodeId
-        
+#Script to load a word from wordnet using nltk.wordnet package.
+#Python API is much more simple then C API.        
         
         
 wordGraph = None

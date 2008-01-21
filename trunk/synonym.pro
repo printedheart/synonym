@@ -8,7 +8,6 @@ FORMS = src/ui/displayconfig.ui
 HEADERS = src/model/wordgraph.h \
         src/model/worddataloader.h \
         src/model/partofspeechlistmodel.h \
-        src/model/wordgraphdecorator.h \
         src/ui/graphnode.h \
         src/ui/graphedge.h \
         src/ui/graphscene.h \
@@ -21,19 +20,19 @@ HEADERS = src/model/wordgraph.h \
 #        src/ui/wordsoundimpl.h \
         src/ui/layout.h \
         src/ui/configdialog.h \ 
-#        src/ui/ui_displayconfig.h \
         src/model/graphalgorithms.h \
-        src/model/wordnetutil.h \
-#        src/model/pythondataloader.h \
+        src/model/wordnetutil.h \        
         src/model/iworddataloader.h \
-        src/model/relation.h 
+        src/model/relation.h \
+#        src/model/wordgraphdecorator.h \
+#        src/model/pythondataloader.h \
+        
 #        src/test/graphtest.h
 
 
 
 SOURCES = src/model/wordgraph.cpp \
         src/model/worddataloader.cpp \
-        src/model/wordgraphdecorator.cpp \
         src/model/partofspeechlistmodel.cpp \
         src/ui/graphnode.cpp \
         src/ui/graphedge.cpp \
@@ -47,9 +46,9 @@ SOURCES = src/model/wordgraph.cpp \
 #        src/ui/wordsoundimpl.cpp \
         src/ui/configdialog.cpp \
         src/main.cpp \
+        src/model/relation.cpp \
+#        src/model/wordgraphdecorator.cpp \
 #        src/model/pythondataloader.cpp \
-        src/model/relation.cpp 
-
 #        src/test/graphtest.cpp 
 
 CONFIG += warn_on \
