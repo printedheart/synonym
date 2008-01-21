@@ -22,7 +22,7 @@
       </size>
      </property>
      <property name="currentIndex" >
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="fontTab" >
       <attribute name="title" >
@@ -329,7 +329,7 @@
        <item row="2" column="2" >
         <widget class="QSlider" name="lineContrastSlider" >
          <property name="maximum" >
-          <number>255</number>
+          <number>200</number>
          </property>
          <property name="value" >
           <number>140</number>
