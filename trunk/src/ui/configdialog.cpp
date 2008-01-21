@@ -205,7 +205,7 @@ void DisplayPage::initializeFromSettings()
 
 void DisplayPage::loadWord()
 {
-    controller->makeGraph("word");
+    controller->makeGraph("down");
 }
 
 void DisplayPage::updatePreview()
