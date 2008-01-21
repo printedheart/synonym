@@ -1,10 +1,9 @@
 TEMPLATE = app
 
+DEFINES = QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH = . src src/ui src/model
-
 FORMS = src/ui/displayconfig.ui 
-
 HEADERS = src/model/wordgraph.h \
         src/model/worddataloader.h \
         src/model/partofspeechlistmodel.h \
@@ -29,8 +28,6 @@ HEADERS = src/model/wordgraph.h \
         
 #        src/test/graphtest.h
 
-
-
 SOURCES = src/model/wordgraph.cpp \
         src/model/worddataloader.cpp \
         src/model/partofspeechlistmodel.cpp \
@@ -51,6 +48,8 @@ SOURCES = src/model/wordgraph.cpp \
 #        src/model/pythondataloader.cpp \
 #        src/test/graphtest.cpp 
 
+RESOURCES += src/synonym.qrc
+
 CONFIG += warn_on \
       qt \
       rtti \
@@ -70,23 +69,19 @@ svg
 
 DESTDIR = .
 
-
-
-
-# This is only when we use python to load wordnet
+#This is only when we use python to load wordnet
 #INCLUDEPATH += /home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0/src
 #INCLUDEPATH += /usr/include/python2.5
 #LIBS += -L$(PYTHONQT_ROOT)/lib -lPythonQt
 #LIBS += -L$(PYTHON_LIB) -lpython2.5
 
 
-INCLUDEPATH += /usr/local/WordNet-3.0/include
-LIBS += -L/usr/local/WordNet-3.0/lib \
--lWN
+# If you compile wordnet youself uncomment the following lines.
+#INCLUDEPATH += /usr/local/WordNet-3.0/include
+#LIBS += -L/usr/local/WordNet-3.0/lib -lWN
+
+LIBS += -L/usr/lib -lwordnet
 
 
-RESOURCES += src/synonym.qrc
-
-DEFINES = QT_NO_DEBUG_OUTPUT
 
 
