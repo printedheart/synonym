@@ -23,7 +23,6 @@
 #include "graphcontroller.h"
 #include "partofspeechitemdelegate.h"
 #include "wordgraph.h"
-#include "worddataloader.h"
 #include "partofspeechlistmodel.h"
 #include "wordnetutil.h"
 #include "relation.h"
