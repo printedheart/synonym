@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-#DEFINES = QT_NO_DEBUG_OUTPUT
+DEFINES = QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH = . src src/ui src/model
 FORMS = src/ui/displayconfig.ui 
@@ -45,7 +45,7 @@ CONFIG += warn_on \
       qt \
       rtti \
       thread \
-      debug 
+      release 
 #qtestlib
 
 TARGET = bin/synonym
@@ -61,11 +61,6 @@ sql
 
 DESTDIR = .
 
-#This is only when we use python to load wordnet
-#INCLUDEPATH += /home/sergey/soft/WordnetTools/PythonQt-1.0/PythonQt-1.0/src
-#INCLUDEPATH += /usr/include/python2.5
-#LIBS += -L$(PYTHONQT_ROOT)/lib -lPythonQt
-#LIBS += -L$(PYTHON_LIB) -lpython2.5
 
 
 
