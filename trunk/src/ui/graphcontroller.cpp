@@ -133,7 +133,7 @@ WordGraph*  GraphController::makeGraph(const QString &word)
             currentCentralNode->setMass(1.0);
             currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
         } else {
-            QString searchWord = QString(word).replace(' ', "_");
+            QString searchWord = word;
             WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
             if (!newGraph)
                 return m_graph;
