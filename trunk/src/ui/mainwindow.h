@@ -52,6 +52,7 @@ public:
 public slots:    
     void nodeActivated(const QModelIndex &index);
     void nodeActivated(const QString &id);
+    void nodeClicked(const QModelIndex &index);
 private:
     QGraphicsView *m_graphView;
     GraphScene *m_scene;
@@ -68,7 +69,6 @@ private slots:
 
     void lookUpWordNet(const QString &word);
 
-    //void playSound(const QString &word);
     
     void dockWidgetVisibilityChanged();
     

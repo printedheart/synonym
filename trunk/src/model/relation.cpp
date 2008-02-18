@@ -52,12 +52,8 @@ QString Relation::toString(Type type, int pos)
     };
     
     if (pos != 0) {
-        if (!typesForPos(pos).testFlag(type)) {
-            return "Undefined";
-        }
-        
         if (type == Pertains && pos == Adverb) {
-            return "Derived from";
+            return "derived from";
         }    
     }
     

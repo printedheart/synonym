@@ -395,15 +395,20 @@ void MeaningGraphicsNode::createToolTip()
     }
            
     // Prepare definition dext
-    QString meaningText = data(MEANING).toString();
-    QString definition = meaningText.section(';', 0, 0);
-    QString examples = meaningText.section(';', 1);
-    definition.remove(0, 1);
-    examples.remove(examples.length() - 2, 1);
-    QString defHtml = definition;
-    defHtml.append("<br>-------------------------------<br>");
-    defHtml.append(examples);
-    defHtml.append("<br>");
+    QString meaning = data(MEANING).toString();
+    QString samplesStr;
+    QList<QVariant> samples = data(SAMPLES).toList();
+    for (int i = 0; i < samples.size(); i++) {
+        samplesStr.append("\"").append(samples[i].toString()).append("\"");
+        if (i < samples.size() - 1)
+            samplesStr.append("; ");
+    }
+    
+    QString defHtml = meaning;
+    if (samplesStr.length() > 0) {
+        defHtml.append("<br>-------------------------------<br>");
+        defHtml.append(samplesStr);
+    }
     /* Debugging info
     defHtml.append(id());
     defHtml.append("<br>");

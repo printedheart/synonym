@@ -29,7 +29,7 @@
 enum PartOfSpeech { Noun = 1, Verb = 2, Adjective = 3, Adverb = 4 };
 Q_DECLARE_FLAGS(PartsOfSpeech, PartOfSpeech)
         
-        Q_DECLARE_OPERATORS_FOR_FLAGS(PartsOfSpeech)        
+Q_DECLARE_OPERATORS_FOR_FLAGS(PartsOfSpeech)        
 
 
 class Relation

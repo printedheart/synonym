@@ -95,7 +95,7 @@ Edge *WordGraph::addEdge(const QString &aNodeId, const QString &bNodeId, EdgeFac
         m_edges[edgeId] = edge;
         signalChange();
     }
-    return edge;
+    return m_edges.contains(edgeId) ? m_edges[edgeId] : m_edges[edgeId2];
 }
 
 
@@ -290,6 +290,17 @@ Node* WordGraph::node(const QString &id) const
 Edge* WordGraph::edge(const QString &id) const
 {
     return m_edges[id];
+}
+
+Edge* WordGraph::edge(Node *node1, Node *node2)
+{
+    QString key = node1->id() + "-" + node2->id();
+    if (m_edges.contains(key))
+        return m_edges[key];
+    key = node2->id() + "-" + node1->id();
+    if (m_edges.contains(key))
+        return m_edges[key];
+    return 0;
 }
 
 Node* WordGraph::centralNode() const

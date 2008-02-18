@@ -69,9 +69,7 @@ QVariant PartOfSpeechListModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole) {
-        QString fullMeaning =  m_meanings.at(index.row())->data(MEANING).toString();
-        QString definition = fullMeaning.section(';', 0, 0);
-        definition.remove(0, 1);
+        QString definition =  m_meanings.at(index.row())->data(MEANING).toString();
         return definition;
     }
     else
