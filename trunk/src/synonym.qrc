@@ -1,6 +1,5 @@
  <!DOCTYPE RCC><RCC version="1.0">
  <qresource>
-     <file>scripts/loadgraph.py</file>
      <file>resources/synonymicon3.png</file>
  </qresource>
  </RCC>
