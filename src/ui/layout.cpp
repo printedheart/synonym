@@ -61,7 +61,8 @@ static bool needsPreLayout(GraphicsNode *rootNode)
 void ForceDirectedLayout::layoutNodes(GraphicsNode *node,
                         QSet<GraphicsNode*> &visitSet)
 {
-    QSet<GraphicsNode*> neighbors = node->outNeighbors();
+    QSet<GraphicsNode*> neighbors = 
+            node == node->graphScene()->centralNode() ? node->neighbors() : node->outNeighbors();
     
     QList<GraphicsNode*> children;
     foreach (GraphicsNode *neighbor, neighbors) {
@@ -242,7 +243,7 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
     
 }
 
-void ForceDirectedLayout::run()
+ void ForceDirectedLayout::run()
 {
     typedef QHash<GraphicsNode*, NodeAnimation>::iterator AnimationIterator;
     qDebug() << "run()";
@@ -282,7 +283,6 @@ void ForceDirectedLayout::run()
                 qreal distance2 = dx * dx + dy * dy;
                 qreal distance = sqrt(distance2);
                 if (distance > 0) {
-
                     qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
                     qreal xvel = repulsive * dx / distance;
                     qreal yvel = repulsive * dy / distance;
@@ -293,12 +293,11 @@ void ForceDirectedLayout::run()
             }
         }
         
+        
 
         foreach (GraphicsEdge *edge, m_edges) {
             GraphicsNode *source = edge->source();
             GraphicsNode *dest = edge->dest();
-//             if (!source || !dest)
-//                 continue;
 
             NodeAnimation &sourceAnimation = m_animations[source];
             NodeAnimation &destAnimation = m_animations[dest];
@@ -320,7 +319,6 @@ void ForceDirectedLayout::run()
                 destAnimation.force += QPointF(-force * (dx / distance), -force * (dy / distance));
             }
         }
-
 
         {
             // Calculate new position for each node.
@@ -407,6 +405,7 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
         }
     }
     
+    
     foreach (GraphicsEdge *edge, edges) {
         QLineF line(edge->source()->pos(), edge->dest()->pos());
         qreal dx = line.dx();
@@ -425,6 +424,7 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
         }
     }
         
+    
     QGraphicsScene *scene = nodes.first()->scene();
     QRectF sceneRect = scene->sceneRect();
     

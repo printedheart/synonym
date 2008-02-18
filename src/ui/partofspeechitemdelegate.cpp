@@ -134,7 +134,8 @@ void PartOfSpeechItemView::mouseMoveEvent(QMouseEvent *event)
         QModelIndex old = m_indexUnderMouse;
         m_indexUnderMouse = QModelIndex();
         update(old);
-        emit entered(QModelIndex());
+        if (!index.isValid())
+            emit entered(QModelIndex());
     }
 
 }

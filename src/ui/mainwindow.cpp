@@ -29,11 +29,11 @@
 #include "relation.h"
 #include "configdialog.h"
 #include "layout.h"
-
-//#include "pythondataloader.h"
+#include "dbdataloader.h"
 
 #include <QtGui>
 #include <QtCore>
+
 
         
 MainWindow::MainWindow()
@@ -48,7 +48,7 @@ MainWindow::MainWindow()
     m_graphView = new QGraphicsView(scene, this);
     setCentralWidget(m_graphView);
 
-    m_loader = new WordDataLoader(this);
+    m_loader = new DbDataLoader(this);
     m_graphController = new GraphController(scene, m_loader);
 
     m_graphView->setCacheMode(QGraphicsView::CacheBackground);
@@ -118,6 +118,8 @@ MainWindow::MainWindow()
                  view, SLOT(clearHighlighting()));
         connect (dockWidget, SIGNAL(visibilityChanged(bool)), 
                  this, SLOT(dockWidgetVisibilityChanged()));
+        connect (view, SIGNAL(clicked(const QModelIndex&)),
+                 this, SLOT(nodeClicked(const QModelIndex&)));
         
     }
 
@@ -125,6 +127,7 @@ MainWindow::MainWindow()
    createActions();
    createMenus();
    
+  
    //Zack's Rusin advice. http://developer.kde.org/documentation/other/mistakes.html
    QTimer::singleShot(0, this, SLOT(initCompleter()));
 }
@@ -163,6 +166,16 @@ void MainWindow::nodeActivated(const QModelIndex &index)
         return;
     }
     m_scene->setActivated(node->id());
+}
+
+void MainWindow::nodeClicked(const QModelIndex &index)
+{
+    PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
+            const_cast<QAbstractItemModel*>(index.model()));
+    Node *node = 0;
+    node = indexModel->nodeAt(index);
+    if (node) 
+        lookUpWordNet(node->id());
 }
 
 void MainWindow::nodeActivated(const QString &id)

@@ -147,6 +147,8 @@ public:
     
     Node* node(const QString &id) const;
     Edge *edge(const QString &id) const;
+    Edge *edge(Node *node1, Node *node2);
+    
 
     QList<Edge*> edges() const;
     QList<Node*> nodes() const;

@@ -29,6 +29,7 @@ const int MEANING        = 222;
 const int Relation       = 223;
 const int WORD           = 224;
 const int LEVEL          = 225;
+const int SAMPLES        = 226;
 
 
 class IsMeaning
@@ -75,10 +76,10 @@ private:
     QList<PartOfSpeech> m_poses;
 };
 
-class IsInrelations
+class WithRelations
 {
 public:    
-    IsInrelations(Relation::Types types):
+    WithRelations(Relation::Types types):
         m_types(types) {}
     
     bool operator() (Edge *edge) {
@@ -90,84 +91,7 @@ private:
 
 
     
-        
-
-
 class VisualFilter
-{
-public:
-    bool operator() (Node *node) {
-        bool canShowNode = canShow(node);
-        return canShowNode;
-    }
-        
-    bool canShow(Node *node) {
-        int level = node->data(LEVEL).toInt();
-        if (level > 3) return false;
-        if (level == 3 && IsMeaning() (node)) return false;
-        
-        QSet<Node*> neighbors = node->neighbors();
-        if (level > 1 && neighbors.size() > 15) return false;
-        
-
-        QSet<Node*>::const_iterator iter;
-        QSet<Node*>::const_iterator end = neighbors.constEnd();
-        if (level == 2) {
-            for (iter = neighbors.constBegin(); iter != end; ++iter) {
-                Node *neighbor = *iter;
-                if (neighbor->data(LEVEL).toInt() < level) {
-                    if (node->data(POS) != QVariant() && neighbor->data(POS) != node->data(POS)) return true;
-                    if (neighbor->neighbors().size() > 15) {
-                        if (IsWord()(neighbor)) {
-                            QList<Node*> wordNodes;
-                            filter(neighbors.constBegin(), neighbors.constEnd(), wordNodes, IsWord());
-                            if (wordNodes.size() < 15) return true;
-                        }
-                        return false;
-                    }
-                }
-            }
-            
-            if (IsMeaning()(node)) {
-                for (iter = neighbors.constBegin(); iter != end; ++iter) {
-                    Node *neighbor = *iter;
-                    if (neighbor->data (LEVEL).toInt() < level && hasWordNeighborsWithGreaterLevel (neighbor)) {
-                        return false;
-                    }
-                }
-            }
-        }            
-        
-                     
-        
-        if (level == 3 && IsWord() (node)) {
-            for (iter = neighbors.constBegin(); iter != end; ++iter) {
-                Node *neighbor = *iter;
-                if (neighbor->data(LEVEL).toInt() < level
-                        && (*this)(neighbor)) {
-                    return true;
-                }
-                return false;
-            }
-        }
-
-        return true;
-    }
-    bool hasWordNeighborsWithGreaterLevel (Node *node) {
-        IsWord isWord;
-        int level = node->data (LEVEL).toInt();
-        QSet<Node*> neighbors = node->neighbors();
-        QSet<Node*>::const_iterator iter; 
-        QSet<Node*>::const_iterator end = neighbors.constEnd();
-        for (iter = neighbors.constBegin(); iter != end; ++iter) {
-            Node *neighbor = *iter;
-            if (neighbor->data (LEVEL).toInt() > level && isWord (neighbor) ) return true;
-        }
-        return false;
-    }
-};
-
-class VisualFilterForDFS
 {
 public:    
     
@@ -196,13 +120,36 @@ public:
                         words.remove(first);
                     }
                 } else {
-                    Node *lnn = *outNeighbors.constBegin();
+                    WordGraph *graph = node->graph();
+                    Node *lnn = 0;
                     foreach (Node *n, outNeighbors) {
-                        if (n->outNeighbors().size() > lnn->outNeighbors().size()) 
+                        Relation::Type nRelation = graph->edge(node, n)->relation();
+                        if (nRelation == Relation::Hyponym) {
+                            disabledNodes.insert(n);
+                            continue;
+                        } 
+                         
+                        if (lnn == 0)
                             lnn = n;
+                        else {
+                            Relation::Type lnnRelation = graph->edge(node, lnn)->relation();
+                            if (lnnRelation == Relation::Hypernym && nRelation != Relation::Hypernym) {
+                                continue;
+                            }
+                            if (lnnRelation != Relation::Hypernym && nRelation == Relation::Hypernym) {
+                                lnn = n;
+                                continue;
+                            }
+                            
+                            if (n->outNeighbors().size() < lnn->outNeighbors().size() ) {
+                                lnn = n;
+                            }
+                        }
                     }               
                     disabledNodes.unite(outNeighbors);
-                    disabledNodes.remove(lnn);
+                    if (lnn != 0) 
+                        disabledNodes.remove(lnn);
+                    
                 }
                 
             } else { // Never show more then 3 levels.
@@ -216,18 +163,44 @@ public:
 
 
 
-class MeaningVisualFilter
+class MeaningVusualFilter
 {
 public:
-    bool operator() (Node *node) {
+    void operator() (Node *node, Node *prev) {
         int level = node->data(LEVEL).toInt();
-        if (level >= 3) return false;
-        if (level == 2 && IsMeaning() (node)) return false;
-        return true;
+        if (disabledNodes.contains(node)) 
+            return;
+        
+        if (disabledNodes.contains(prev)) {
+            disabledNodes.insert(node);
+            return;
+        }
+        WordGraph *graph = node->graph();
+        if (level == 0) {
+            QSet<Node*> neighbors = node->neighbors();
+            if (neighbors.size() > 15) {
+                foreach (Node *n, neighbors) {
+                    if (IsMeaning() (node) && graph->edge(node, n)->relation() != Relation::Hypernym) {
+                        disabledNodes.insert(n);
+                    }
+                }
+            }
+        } else if (level == 1 && IsWord() (node)) {
+             foreach (Node *n, node->neighbors()) {
+                 if (n->data(LEVEL).toInt() > 1)
+                     disabledNodes.insert(n);
+             }
+        } else if (level == 2) {
+            foreach (Node *n, node->neighbors()) {
+                if (n->data(LEVEL).toInt() > 2)
+                    disabledNodes.insert(n);
+            }
+        }
+                    
     }
             
+    QSet<GraphicsNode*> disabledNodes;            
 };
-
 
 
 #endif

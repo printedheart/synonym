@@ -158,13 +158,17 @@ void GraphicsEdge::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QW
 
 void GraphicsEdge::setLineWidth(double width)
 {
+    if (relation() == Relation::Antonym) 
+        width *= 1.2;
     m_pen.setWidthF(width);
 }
 
 
 void GraphicsEdge::setLineContrast(int value)
 {
-    QColor color;
+    if (relation() == Relation::Antonym) 
+        return;
+    QColor color = m_pen.color();
     color.setHsv(0, 0, value);
     m_pen.setColor(color);
 }
@@ -203,13 +207,8 @@ void GraphicsEdge::createToolTip()
 {
     
     int sourcePos = source()->data(POS).toInt();
-    int destPos = dest()->data(POS).toInt();
     QString text;
-    if (Relation::applies(relation(), sourcePos)) {
-        text = Relation::toString(relation(), sourcePos);
-    } else if (Relation::applies(relation(), destPos)) {
-        text = Relation::toString(relation(), destPos);
-    }
+    text = Relation::toString(relation(), sourcePos);
     if (text.isEmpty())
         return;
     
@@ -281,7 +280,7 @@ void GraphicsEdge::setRelation(Relation::Type type)
         m_pen.setDashPattern(dashes); 
         if (type == Relation::Antonym) {
             QColor c;
-            c.setHsv(6, 243, 214);
+            c.setHsv(6, 243, 185);
             m_pen.setColor(c);
             m_pen.setWidthF(0.6);
         } else {
@@ -292,8 +291,11 @@ void GraphicsEdge::setRelation(Relation::Type type)
     }
 }
     
+
 Relation::Type GraphicsEdge::relation() const
 {
     return m_type;
 }
+
+
 

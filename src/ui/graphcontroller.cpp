@@ -53,7 +53,7 @@ static void disturbLayout(WordGraph *graph)
     }
 }  
 
-static void setNewGraphToScene(GraphScene *scene, WordGraph *graph)
+static void setNewGraphToScene(GraphScene *scene, WordGraph *graph, bool resetPos = false)
 {
     scene->setLayout(false);
     QList<QGraphicsItem*> items = scene->items();
@@ -69,6 +69,9 @@ static void setNewGraphToScene(GraphScene *scene, WordGraph *graph)
     
     QList<GraphicsNode*> nodes = graph->nodes();
     foreach (GraphicsNode *node, nodes) {
+        if (resetPos) {
+            node->setPos(QPointF());
+        }
         scene->addItem(node);
     } 
 
@@ -82,15 +85,15 @@ static void adjustMass(WordGraph *graph)
     QList<GraphicsNode*> nodes = graph->nodes();
     foreach (GraphicsNode *node, nodes) {
         if (IsMeaning() (node)) {
-            QSet<GraphicsNode*> neighbors = node->neighbors();
+            QSet<GraphicsNode*> neighbors = node->neighbors(); 
             if (neighbors.size() > 6) {
                 foreach (GraphicsNode *neighbor, neighbors) {
                     if (neighbor != graph->centralNode()) {
                         neighbor->setMass(0.7);
                     }
                 }
-            }
-        }
+            }   
+        } 
     }
 } 
 
@@ -113,7 +116,7 @@ GraphController::~GraphController()
      
 }
 
-
+ 
 
 WordGraph*  GraphController::makeGraph(const QString &word)
 {
@@ -134,19 +137,19 @@ WordGraph*  GraphController::makeGraph(const QString &word)
             WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
             if (!newGraph)
                 return m_graph;
-            
-            centralNode = newGraph->node(searchWord);
+              
+            centralNode = newGraph->node(searchWord);    
             if (!centralNode) {
                 delete newGraph;
                 return m_graph; 
             }
             
-            if (m_graph)
+            if (m_graph) 
                 m_backHistory.append(m_graph);
             
             m_graph = newGraph;
             m_graph->setCentralNode(searchWord);
-        } 
+        }   
         
         if (m_backHistory.size() > HISTORY_SIZE) {
             WordGraph *graph = m_backHistory.takeFirst();
@@ -158,13 +161,13 @@ WordGraph*  GraphController::makeGraph(const QString &word)
         m_forwardHistory.clear();
         
         centralNode->setMass(10);
-        centralNode->setFlag(QGraphicsItem::ItemIsMovable, false); 
+        centralNode->setFlag(QGraphicsItem::ItemIsMovable, false);     
         filterGraphNodes();
         adjustMass(m_graph);
     }
     
     applyUserSettings();
-    setNewGraphToScene(m_scene, m_graph);
+    setNewGraphToScene(m_scene, m_graph, m_scene->centralNode() != m_graph->centralNode());
     m_graph->setEnabledSignals(true);
     return m_graph;
 }
@@ -178,28 +181,20 @@ void GraphController::filterGraphNodes()
     levelOrderScan(centralNode, SetLevel());
     QList<GraphicsNode*> nodes = m_graph->nodes();    
     IsPOS posPredicate(m_poses);
-    
-    // Use different strategies here. If the central node is word node
-    // we use recursive algorithm. For meaning node we just scant a list of nodes.
+    QSet<GraphicsNode*> disabledNodes;
     if (IsWord() (centralNode)) {
-        VisualFilterForDFS filter;
+        VisualFilter filter; 
         depthFirstSearch(centralNode, filter);
-        QSet<GraphicsNode*> disabledNodes = filter.disabledNodes;
-        qDebug() << "disabledNodes " << disabledNodes.size();
-        foreach (GraphicsNode *node, nodes) {
-            if (disabledNodes.contains(node) || !posPredicate(node)) {
-                m_graph->disableNode(node);
-            } 
-        }
+        disabledNodes = filter.disabledNodes;
     } else {
-        QSet<Node*> visualNodes;
-        filter (nodes.constBegin(), nodes.constEnd(), visualNodes,
-                FunctionCombiner<MeaningVisualFilter, IsPOS>(MeaningVisualFilter(), posPredicate));
-        foreach (Node *node, nodes) {
-            if (!visualNodes.contains(node)) {
-                m_graph->disableNode(node);
-            }
-        }
+        MeaningVusualFilter filter;
+        depthFirstSearch(centralNode, filter);
+        disabledNodes = filter.disabledNodes;
+    }
+    foreach (GraphicsNode *node, nodes) {
+        if (disabledNodes.contains(node) || !posPredicate(node)) {
+            m_graph->disableNode(node);
+        }   
     }
         
     // The filtering could make graph not connected, so we make it
@@ -237,7 +232,7 @@ WordGraph * GraphController::nextGraph()
 }
 
 void GraphController::makeConnected(Node *goal)
-{ 
+{
     bool connected = false;
     while (!connected) {
         connected = true;
@@ -255,16 +250,6 @@ void GraphController::makeConnected(Node *goal)
     }
 }
 
-void GraphController::soundReady(const QString &word)
-{
-    Q_UNUSED(word);
-/*   WordGraph *wordGraph = m_graphHistory.back().first;
-   Node *node = wordGraph->centralNode();
-   if (node && node->data(WORD).toString() == word) {
-        m_scene->displaySoundIcon();
-   }*/
-}
-
 void GraphController::assertGraphConnectivityToNode(Node *goalNode)
 {
     QList<Node*> nodes = m_graph->nodes();
@@ -276,7 +261,7 @@ void GraphController::assertGraphConnectivityToNode(Node *goalNode)
             displayString = node->data(MEANING).toString();
         Q_ASSERT_X(isReachable(node, goalNode), "assertGraphConnectivity", displayString.toLatin1().data());
     }
-}
+} 
 
 void GraphController::setPoses(QList<PartOfSpeech> &poses)
 {
@@ -288,7 +273,7 @@ void GraphController::setPoses(QList<PartOfSpeech> &poses)
     m_graph->enableAll();
     filterGraphNodes();
     m_graph->setEnabledSignals(true);
-    applyUserSettings();
+    applyUserSettings();   
     updateSceneNodes();
 }
 
@@ -303,7 +288,7 @@ void GraphController::setrelations(Relation::Types relTypes)
         m_relTypes = relTypes;
         return;
     }
-    
+      
     Relation::Types newTypes = ((~m_relTypes) & relTypes) | (m_relTypes & relTypes);
     if (newTypes == 0) {
         return;
@@ -312,8 +297,7 @@ void GraphController::setrelations(Relation::Types relTypes)
     m_relTypes = relTypes;
     QList<Edge*> edges = m_graph->edges();
     QSet<Edge*> filteredEdges;
-    IsInrelations predicate(m_relTypes);
-    filter(edges.constBegin(), edges.constEnd(), filteredEdges, predicate);
+    filter(edges.constBegin(), edges.constEnd(), filteredEdges, WithRelations(m_relTypes));   
     foreach (Edge *edge, edges) {
         if (!filteredEdges.contains(edge)) {
             m_graph->disableEdge(edge);

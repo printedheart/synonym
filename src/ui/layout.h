@@ -70,7 +70,6 @@ public:
     ~ForceDirectedLayout();
 
     // TODO: make the following parameters configurable.
-    static const int REST_DISTANCE = 100;
     static const qreal STIFFNESS = 0.2;
     static const qreal REPULSION = 3000;
 

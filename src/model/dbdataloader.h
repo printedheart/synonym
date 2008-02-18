@@ -17,72 +17,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef GRAPHCONTROLLER_H
-#define GRAPHCONTROLLER_H
+#ifndef DBDATALOADER_H
+#define DBDATALOADER_H
 
-#include "wordgraph.h"
+#include <iworddataloader.h>
 #include "relation.h"
-
-#include <QObject>
-#include <QPair>
-#include <QList>
-
-class GraphScene;
-class IWordDataLoader;
-class MeaningGraphicsNode;
-class WordGraphicsNode;
-class GraphicsEdge;
-class GraphicsNode;
-class QGraphicsItem;                     
+#include <QHash>
 /**
-    @author Sergejs <sergey.melderis@gmail.com>
+	@author Sergey Melderis <sergey.melderis@gmail.com>
 */
-
-class GraphController : public QObject
+class DbDataLoader : public QObject, public IWordDataLoader
 {
 Q_OBJECT
 public:
-    GraphController(GraphScene *graphScene, IWordDataLoader *loader,
-                    QObject *parent = 0);
+    DbDataLoader(QObject *parent = 0);
 
-    ~GraphController();
+    ~DbDataLoader();
+    
+    virtual WordGraph * createWordGraph(const QString &searchWord, Relation::Types searchTypes);
+     
+    virtual QStringList words() const;
 
-
-    WordGraph* makeGraph(const QString &word);
-    
-    WordGraph * previousGraph();
-    WordGraph * nextGraph();
-    
-    void setPoses(QList<PartOfSpeech> &poses);
-    
-    void setrelations(Relation::Types relations);
-
-    
-private:
-    GraphScene *m_scene;
-    IWordDataLoader *m_loader;
-    WordGraph *m_graph;
-
-    QList<PartOfSpeech> m_poses;
-    Relation::Types m_relTypes;
-
-    void makeConnected(Node *goal);
-    
-    void updateSceneNodes();
-    
-    
-    GraphicsNode * findGraphicsNode(Node *dataNode);
-    
-    void addEdge(GraphicsNode *graphNode, Edge *edge);
-    
-    QList<WordGraph*> m_backHistory;
-    QList<WordGraph*> m_forwardHistory;
-    
-    void filterGraphNodes();
-    
-    void assertGraphConnectivityToNode(Node *node);
-    
-    void applyUserSettings();
+private:    
+    QHash<Relation::Type, int> relTypeLinkId;
+    QHash<int, Relation::Type> linkIdRelType;
 };
 
 #endif
