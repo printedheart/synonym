@@ -22,16 +22,27 @@
 #include "wordnetutil.h"
 #include <QtSql>
 #include <QDir>
+#include <QMessageBox>
 
 DbDataLoader::DbDataLoader(QObject *parent)
  : QObject(parent)
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
     QString dbFile = QDir::currentPath() + "/wordnet30";
-    
     db.setDatabaseName(dbFile);
-    bool ok = db.open();
     
+    bool ok = db.open();
+    if (ok) {
+        QSqlQuery query(db);
+        ok = query.exec("SELECT word.wordid from word where lemma = 'word'");
+    }
+    if (!ok) {
+        QMessageBox::critical(0,
+                              "Synonym",
+                              "Cannot open database file '" + dbFile + "'.\n" + 
+                              "Please place wordnet30 file together with executable.");
+    }
+                                          
     
     relTypeLinkId[Relation::Antonym] = 30;
     relTypeLinkId[Relation::Hypernym] = 1;
@@ -123,7 +134,7 @@ WordGraph * DbDataLoader::createWordGraph(const QString &searchWord, Relation::T
         Node *meaning = graph->addNode(synsetId, meaningFactory);
         meaning->setData(POS, getpos(query.value(2).toString()));
         meaning->setData(MEANING, query.value(3).toString());
-        Edge *edge = graph->addEdge(searchNode->id(), synsetId, edgeFactory);
+        graph->addEdge(searchNode->id(), synsetId, edgeFactory);
         synsets += synsetId + ",";
     }
 
@@ -161,7 +172,7 @@ WordGraph * DbDataLoader::createWordGraph(const QString &searchWord, Relation::T
     while (query.next()) {
         Node *word = graph->addNode(query.value(1).toString(), wordFactory);        
         word->setData(WORD, query.value(1));
-        Edge *edge = graph->addEdge(query.value(2).toString(), word->id(), edgeFactory);
+        graph->addEdge(query.value(2).toString(), word->id(), edgeFactory);
     }
     
     // Get all samples
