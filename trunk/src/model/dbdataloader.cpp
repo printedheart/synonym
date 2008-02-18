@@ -23,25 +23,12 @@
 #include <QtSql>
 #include <QDir>
 #include <QMessageBox>
+#include <QFileDialog>
 
 DbDataLoader::DbDataLoader(QObject *parent)
  : QObject(parent)
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-    QString dbFile = QDir::currentPath() + "/wordnet30";
-    db.setDatabaseName(dbFile);
-    
-    bool ok = db.open();
-    if (ok) {
-        QSqlQuery query(db);
-        ok = query.exec("SELECT word.wordid from word where lemma = 'word'");
-    }
-    if (!ok) {
-        QMessageBox::critical(0,
-                              "Synonym",
-                              "Cannot open database file '" + dbFile + "'.\n" + 
-                              "Please place wordnet30 file together with executable.");
-    }
+    checkDatabase();
                                           
     
     relTypeLinkId[Relation::Antonym] = 30;
@@ -220,12 +207,56 @@ QStringList DbDataLoader::words() const
     QStringList words;
     
     QSqlQuery query(QSqlDatabase::database());
-    query.exec("SELECT lemma from word");
-    while (query.next())
-        words << query.value(0).toString();
+    if (query.exec("SELECT lemma from word")) {
+        while (query.next())
+            words << query.value(0).toString();
+    }
     
     return words;
 }
 
 
+void DbDataLoader::selectDbFile()
+{
+    QString dbFileName = QFileDialog::getOpenFileName(0, "Select database file");
+    if (QFile(dbFileName).exists()) {
+        QSettings settings("http://code.google.com/p/synonym/", "synonym");
+        settings.beginGroup("db");
+        settings.setValue("dbfile", dbFileName);
+        settings.endGroup();
+    }
+    checkDatabase();
+}
 
+void DbDataLoader::checkDatabase()
+{
+    QString dbFilePath = QDir::currentPath() + "/wordnet30";
+    QSettings settings("http://code.google.com/p/synonym/", "synonym");
+    if (settings.childGroups().contains("db")) {
+        settings.beginGroup("db");
+        dbFilePath = settings.value("dbfile").toString();
+        settings.endGroup();
+    }
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    
+    db.setDatabaseName(dbFilePath);
+    
+    bool ok = db.open();
+    if (ok) {
+        QSqlQuery query(db);
+        ok = query.exec("SELECT word.wordid from word where lemma = 'word'");
+    }
+    if (!ok) {
+        QSqlDatabase::removeDatabase("QSQLITE");
+        int answer = QMessageBox::question(0,
+                              "Synonym",
+                              "Cannot open database file '" + dbFilePath + "'.\n" +
+                              "Do you want to select another database file?\n",
+                              QMessageBox::Yes,
+                              QMessageBox::No);
+        
+        if (answer & QMessageBox::Yes) {
+            QTimer::singleShot(0, this, SLOT(selectDbFile()));
+        }                               
+    }
+}

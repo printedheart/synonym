@@ -41,6 +41,10 @@ public:
 private:    
     QHash<Relation::Type, int> relTypeLinkId;
     QHash<int, Relation::Type> linkIdRelType;
+    
+    void checkDatabase();
+private slots:    
+    void selectDbFile();
 };
 
 #endif
