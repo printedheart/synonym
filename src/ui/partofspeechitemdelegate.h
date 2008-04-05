@@ -43,10 +43,12 @@ public slots:
     void highlightItem(const QModelIndex &index);
     void clearHighlighting();
     
+    
 protected:
     virtual void resizeEvent(QResizeEvent *resizeEvent);  
     virtual void mouseMoveEvent(QMouseEvent *event);
     virtual void wheelEvent(QWheelEvent*event);
+    virtual void leaveEvent(QEvent *event);
     
     QModelIndex m_indexUnderMouse;
 };
@@ -62,7 +64,11 @@ public:
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const;
     
+    
+protected:
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;  
+    
+    
 };
 
 
