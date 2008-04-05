@@ -99,7 +99,7 @@ PartOfSpeechItemView::PartOfSpeechItemView(QWidget *parent):
 
 void PartOfSpeechItemView::resizeEvent(QResizeEvent *resizeEvent)
 {
-    reset();
+    //reset();
     QListView::resizeEvent(resizeEvent);
 }
 
@@ -107,7 +107,8 @@ void PartOfSpeechItemView::resizeEvent(QResizeEvent *resizeEvent)
 void PartOfSpeechItemView::mouseMoveEvent(QMouseEvent *event)
 {
     QAbstractItemView::mouseMoveEvent(event);
-    QModelIndex index = indexAt(event->pos());
+   
+    QModelIndex index = indexAt(event->pos());   
     if (index.isValid()) {
         m_indexUnderMouse = index;
         update(index);
@@ -119,25 +120,7 @@ void PartOfSpeechItemView::mouseMoveEvent(QMouseEvent *event)
         if (below.isValid()) {
             update(below);
         }
-    }
-    
-    bool mouseCloseToEdge = event->y() > viewport()->height() - 1 || event->y() < 1;
-    if (!index.isValid() || mouseCloseToEdge) {
-        QModelIndex above = index.sibling(m_indexUnderMouse.row() - 1, m_indexUnderMouse.column());
-        if (above.isValid()) {
-            update(above);
-        }
-        QModelIndex below = index.sibling(m_indexUnderMouse.row() + 1, m_indexUnderMouse.column());
-        if (below.isValid()) {
-            update(below);
-        }
-        QModelIndex old = m_indexUnderMouse;
-        m_indexUnderMouse = QModelIndex();
-        update(old);
-        if (!index.isValid())
-            emit entered(QModelIndex());
-    }
-
+    } 
 }
 
 void PartOfSpeechItemView::wheelEvent(QWheelEvent*event)
@@ -176,6 +159,25 @@ QModelIndex  PartOfSpeechItemView::indexUnderMouse() const
 {
     return m_indexUnderMouse;
 }
+
+void PartOfSpeechItemView::leaveEvent(QEvent *event)
+{
+    if (indexUnderMouse().isValid()) {
+        QModelIndex above = m_indexUnderMouse.sibling(m_indexUnderMouse.row() - 1, m_indexUnderMouse.column());
+        if (above.isValid()) {
+            update(above);
+        }
+        QModelIndex below = m_indexUnderMouse.sibling(m_indexUnderMouse.row() + 1, m_indexUnderMouse.column());
+        if (below.isValid()) {
+            update(below);
+        }
+        QModelIndex old = m_indexUnderMouse;
+        m_indexUnderMouse = QModelIndex();
+        update(old);
+        emit entered(QModelIndex());
+    }
+}
+
 
 
 
