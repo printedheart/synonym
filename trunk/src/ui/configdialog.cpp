@@ -219,9 +219,8 @@ void DisplayPage::fontChanged()
     font.setPointSize(ui.fontSizeSpinBox->value());
     QList<GraphicsNode*> nodes = m_graphScene->graphNodes();
     foreach (GraphicsNode *node, nodes) {
-        if (WordGraphicsNode *wordNode = dynamic_cast<WordGraphicsNode*>(node)) {
-            wordNode->setFont(font);
-        }
+        node->setFont(font);
+         
     }
     updatePreview();
     emit settingsChanged(this);
