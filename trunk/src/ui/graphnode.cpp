@@ -387,12 +387,17 @@ void MeaningGraphicsNode::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
     graphScene()->signalMouseHoverLeaved(this);
 }
 
+
+static const int TOOL_TIP_WIDTH = 160;
+
+
 void MeaningGraphicsNode::createToolTip()
 {
     if (!m_toolTip) {
         m_toolTip = new QGraphicsPathItem(this);
         m_defItem = new QGraphicsTextItem(m_toolTip);
     }
+    m_defItem->setFont(m_font);
            
     // Prepare definition dext
     QString meaning = data(MEANING).toString();
@@ -405,8 +410,15 @@ void MeaningGraphicsNode::createToolTip()
     }
     
     QString defHtml = meaning;
+    
+    
     if (samplesStr.length() > 0) {
-        defHtml.append("<br>-------------------------------<br>");
+        int dashWidth = QFontMetrics(m_font).width(QChar('-'));
+        int dashesCount = TOOL_TIP_WIDTH / dashWidth;
+        defHtml.append("<br>");
+        for (int i = 0; i < dashesCount; i++) 
+            defHtml.append("-");
+        defHtml.append("<br>");
         defHtml.append(samplesStr);
     }
     /* Debugging info
@@ -420,7 +432,7 @@ void MeaningGraphicsNode::createToolTip()
     */
     
     m_defItem->document()->setHtml(defHtml);
-    m_defItem->setTextWidth(160);
+    m_defItem->setTextWidth(TOOL_TIP_WIDTH);
     QRectF rect = m_defItem->boundingRect();
     rect.setLeft(rect.left() - 5);
     rect.setRight(rect.right() + 5);
@@ -486,6 +498,11 @@ void MeaningGraphicsNode::setCircleRadius(int radius)
 {
     m_radius = radius;
     calculateBoundingRect();        
+}
+
+void MeaningGraphicsNode::setFont(QFont &font)
+{
+    m_font = font;
 }
 
 

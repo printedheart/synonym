@@ -154,6 +154,8 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
     
     void setActivated(bool activated);
+    
+    void setFont(QFont &font);
 protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
@@ -174,6 +176,8 @@ private:
     
     QColor m_color;
     QColor circleColor() const;
+    
+    QFont m_font;
 };
 
 
