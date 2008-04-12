@@ -85,12 +85,16 @@ public:
     
     GraphScene *graphScene() const;
     
+    virtual void setFont(const QFont &font);
+    
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     
+    QFont m_font;
+private:
     
-private:    
+        
     QPointF m_newPos;
     QPointF m_intermedPos;
     
@@ -127,7 +131,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
 private:
-    QFont m_font;
+    
     QPointF m_mousePressPos;
     
     void calculateBoundingRect();
@@ -155,7 +159,6 @@ public:
     
     void setActivated(bool activated);
     
-    void setFont(QFont &font);
 protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
@@ -176,8 +179,6 @@ private:
     
     QColor m_color;
     QColor circleColor() const;
-    
-    QFont m_font;
 };
 
 

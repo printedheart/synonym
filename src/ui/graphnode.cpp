@@ -42,7 +42,7 @@ GraphicsNode::~GraphicsNode()
 }
 
 GraphicsNode::GraphicsNode(const GraphicsNode &o)
-    : QGraphicsItem(), m_id(o.id()), m_graph(o.graph()), m_mass(o.mass()), m_edges(o.edges())
+    : QGraphicsItem(), m_font(o.m_font), m_id(o.id()), m_graph(o.graph()), m_mass(o.mass()), m_edges(o.edges())
 {
     setPos(o.pos());
     setFlags(o.flags());
@@ -147,6 +147,12 @@ GraphScene * GraphicsNode::graphScene() const
     
     return 0;
 }
+
+
+void GraphicsNode::setFont(const QFont &font)
+{
+    m_font = font;
+}
         
 
 
@@ -160,7 +166,7 @@ WordGraphicsNode::WordGraphicsNode(const QString &id, WordGraph *graph)
 }
 
 WordGraphicsNode::WordGraphicsNode(const WordGraphicsNode &o)
-    : GraphicsNode(o) , m_font(o.m_font)
+    : GraphicsNode(o)
 {        
     setData(WORD, o.data(WORD));
 }
@@ -263,7 +269,7 @@ void WordGraphicsNode::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void WordGraphicsNode::setFont(const QFont &font)
 {
-    m_font = font;
+    GraphicsNode::setFont(font);
     calculateBoundingRect();
 }
 
@@ -416,7 +422,7 @@ void MeaningGraphicsNode::createToolTip()
         int dashWidth = QFontMetrics(m_font).width(QChar('-'));
         int dashesCount = TOOL_TIP_WIDTH / dashWidth;
         defHtml.append("<br>");
-        for (int i = 0; i < dashesCount; i++) 
+        for (int i = 0; i < dashesCount - 1; i++) 
             defHtml.append("-");
         defHtml.append("<br>");
         defHtml.append(samplesStr);
@@ -500,10 +506,8 @@ void MeaningGraphicsNode::setCircleRadius(int radius)
     calculateBoundingRect();        
 }
 
-void MeaningGraphicsNode::setFont(QFont &font)
-{
-    m_font = font;
-}
+
+
 
 
 

@@ -359,10 +359,9 @@ void GraphController::applyUserSettings()
     QFont font;
     font.setFamily(settings.value("Font Family").toString());
     font.setPointSize(settings.value("Font Size").toInt());
-    QList<Node*> wordNodes = m_graph->nodes(IsWord());
-    for (int i = 0; i < wordNodes.size(); i++) {
-        WordGraphicsNode *wordNode = static_cast<WordGraphicsNode*>(wordNodes[i]);
-        wordNode->setFont(font);
+    QList<Node*> nodes = m_graph->nodes();
+    for (int i = 0; i < nodes.size(); i++) {
+        nodes[i]->setFont(font);
     }
     
     // meaning nodes
