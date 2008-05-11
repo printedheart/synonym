@@ -16,7 +16,7 @@
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
+ **************************************************************************/
 #include "mainwindow.h"
 #include "graphwidget.h"
 #include "graphscene.h"
@@ -29,14 +29,19 @@
 #include "configdialog.h"
 #include "layout.h"
 #include "dbdataloader.h"
+#include "audiopronunciationloaderfactory.h"
+#include "audiopronunciationloader.h"
 
 #include <QtGui>
 #include <QtCore>
 
+#include <phonon/audiooutput.h>
+
+
 
         
 MainWindow::MainWindow()
- : QMainWindow(), m_currentGraph(0)
+ : QMainWindow(), m_currentGraph(0), soundLoader(0)
 {
     m_layout = new ForceDirectedLayout();
     GraphScene *scene = new GraphScene(m_layout, this);
@@ -76,7 +81,7 @@ MainWindow::MainWindow()
     m_wordLine->setObjectName("inputline");
     m_wordLine->setFixedWidth(300);
     toolBar->addWidget(m_wordLine);
-    QAction *searchAct = toolBar->addAction(QIcon(":pics/synonymicon3.png"), "Search");
+    QAction *searchAct = toolBar->addAction(QIcon(":resources/synonymicon3.png"), "Search");
     addToolBar(" ");
     
     connect (searchAct, SIGNAL(triggered()), this, SLOT(callLoadWord()));
@@ -125,16 +130,22 @@ MainWindow::MainWindow()
     
    createActions();
    createMenus();
-   
   
    //Zack's Rusin advice. http://developer.kde.org/documentation/other/mistakes.html
-   QTimer::singleShot(0, this, SLOT(initCompleter()));
+   QTimer::singleShot(10, this, SLOT(initServices()));
 }
 
 
 MainWindow::~MainWindow()
 {
         
+}
+
+
+void MainWindow::initServices()
+{
+    initSound();
+    initCompleter();
 }
 
 void MainWindow::callLoadWord()
@@ -149,15 +160,19 @@ void MainWindow::lookUpWordNet(const QString &word)
 {
     WordGraph *dataGraph = m_graphController->makeGraph(word);
     if (dataGraph) {
-        setNewGraph(dataGraph);
+        if (soundAvailable()) {
+            mediaObject->stop();
+            mediaObject->clearQueue();
+            setNewGraph(dataGraph);
+            soundLoader->loadAudio(word);
+        }
     }
-        
 }
 
 void MainWindow::nodeActivated(const QModelIndex &index)
 {
-    PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
-            const_cast<QAbstractItemModel*>(index.model()));
+    PartOfSpeechListModel *indexModel = 
+            qobject_cast<PartOfSpeechListModel*>(const_cast<QAbstractItemModel*>(index.model()));
     Node *node = 0;
     node = indexModel->nodeAt(index);
     if (!node) {
@@ -169,8 +184,9 @@ void MainWindow::nodeActivated(const QModelIndex &index)
 
 void MainWindow::nodeClicked(const QModelIndex &index)
 {
-    PartOfSpeechListModel *indexModel = qobject_cast<PartOfSpeechListModel*>(
-            const_cast<QAbstractItemModel*>(index.model()));
+    PartOfSpeechListModel *indexModel = 
+            qobject_cast<PartOfSpeechListModel*>(const_cast<QAbstractItemModel*>(index.model()));
+    
     Node *node = 0;
     node = indexModel->nodeAt(index);
     if (node) 
@@ -321,6 +337,54 @@ void MainWindow::showConfigDialog()
     }
         
 }
+
+
+void MainWindow::initSound()
+{
+    mediaObject = new Phonon::MediaObject(this);
+    
+    Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
+    Phonon::createPath(mediaObject, audioOutput);
+    AudioPronunciationLoaderFactory factory;
+    soundLoader = factory.createAudioLoader();
+    soundLoader->setParent(this);
+    if (soundLoader) {
+        connect (soundLoader, SIGNAL(soundLoaded(const Phonon::MediaSource&)),
+                this, SLOT(soundLoaded(const Phonon::MediaSource&)));
+        connect (m_scene, SIGNAL(soundButtonClicked()), this, SLOT(play()));
+        connect (soundLoader, SIGNAL(soundLoaded(const QString&)),
+                this, SLOT(soundLoaded(const QString&)));
+    }
+    
+}
+
+void MainWindow::soundLoaded(const QString &fileName)
+{
+    Phonon::MediaSource source(fileName);
+    source.setAutoDelete(true);
+    mediaObject->setCurrentSource(source);
+    m_scene->displaySoundIcon();
+}
+
+void MainWindow::soundLoaded(const Phonon::MediaSource &sound)
+{
+    mediaObject->setCurrentSource(sound);
+    m_scene->displaySoundIcon();
+}
+
+
+void MainWindow::play()
+{
+    qDebug() << mediaObject->currentSource().fileName();
+    mediaObject->play();
+}
+
+
+bool MainWindow::soundAvailable() 
+{
+    return soundLoader != 0;
+}
+
 
 #include "mainwindow.moc"
                  

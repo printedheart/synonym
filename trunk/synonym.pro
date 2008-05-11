@@ -1,8 +1,8 @@
 TEMPLATE = app
 
-DEFINES = QT_NO_DEBUG_OUTPUT
+#DEFINES = QT_NO_DEBUG_OUTPUT
 
-INCLUDEPATH = . src src/ui src/model
+INCLUDEPATH = . src src/ui src/model src/audio
 FORMS = src/ui/displayconfig.ui 
 HEADERS = src/model/wordgraph.h \
         src/model/partofspeechlistmodel.h \
@@ -20,7 +20,12 @@ HEADERS = src/model/wordgraph.h \
         src/model/iworddataloader.h \
         src/model/relation.h \
         src/model/dbdataloader.h \
-
+        src/audio/remoteaudiopronunciationloader.h \
+        src/audio/scriptablesoundsource.h \
+        src/audio/audiopronunciationloader.h \
+        src/audio/localaudiopronunciationloader.h \
+        src/audio/audiopronunciationloaderfactory.h \
+        src/audio/soundsource.h
 #        src/test/graphtest.h
 
 SOURCES = src/model/wordgraph.cpp \
@@ -37,7 +42,14 @@ SOURCES = src/model/wordgraph.cpp \
         src/main.cpp \
         src/model/relation.cpp \
         src/model/dbdataloader.cpp \
+        src/audio/remoteaudiopronunciationloader.cpp \
+        src/audio/scriptablesoundsource.cpp \
+        src/audio/audiopronunciationloader.cpp \
+        src/audio/localaudiopronunciationloader.cpp \
+        src/audio/audiopronunciationloaderfactory.cpp
+
 #        src/test/graphtest.cpp 
+
 
 RESOURCES += src/synonym.qrc
 
@@ -45,7 +57,8 @@ CONFIG += warn_on \
       qt \
       rtti \
       thread \
-      release 
+      debug
+#      release 
 #qtestlib
 
 TARGET = bin/synonym
@@ -56,7 +69,9 @@ xml \
 network \
 gui \
 svg \
-sql
+sql \
+phonon \
+script
 #CONFIG -= release
 
 DESTDIR = .
@@ -64,4 +79,8 @@ DESTDIR = .
 
 
 
+
+DISTFILES += src/scripts/parse.js \
+ src/scripts/wikiwords.js \
+ src/scripts/webster.js
 

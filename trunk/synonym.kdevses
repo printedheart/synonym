@@ -1,65 +1,23 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="15" >
-  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordgraph.cpp" >
-   <View0 Encoding="" Type="Source" />
+ <DocsAndViews NumberOfDocuments="3" >
+  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/synonym.pro" >
+   <View0 Encoding="" line="48" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.cpp" >
-   <View0 Encoding="" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.cpp" >
+   <View0 Encoding="" line="20" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.h" >
-   <View0 Encoding="" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.h" >
+   <View0 Encoding="" line="12" Type="Source" />
   </Doc2>
-  <Doc3 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphscene.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc3>
-  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphscene.cpp" >
-   <View0 Encoding="" Type="Source" />
-  </Doc4>
-  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphcontroller.cpp" >
-   <View0 Encoding="" Type="Source" />
-  </Doc5>
-  <Doc6 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/configdialog.cpp" >
-   <View0 Encoding="" Type="Source" />
-  </Doc6>
-  <Doc7 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/graphcontroller.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc7>
-  <Doc8 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc8>
-  <Doc9 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/worddataloader.cpp" >
-   <View0 Encoding="" Type="Source" />
-  </Doc9>
-  <Doc10 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/main.cpp" >
-   <View0 Encoding="" Type="Source" />
-  </Doc10>
-  <Doc11 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/wordnetutil.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc11>
-  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/configdialog.h" >
-   <View0 Encoding="" Type="Source" />
-  </Doc12>
-  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/layout.h" >
-   <View0 Encoding="" line="44" Type="Source" />
-  </Doc13>
-  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/synonym.pro" >
-   <View0 Encoding="" line="66" Type="Source" />
-  </Doc14>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
    <breakpointList>
-    <breakpoint0 location="/home/sergey/devel/graphs/synonym/src/sound/qalsasound.cpp:65" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="0" >
+    <breakpoint0 location="/home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationproducer.cpp:50" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
      <tracedExpressions/>
     </breakpoint0>
-    <breakpoint1 location="/home/sergey/devel/graphs/synonym/src/model/worddatagraph.cpp:82" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint1>
-    <breakpoint2 location="/home/sergey/devel/graphs/synonym/src/ui/graphedge.cpp:203" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
-     <tracedExpressions/>
-    </breakpoint2>
    </breakpointList>
    <showInternalCommands value="1" />
   </kdevdebugger>
@@ -92,8 +50,8 @@
   <kdevvalgrind>
    <executable path="" params="" />
    <valgrind path="valgrind" params=" --tool=memcheck --leak-check=yes" />
-   <calltree path="" params="" />
-   <kcachegrind path="" />
+   <calltree path="/usr/bin/valgrind" params="--tool=callgrind --trace-children=yes" />
+   <kcachegrind path="/usr/lib/kde4/bin//kcachegrind" />
   </kdevvalgrind>
  </pluginList>
 </KDevPrjSession>
