@@ -1,6 +1,8 @@
  <!DOCTYPE RCC><RCC version="1.0">
  <qresource>
      <file>resources/synonymicon3.png</file>
+     <file>resources/Sound-icon.svg</file>
+     <file>scripts/parse.js</file>
  </qresource>
  </RCC>
 
