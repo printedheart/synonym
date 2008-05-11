@@ -25,6 +25,9 @@
 #include <QMainWindow>
 #include <QList>
 #include <QPair>
+#include <phonon/mediaobject.h>
+#include <phonon/mediasource.h>
+
 class QGraphicsView;
 class QLineEdit;
 class WordGraph;
@@ -37,6 +40,8 @@ class GraphScene;
 class QModelIndex;
 class QCheckBox;
 class Layout;
+class AudioPronunciationLoader;
+
 
 /**
     @author Sergejs Melderis <sergey.melderis@gmail.com>
@@ -75,6 +80,8 @@ private slots:
     void slotBack();
     void slotForward();
     
+    void initServices();
+    
     void initCompleter();
     void completerLoaderFinished();
     
@@ -83,6 +90,9 @@ private slots:
     
     void showConfigDialog();
     
+    void soundLoaded(const Phonon::MediaSource &sound);
+    void soundLoaded(const QString &fileName);
+    void play();
 private:
     WordGraph *m_currentGraph;    
     Layout *m_layout;
@@ -97,6 +107,12 @@ private:
 
     QAction *quitAct;
     QAction *m_settingsAct;
+    
+    void initSound();
+    AudioPronunciationLoader *soundLoader;
+    Phonon::MediaObject *mediaObject;
+    bool soundAvailable();
+    
 };
 
 #endif
