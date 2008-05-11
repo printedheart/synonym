@@ -22,10 +22,11 @@
 #include <QApplication>
 #include "ui/mainwindow.h"
 #include <QLineEdit>               
-
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    app.setApplicationName("Synonym");
+    
     MainWindow *mainWindow = new MainWindow();
     mainWindow->show();
     mainWindow->findChild<QLineEdit*>("inputline")->setFocus();
