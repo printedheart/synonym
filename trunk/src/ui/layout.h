@@ -90,7 +90,7 @@ private:
     void startThread();
     
     volatile bool finishedLayout;
-    volatile bool firstRemoved;
+    bool firstRemoved;
     
     volatile bool m_abort;
     QWaitCondition m_aborted;
@@ -101,20 +101,18 @@ private:
     QList<GraphicsEdge*> m_edges;
     GraphicsNode *centralNode;
     
-    volatile bool m_restart;
-    
     //Internal structure to hold node animation points.
     struct NodeAnimation {
         NodeAnimation() : firstIndex(0), lastIndex(0) {}
         static const  uint BUFFER_SIZE = 8192;
         QPointF buffer[BUFFER_SIZE];
-        volatile uint firstIndex;
-        volatile uint lastIndex;
+        uint firstIndex;
+        uint lastIndex;
         QPointF force;
         
         inline void addPoint(QPointF p) { buffer[(lastIndex++) % BUFFER_SIZE] = p; }
         inline QPointF &lastPoint()  { return buffer[(lastIndex - 1) % BUFFER_SIZE]; }
-        QPointF  takeFirstPoint() { return  buffer[(firstIndex++) % BUFFER_SIZE]; }
+        inline QPointF  takeFirstPoint() { return  buffer[(firstIndex++) % BUFFER_SIZE]; }
         inline void reset() { firstIndex = 0; lastIndex = 0;}
         inline int pointCount() const { return lastIndex - firstIndex; } 
         
