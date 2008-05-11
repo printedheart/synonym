@@ -141,6 +141,7 @@ void PartOfSpeechItemView::highlightItem(const QModelIndex &index)
 {
     if (index.isValid()) {
         m_indexUnderMouse = index;
+        scrollTo(index);
         update(index);
     }    
 }
