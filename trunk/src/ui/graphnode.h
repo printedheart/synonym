@@ -68,7 +68,7 @@ public:
     void setMass(double mass) { m_mass = mass; }
     inline double mass() const { return m_mass; }
     
-    virtual bool advance();
+    bool advance(bool force = false);
     void setNewPos(QPointF newPos);
     
     // Types for QGraphicsScene::qgraphicsitem_cast()
@@ -121,8 +121,6 @@ public:
     virtual QPainterPath shape() const;
     virtual QRectF boundingRect() const;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget);
-
-    bool advance();
 
     void showSoundButton();
     
