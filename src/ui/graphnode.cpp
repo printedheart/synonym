@@ -92,10 +92,12 @@ WordGraph * GraphicsNode::graph() const
     return m_graph;
 }
 
-bool GraphicsNode::advance()
+bool GraphicsNode::advance(bool force)
 {
+    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
+        return false;
     qreal tolerance = 0.05;
-    if (qAbs(m_newPos.x() - pos().x()) > tolerance && qAbs(m_newPos.y() - pos().y()) > tolerance) {
+    if (force || (qAbs(m_newPos.x() - pos().x()) > tolerance && qAbs(m_newPos.y() - pos().y()) > tolerance)) {
         setPos(m_newPos);
         return true;
     }
@@ -241,13 +243,7 @@ void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     painter->drawText(boundingRect(), Qt::AlignCenter, data(WORD).toString());
 }
 
-bool WordGraphicsNode::advance()
-{
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable))
-        return false;
 
-    return GraphicsNode::advance();
-}
 
 void WordGraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
