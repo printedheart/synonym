@@ -104,6 +104,7 @@ QList<GraphicsEdge*> GraphScene::graphEdges()
 
 void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    m_timerInterval = 10;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
     QList<QGraphicsItem*> eventItems = items(mouseEvent->scenePos());
     foreach (QGraphicsItem *item, eventItems) {
