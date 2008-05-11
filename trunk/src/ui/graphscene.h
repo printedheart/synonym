@@ -40,7 +40,7 @@ public:
 
     ~GraphScene();
 
-    void itemMoved();
+    
 
     QList<GraphicsNode*> graphNodes();
     QList<GraphicsEdge*> graphEdges();
@@ -78,6 +78,7 @@ public:
      */
     void addItem(QGraphicsItem *item);
     void removeItem(QGraphicsItem *item);
+    
 public slots:    
     /**
      * Mark the node with id as active node.
@@ -88,15 +89,17 @@ public slots:
      * If enable is true, the scene will schedule layouting of the nodes.
      */
     void setLayout(bool enable = true);
+    
+    void itemMoved();
 signals:
     void nodeClicked(const QString &id);
     void nodeMouseHovered(const QString &id);
     void nodeMouseHoverLeaved(const QString &id);
     
-    void soundButtonClicked(const QString &phrase);
+    void soundButtonClicked();
 protected:
     void timerEvent(QTimerEvent *event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+  //  void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void layout();
@@ -125,6 +128,9 @@ private:
     QList<GraphicsEdge*> m_edges;
     
     void adjustEdges();
+    
+    QPointF m_mousePos;
+    QPointF m_mouseLayoutPos;
 };
 
 #endif
