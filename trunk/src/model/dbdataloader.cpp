@@ -218,7 +218,8 @@ QStringList DbDataLoader::words() const
 
 void DbDataLoader::selectDbFile()
 {
-    QString dbFileName = QFileDialog::getOpenFileName(0, "Select database file");
+    QString dbFileName = QFileDialog::getOpenFileName(0,"Select database file");
+    qDebug() << dbFileName;
     if (QFile(dbFileName).exists()) {
         QSettings settings("http://code.google.com/p/synonym/", "synonym");
         settings.beginGroup("db");
