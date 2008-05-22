@@ -112,6 +112,7 @@ private:
     AudioPronunciationLoader *soundLoader;
     Phonon::MediaObject *mediaObject;
     bool soundAvailable();
+    void loadSound();
     
 };
 

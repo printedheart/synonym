@@ -159,14 +159,9 @@ void MainWindow::callLoadWord()
 void MainWindow::lookUpWordNet(const QString &word)
 {
     WordGraph *dataGraph = m_graphController->makeGraph(word);
-    if (dataGraph) {
-        if (soundAvailable()) {
-            mediaObject->stop();
-            mediaObject->clearQueue();
-            setNewGraph(dataGraph);
-            soundLoader->loadAudio(word);
-        }
-    }
+    if (dataGraph) 
+        setNewGraph(dataGraph);
+    
 }
 
 void MainWindow::nodeActivated(const QModelIndex &index)
@@ -303,6 +298,7 @@ void MainWindow::setNewGraph(WordGraph *graph)
     m_currentGraph = graph;
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(graph);
+    loadSound();
 }
 
 void MainWindow::createMenus()
@@ -383,6 +379,18 @@ void MainWindow::play()
 bool MainWindow::soundAvailable() 
 {
     return soundLoader != 0;
+}
+
+void MainWindow::loadSound()
+{
+    if (soundAvailable()) {
+        GraphicsNode *centralNode = m_currentGraph->centralNode();
+        if (dynamic_cast<WordGraphicsNode*>(centralNode)) { 
+            mediaObject->stop();
+            mediaObject->clearQueue();
+            soundLoader->loadAudio(centralNode->id());
+        }
+    }    
 }
 
 
