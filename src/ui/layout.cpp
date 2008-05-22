@@ -105,7 +105,6 @@ void ForceDirectedLayout::layoutNodes(GraphicsNode *node,
 // arranging nodes in a tree-like layout.
 void ForceDirectedLayout::preLayout(GraphicsNode *rootNode)
 {
-    qDebug() << "preLayout()" << rootNode->id();
     rootNode->setPos(0.0, 0.0);
     rootNode->setFlag(QGraphicsItem::ItemIsMovable, false);
     QSet<GraphicsNode*> visitSet;
