@@ -23,11 +23,13 @@
 #include <QGraphicsScene>
 #include <QList>
 #include <QSet>        
+#include <QMutex>
 class Layout;
 class GraphicsNode;
 class GraphicsEdge;
 class WordGraphicsNode;
 class QSvgRenderer;
+class GraphicsItem;
 /**
     @author Sergejs <sergey.melderis@gmail.com>
 */
@@ -103,8 +105,6 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void layout();
-       
-    
     
 private:
     Layout *m_layout;
@@ -131,6 +131,7 @@ private:
     
     QPointF m_mousePos;
     QPointF m_mouseLayoutPos;
+    
 };
 
 #endif

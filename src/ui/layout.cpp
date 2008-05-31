@@ -39,7 +39,7 @@ ForceDirectedLayout::ForceDirectedLayout(QObject *parent)
 
 void ForceDirectedLayout::wakeUp()
 {
-    finishedLayout = true;
+    m_state = IDLE;
     m_aborted.wakeAll();
 }
 
@@ -112,30 +112,34 @@ void ForceDirectedLayout::preLayout(GraphicsNode *rootNode)
 }
 
 
-bool ForceDirectedLayout::layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) 
+bool ForceDirectedLayout::layout(bool restart) 
 {
     if (restart) {
-         stop();
-         return layoutSerial(nodes, edges);
+         if (m_state == CALC_ANIMATION) {
+            m_abort = true; 
+            return true;
+         }
+         startThread();
+         return layoutSerial();
     }
     m_abort = false;
-    return layoutParallel(nodes, edges);
-}
-
-void ForceDirectedLayout::stop()
-{
-    m_abort = true;
+    return layoutParallel();
 }
 
 
 
-bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
+
+
+bool ForceDirectedLayout::layoutParallel()
 {
+    QList<GraphicsNode*> nodes = m_scene->graphNodes();
+    QList<GraphicsEdge*> edges = m_scene->graphEdges();
+
     if (nodes.size() == 0) {
         return false;
     }
-    QGraphicsScene *scene = nodes.first()->scene();
-    GraphicsNode *rootNode = qobject_cast<GraphScene*>(scene)->centralNode();
+    GraphicsNode *rootNode = m_scene->centralNode();
+    
     
     if (centralNode != rootNode) {
         m_abortMutex.lock();
@@ -199,11 +203,10 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
         startThread();
     } 
     
-    if (m_animations.constBegin()->pointCount() < 10 && !finishedLayout) {
+    if (m_animations.constBegin()->pointCount() < 10 && isRunning()) {
         return true;
     }
     
-//    m_mutex.lock();
     
     // If there are too many nodes drawing becomes very slow.
     // To speed up the process we will skip a step or more of the animation.
@@ -211,7 +214,7 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
     int nodesToTake = nodesCount / 20 > 0 ? nodesCount / 20 : 1;
     
     bool itemsMoved = false;
-    QGraphicsItem *grabberItem = scene->mouseGrabberItem();
+    QGraphicsItem *grabberItem = m_scene->mouseGrabberItem();
     
     for (int i = 0; i < nodesCount; i++) {
         GraphicsNode *node = nodes.at(i);
@@ -229,24 +232,19 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
             if (node->advance(itemsMoved))
                 itemsMoved = true;
     }
-  //  m_mutex.unlock();
-
-    //qDebug() << (itemsMoved ? "moved " : " ") << (m_animations.constBegin()->pointCount() > 0 ? "points" : "  ") << (isRunning() ? " running " : " " );
 
     return itemsMoved || m_animations.constBegin()->pointCount() > 0 ||   isRunning();
     
 }
 
- void ForceDirectedLayout::run()
+void ForceDirectedLayout::calculateAnimation()
 {
+    m_state = CALC_ANIMATION;
     typedef QHash<GraphicsNode*, NodeAnimation>::iterator AnimationIterator;
-    qDebug() << "run()";
-    QGraphicsScene *scene = m_animations.begin().key()->scene();
     bool done = false;
     int count = 0;
     while (!done) {
         done = true;
-        finishedLayout = false;
         count++;
         
         AnimationIterator aIter;
@@ -259,9 +257,9 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
                 foreach (NodeAnimation animation, m_animations) {
                     animation.reset();
                 }
-                qDebug() << "finished run()";
                 m_aborted.wakeAll();
                 m_abortMutex.unlock();
+                m_state = FINISHED;
                 return;
                 
             }
@@ -332,8 +330,8 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
                 QPointF previous = animation.lastPoint();
                 QPointF newPos = previous + QPointF(xvel, yvel);
                 
-                newPos.setX(qMin(qMax(newPos.x(), scene->sceneRect().left() + 10), scene->sceneRect().right() - 10));
-                newPos.setY(qMin(qMax(newPos.y(), scene->sceneRect().top() + 10), scene->sceneRect().bottom() - 10));
+                newPos.setX(qMin(qMax(newPos.x(), m_scene->sceneRect().left() + 10), m_scene->sceneRect().right() - 10));
+                newPos.setY(qMin(qMax(newPos.y(), m_scene->sceneRect().top() + 10), m_scene->sceneRect().bottom() - 10));
                 
                 if (previous != newPos)
                     done = false;
@@ -362,13 +360,26 @@ bool ForceDirectedLayout::layoutParallel(QList<GraphicsNode*> &nodes, QList<Grap
         }
         m_mutex.unlock();    
     }
-    finishedLayout = true;
-    qDebug() << "finished run";
+    m_state = FINISHED;
+}
+
+void ForceDirectedLayout::run()
+{
+    if (!m_scene->mouseGrabberItem())
+        calculateAnimation();   
+    else {
+        while (m_scene->mouseGrabberItem()) {
+            calculateForces();
+            QThread::msleep(15);
+        }    
+    }
 }
 
 
-bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges)
+void ForceDirectedLayout::calculateForces()
 {
+    QList<GraphicsNode*> nodes = m_scene->graphNodes();
+    QList<GraphicsEdge*> edges = m_scene->graphEdges();
     QHash<GraphicsNode*, QPointF> resultForces;
     QList<GraphicsNode*>::const_iterator aIter;
     QList<GraphicsNode*>::const_iterator bIter;
@@ -410,13 +421,10 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
             resultForces[edge->dest()] += QPointF(-force * (dx / distance), -force * (dy / distance));
         }
     }
-        
     
-    QGraphicsScene *scene = nodes.first()->scene();
-    QRectF sceneRect = scene->sceneRect();
-    
-    bool itemsMoved = false;
-    QGraphicsItem *grabberNode = scene->mouseGrabberItem();
+    QRectF sceneRect = m_scene->sceneRect();
+
+    QGraphicsItem *grabberNode = m_scene->mouseGrabberItem();
     foreach (GraphicsNode *node, nodes) {
         if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
             continue;
@@ -430,21 +438,30 @@ bool ForceDirectedLayout::layoutSerial(QList<GraphicsNode*> &nodes, QList<Graphi
         newPos.setX(qMin(qMax(newPos.x(), sceneRect.left() + 10), sceneRect.right() - 10));
         newPos.setY(qMin(qMax(newPos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10));
         node->setNewPos(newPos);
+    }
+}
+
+
+bool ForceDirectedLayout::layoutSerial()
+{
+    QGraphicsItem *grabberNode = m_scene->mouseGrabberItem();
+    QList<GraphicsNode*> nodes = m_scene->graphNodes();
+    bool itemsMoved = false;
+    foreach (GraphicsNode *node, nodes) {
         if (grabberNode != node)
             if (node->advance(itemsMoved))
                 itemsMoved = true;
     }
 
-    return itemsMoved;
-        
+    //qDebug("Time elapsed: %d ms", t.elapsed());
+    return true;// itemsMoved;        
 }
 
 void ForceDirectedLayout::startThread()
 {
     if (!isRunning()) {
-        finishedLayout = false;
         m_abort = false;
-        start(QThread::HighestPriority);
+        start(QThread::NormalPriority);
         //  We want to get some points as soon as possible
         QThread::currentThread()->usleep(10000);
     }
