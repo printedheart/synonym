@@ -27,7 +27,8 @@
 #include <cmath>
 #include <QList>
 #include <QThread>
-
+#include <QMutex>
+#include <QWaitCondition>  
 
 
 /**
@@ -36,7 +37,7 @@
 class Layout
 {
 public:
-    Layout() {};
+    Layout() { };
 
     virtual ~Layout() {};
 
@@ -44,13 +45,17 @@ public:
      * Layouts nodes and edges.
      * restart indicates that layout should be restarted.
      */
-    virtual bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart) = 0;
+    virtual bool layout(bool restart) = 0;
     
     virtual void stop() {}
     
     virtual void setRestDistance(int distance) { m_restDistance = distance; }
     
+    void setScene(GraphScene *scene) { m_scene = scene; }
+    
+    
 protected:    
+    GraphScene *m_scene;
     int m_restDistance;
 };
 
@@ -58,8 +63,7 @@ protected:
 
  
 
-#include <QMutex>
-#include <QWaitCondition>                 
+               
 
  
 class ForceDirectedLayout : public QThread, public Layout
@@ -72,11 +76,15 @@ public:
     // TODO: make the following parameters configurable.
     static const qreal STIFFNESS = 0.2;
     static const qreal REPULSION = 3000;
+    
+    static const int FINISHED = 1;
+    static const int CALC_ANIMATION = 2;
+    static const int CALC_FORCES = 3;
+    static const int IDLE = 4;
 
-    bool layout(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges, bool restart = false);
+    bool layout(bool restart = false);
     
     void run();
-    void stop();    
 private slots:
     
     void wakeUp();
@@ -84,15 +92,18 @@ private:
     void preLayout(GraphicsNode *rootNode);
     void layoutNodes(GraphicsNode *node, QSet<GraphicsNode*> &visitSet);
     
-    bool layoutParallel(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
-    bool layoutSerial(QList<GraphicsNode*> &nodes, QList<GraphicsEdge*> &edges);
+    bool layoutParallel();
+    bool layoutSerial();
+    
+    void calculateAnimation();
     
     void startThread();
     
-    volatile bool finishedLayout;
     bool firstRemoved;
     
+    volatile bool m_state;
     volatile bool m_abort;
+    
     QWaitCondition m_aborted;
     QMutex m_abortMutex;    
     
@@ -119,6 +130,8 @@ private:
     };
         
     QHash<GraphicsNode*, NodeAnimation> m_animations; 
+    
+    void calculateForces();
 };
 
 #endif
