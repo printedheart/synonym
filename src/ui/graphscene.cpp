@@ -68,7 +68,7 @@ void GraphScene::layout()
     QList<GraphicsNode*> nodes = graphNodes();
     QList<GraphicsEdge*> edges = graphEdges();    
     
-    bool needsLayout = m_layout->layout(mouseGrabberItem());
+    bool needsLayout = m_layout->layout();
     if (!needsLayout) {
         killTimer(m_timerId);
         m_timerId = 0;
@@ -131,15 +131,11 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         }
         GraphicsNode *node = dynamic_cast<GraphicsNode*>(item);
         if (node) {
-            //if (graphNodes().size() < 50) {
-                m_timerInterval = 10 * (graphNodes().size() / 10);
-                if (m_timerInterval < 10) 
-                    m_timerInterval = 10;
-            //}
+            int nodesCount = graphNodes().size();
+            m_timerInterval = qMax(10, 12 * (nodesCount / 10));
         }
     }   
         
-    qDebug() << m_timerInterval;
     QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
