@@ -43,11 +43,10 @@ public:
 
     /**
      * Layouts nodes and edges.
-     * restart indicates that layout should be restarted.
      */
-    virtual bool layout(bool restart) = 0;
+    virtual bool layout() = 0;
     
-    virtual void stop() {}
+    virtual void stop() = 0;
     
     virtual void setRestDistance(int distance) { m_restDistance = distance; }
     
@@ -80,9 +79,12 @@ public:
     static const int FINISHED = 1;
     static const int CALC_ANIMATION = 2;
     static const int CALC_FORCES = 3;
-    static const int IDLE = 4;
+    static const int ABORT_LOOP = 5;
+    
 
-    bool layout(bool restart = false);
+    bool layout();
+    
+    void stop();
     
     void run();
 private slots:
@@ -101,8 +103,7 @@ private:
     
     bool firstRemoved;
     
-    volatile bool m_state;
-    volatile bool m_abort;
+    volatile int m_state;
     
     QWaitCondition m_aborted;
     QMutex m_abortMutex;    

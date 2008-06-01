@@ -31,7 +31,6 @@ static double TWO_PI = 2.0 * PI;
 ForceDirectedLayout::ForceDirectedLayout(QObject *parent)
     :QThread(parent)
 {
-    m_abort = false;
     centralNode = 0;
     m_restDistance = 100;
     connect (this, SIGNAL(finished()), this, SLOT (wakeUp()));
@@ -39,13 +38,17 @@ ForceDirectedLayout::ForceDirectedLayout(QObject *parent)
 
 void ForceDirectedLayout::wakeUp()
 {
-    m_state = IDLE;
     m_aborted.wakeAll();
 }
 
 
 ForceDirectedLayout::~ForceDirectedLayout()
 {}
+
+void ForceDirectedLayout::stop()
+{
+    m_state = ABORT_LOOP;
+}
 
 // Sort of a hack. When algorithm has run through all
 // nodes at least once, then no nodes should have a null point.
@@ -112,17 +115,24 @@ void ForceDirectedLayout::preLayout(GraphicsNode *rootNode)
 }
 
 
-bool ForceDirectedLayout::layout(bool restart) 
+bool ForceDirectedLayout::layout() 
 {
-    if (restart) {
-         if (m_state == CALC_ANIMATION) {
-            m_abort = true; 
-            return true;
-         }
-         startThread();
-         return layoutSerial();
+    if (m_scene->mouseGrabberItem()) {
+        switch (m_state) {
+
+            case CALC_ANIMATION:
+                m_state = ABORT_LOOP;
+                return true;
+                
+            case ABORT_LOOP:
+                return true;
+            case FINISHED:
+                startThread();
+                return true;
+            case CALC_FORCES:    
+                return layoutSerial();
+        }
     }
-    m_abort = false;
     return layoutParallel();
 }
 
@@ -203,7 +213,7 @@ bool ForceDirectedLayout::layoutParallel()
         startThread();
     } 
     
-    if (m_animations.constBegin()->pointCount() < 10 && isRunning()) {
+    if (m_animations.constBegin()->pointCount() < 5 && isRunning()) {
         return true;
     }
     
@@ -252,12 +262,11 @@ void ForceDirectedLayout::calculateAnimation()
         for (aIter = m_animations.begin(); aIter != end; ++aIter) {
             GraphicsNode *aNode = aIter.key();
             
-            if (m_abort) {
+            if (m_state == ABORT_LOOP) {
                 m_abortMutex.lock();
                 foreach (NodeAnimation animation, m_animations) {
                     animation.reset();
                 }
-                m_aborted.wakeAll();
                 m_abortMutex.unlock();
                 m_state = FINISHED;
                 return;
@@ -368,11 +377,16 @@ void ForceDirectedLayout::run()
     if (!m_scene->mouseGrabberItem())
         calculateAnimation();   
     else {
+        m_state = CALC_FORCES;
         while (m_scene->mouseGrabberItem()) {
             calculateForces();
-            QThread::msleep(15);
+            int nodesCount = m_scene->graphNodes().size();
+            QThread::msleep(qMax(10, 10 * (nodesCount / 20)));
+            //qDebug() << qMax(10, 10 * (nodesCount / 20));
         }    
     }
+    m_state = FINISHED;
+    m_aborted.wakeAll();
 }
 
 
@@ -423,8 +437,6 @@ void ForceDirectedLayout::calculateForces()
     }
     
     QRectF sceneRect = m_scene->sceneRect();
-
-    QGraphicsItem *grabberNode = m_scene->mouseGrabberItem();
     foreach (GraphicsNode *node, nodes) {
         if (!node->flags().testFlag(QGraphicsItem::ItemIsMovable)) {
             continue;
@@ -446,24 +458,19 @@ bool ForceDirectedLayout::layoutSerial()
 {
     QGraphicsItem *grabberNode = m_scene->mouseGrabberItem();
     QList<GraphicsNode*> nodes = m_scene->graphNodes();
-    bool itemsMoved = false;
     foreach (GraphicsNode *node, nodes) {
         if (grabberNode != node)
-            if (node->advance(itemsMoved))
-                itemsMoved = true;
+            node->advance(true);
     }
-
-    //qDebug("Time elapsed: %d ms", t.elapsed());
-    return true;// itemsMoved;        
+    return true;
 }
 
 void ForceDirectedLayout::startThread()
 {
     if (!isRunning()) {
-        m_abort = false;
         start(QThread::NormalPriority);
         //  We want to get some points as soon as possible
-        QThread::currentThread()->usleep(10000);
+        QThread::currentThread()->msleep(1);
     }
 }
 
