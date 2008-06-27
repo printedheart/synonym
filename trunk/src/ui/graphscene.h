@@ -113,13 +113,9 @@ private:
     int m_timerInterval;
 
     bool m_enableLayout;
-    bool m_restartLayout;    
     
     GraphicsNode *m_centralNode;
     QSvgRenderer *m_soundIconRenderer;
-
-    
-    
     
     GraphicsNode *m_activeNode;
     
@@ -131,6 +127,8 @@ private:
     
     QPointF m_mousePos;
     QPointF m_mouseLayoutPos;
+    
+    GraphicsNode *m_grabbedNode;
     
 };
 

@@ -70,6 +70,7 @@ public:
     
     bool advance(bool force = false);
     void setNewPos(QPointF newPos);
+    void addToNewPos(QPointF &p);
     
     // Types for QGraphicsScene::qgraphicsitem_cast()
     enum GraphTypes { GraphType = UserType + 90, PhraseType, MeaningType };
