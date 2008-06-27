@@ -31,7 +31,8 @@
 
 GraphScene::GraphScene(Layout *layout, QObject *parent)
  : QGraphicsScene(parent), m_layout(layout),  m_timerId(0), m_timerInterval(10), 
-                  m_enableLayout(true), m_restartLayout(false),  m_centralNode(0), m_activeNode(0)
+                  m_enableLayout(true), 
+                  m_centralNode(0), m_activeNode(0), m_grabbedNode(0)
 {
     m_soundIconRenderer = new QSvgRenderer(QString(":resources/Sound-icon.svg"), this);
     m_layout->setScene(this);
@@ -106,16 +107,12 @@ void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     m_timerInterval = 10;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
-    QList<QGraphicsItem*> eventItems = items(mouseEvent->scenePos());
-    foreach (QGraphicsItem *item, eventItems) {
-        if (item->type() == GraphicsNode::PhraseType || item->type() ==  GraphicsNode::MeaningType) {
-            adjustEdges();
-            m_restartLayout = false;
-            QTimer::singleShot(10, this, SLOT(itemMoved()));
-            break;
-        }
+    if (m_grabbedNode) {
+        adjustEdges();
+        QTimer::singleShot(10, this, SLOT(itemMoved()));
     }
-    qDebug() << m_timerInterval;
+    
+    m_grabbedNode = 0;
 }
 
 
@@ -132,7 +129,8 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
         GraphicsNode *node = dynamic_cast<GraphicsNode*>(item);
         if (node) {
             int nodesCount = graphNodes().size();
-            m_timerInterval = qMax(10, 12 * (nodesCount / 10));
+            m_timerInterval = qMax(20   , 12 * (nodesCount / 10));
+            m_grabbedNode = node;
         }
     }   
         

@@ -109,6 +109,8 @@ void GraphicsNode::setNewPos(QPointF newPos)
     m_newPos = newPos;
 }
 
+
+
 QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (!scene())
