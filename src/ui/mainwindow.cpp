@@ -83,7 +83,7 @@ MainWindow::MainWindow()
     toolBar->addWidget(m_wordLine);
     QAction *searchAct = toolBar->addAction(QIcon(":resources/synonymicon3.png"), "Search");
     addToolBar(" ");
-    
+        
     connect (searchAct, SIGNAL(triggered()), this, SLOT(callLoadWord()));
     connect (m_wordLine, SIGNAL(returnPressed()), this, SLOT(callLoadWord()));
     connect (scene, SIGNAL(nodeClicked(const QString &)),this, SLOT(lookUpWordNet(const QString&)));
@@ -97,6 +97,7 @@ MainWindow::MainWindow()
                                      
     for (int i = 0; i < 4; i++) {
         QDockWidget *dockWidget = new QDockWidget(partsOfSpeechHeaders[i], this);
+        
 
         PartOfSpeechItemView *view = new PartOfSpeechItemView(dockWidget);
         m_posViews[i] = view;
@@ -275,6 +276,18 @@ void MainWindow::configure()
         settings.beginGroup("display");
         int edgeRestDistance = settings.value("Edge Length").toInt();
         m_layout->setRestDistance(edgeRestDistance);
+        
+        const QColor posColors[4] = {
+            QColor(settings.value("Noun Color").toString().trimmed()), 
+            QColor(settings.value("Verb Color").toString().trimmed()),
+            QColor(settings.value("Adjective Color").toString().trimmed()),
+            QColor(settings.value("Adverb Color").toString().trimmed())
+        };
+        for (int i = 0; i < 4; i++) {
+            QString style = "QDockWidget::title {text-align: center; background: " + posColors[i].name() + ";}";
+            qobject_cast<QWidget*>(m_posViews[i]->parent())->setStyleSheet(style);
+        }
+
     }
 }
 
@@ -350,6 +363,7 @@ void MainWindow::initSound()
         connect (m_scene, SIGNAL(soundButtonClicked()), this, SLOT(play()));
         connect (soundLoader, SIGNAL(soundLoaded(const QString&)),
                 this, SLOT(soundLoaded(const QString&)));
+        connect (mediaObject, SIGNAL(finished()), this, SLOT(resetSource()));
     }
     
 }
@@ -366,6 +380,7 @@ void MainWindow::soundLoaded(const Phonon::MediaSource &sound)
 {
     mediaObject->setCurrentSource(sound);
     m_scene->displaySoundIcon();
+    
 }
 
 
@@ -373,6 +388,13 @@ void MainWindow::play()
 {
     qDebug() << mediaObject->currentSource().fileName();
     mediaObject->play();
+    
+}
+
+void MainWindow::resetSource()
+{
+    Phonon::MediaSource source = mediaObject->currentSource();
+    mediaObject->setCurrentSource(source);
 }
 
 
