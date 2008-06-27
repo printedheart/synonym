@@ -131,6 +131,7 @@ private:
     };
         
     QHash<GraphicsNode*, NodeAnimation> m_animations; 
+    void resetAnimations();
     
     void calculateForces();
 };

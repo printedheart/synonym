@@ -263,11 +263,7 @@ void ForceDirectedLayout::calculateAnimation()
             GraphicsNode *aNode = aIter.key();
             
             if (m_state == ABORT_LOOP) {
-                m_abortMutex.lock();
-                foreach (NodeAnimation animation, m_animations) {
-                    animation.reset();
-                }
-                m_abortMutex.unlock();
+                resetAnimations();
                 m_state = FINISHED;
                 return;
                 
@@ -278,10 +274,10 @@ void ForceDirectedLayout::calculateAnimation()
                 if (aNode == bNode) continue;
                 
                 QLineF line(aIter.value().lastPoint(), bIter.value().lastPoint());
-                qreal dx = line.dx();
-                qreal dy = line.dy();
-                qreal distance2 = dx * dx + dy * dy;
-                qreal distance = sqrt(distance2);
+                 qreal dx = line.dx();
+                 qreal dy = line.dy();
+                 qreal distance2 = dx * dx + dy * dy;
+                 qreal distance = sqrt(distance2);
                 if (distance > 0) {
                     qreal repulsive = REPULSION * aNode->mass() * bNode->mass() / distance2;
                     qreal xvel = repulsive * dx / distance;
@@ -374,10 +370,13 @@ void ForceDirectedLayout::calculateAnimation()
 
 void ForceDirectedLayout::run()
 {
+    qDebug() << "run started";
     if (!m_scene->mouseGrabberItem())
         calculateAnimation();   
     else {
+        resetAnimations();
         m_state = CALC_FORCES;
+        
         while (m_scene->mouseGrabberItem()) {
             calculateForces();
             int nodesCount = m_scene->graphNodes().size();
@@ -387,11 +386,13 @@ void ForceDirectedLayout::run()
     }
     m_state = FINISHED;
     m_aborted.wakeAll();
+    qDebug() << "run finished";
 }
 
-
+    
 void ForceDirectedLayout::calculateForces()
 {
+    const QGraphicsItem *selectedNode = m_scene->mouseGrabberItem();
     QList<GraphicsNode*> nodes = m_scene->graphNodes();
     QList<GraphicsEdge*> edges = m_scene->graphEdges();
     QHash<GraphicsNode*, QPointF> resultForces;
@@ -405,6 +406,8 @@ void ForceDirectedLayout::calculateForces()
             
             // Find the distance between nodes
             if (aNode == bNode) continue;
+           // if (aNode == selectedNode || bNode == selectedNode) continue;
+            //qDebug() << "calculating";
             QLineF line(aNode->pos(), bNode->pos());
             qreal dx = line.dx();
             qreal dy = line.dy();
@@ -416,6 +419,7 @@ void ForceDirectedLayout::calculateForces()
                 qreal yvel = repulsive * dy / distance;
                 resultForces[aNode] += QPointF(-xvel, -yvel);
                 resultForces[bNode] += QPointF(xvel, yvel);
+                
             }
         }
     }
@@ -430,9 +434,10 @@ void ForceDirectedLayout::calculateForces()
         qreal distance = sqrt(distance2);
         if (distance > 0) {
             qreal force = -(STIFFNESS *  (m_restDistance - distance));
-        
+           
             resultForces[edge->source()] += QPointF(force * (dx / distance), force * ( dy / distance));
             resultForces[edge->dest()] += QPointF(-force * (dx / distance), -force * (dy / distance));
+            
         }
     }
     
@@ -443,10 +448,12 @@ void ForceDirectedLayout::calculateForces()
         }
         qreal xvel = resultForces[node].x();
         qreal yvel = resultForces[node].y();
+        
         if (qAbs(xvel) < 0.1 && qAbs(yvel) < 0.1)
             xvel = yvel = 0;
-
+        
         QPointF newPos = node->pos() + QPointF(xvel, yvel);
+        
         newPos.setX(qMin(qMax(newPos.x(), sceneRect.left() + 10), sceneRect.right() - 10));
         newPos.setY(qMin(qMax(newPos.y(), sceneRect.top() + 10), sceneRect.bottom() - 10));
         node->setNewPos(newPos);
@@ -456,8 +463,9 @@ void ForceDirectedLayout::calculateForces()
 
 bool ForceDirectedLayout::layoutSerial()
 {
-    QGraphicsItem *grabberNode = m_scene->mouseGrabberItem();
+    GraphicsNode *grabberNode = static_cast<GraphicsNode*>(m_scene->mouseGrabberItem());
     QList<GraphicsNode*> nodes = m_scene->graphNodes();
+    
     foreach (GraphicsNode *node, nodes) {
         if (grabberNode != node)
             node->advance(true);
@@ -472,6 +480,16 @@ void ForceDirectedLayout::startThread()
         //  We want to get some points as soon as possible
         QThread::currentThread()->msleep(1);
     }
+}
+
+
+void ForceDirectedLayout::resetAnimations()
+{
+    m_abortMutex.lock();
+    foreach (NodeAnimation animation, m_animations) {
+        animation.reset();
+    }
+    m_abortMutex.unlock();
 }
 
 
