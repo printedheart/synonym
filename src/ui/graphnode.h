@@ -68,9 +68,14 @@ public:
     void setMass(double mass) { m_mass = mass; }
     inline double mass() const { return m_mass; }
     
+    QPointF p;
+    QPointF d;
+    
     bool advance(bool force = false);
     void setNewPos(QPointF newPos);
     void addToNewPos(QPointF &p);
+    void addToNewPos(double dx, double dy);
+    QPointF& newPos();
     
     // Types for QGraphicsScene::qgraphicsitem_cast()
     enum GraphTypes { GraphType = UserType + 90, PhraseType, MeaningType };
@@ -90,7 +95,8 @@ public:
     
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant& value);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     
     QFont m_font;
 private:

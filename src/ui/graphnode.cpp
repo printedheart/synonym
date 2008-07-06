@@ -109,6 +109,22 @@ void GraphicsNode::setNewPos(QPointF newPos)
     m_newPos = newPos;
 }
 
+void GraphicsNode::addToNewPos(QPointF &p)
+{
+    m_newPos += p;
+}
+
+void GraphicsNode::addToNewPos(double dx, double dy)
+{
+    m_newPos.setX(m_newPos.x() + dx);
+    m_newPos.setY(m_newPos.y() + dy);
+}
+
+QPointF& GraphicsNode::newPos()
+{
+    return m_newPos;
+}
+
 
 
 QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -140,6 +156,12 @@ void GraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
     QGraphicsItem::mouseReleaseEvent(event);
  
+}
+
+void GraphicsNode::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    QGraphicsItem::mouseMoveEvent(event);
+    p = event->scenePos();
 }
 
 
@@ -233,13 +255,9 @@ void WordGraphicsNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* 
     Q_UNUSED(widget);
     
     painter->setClipRect(option->exposedRect);
-    if (!flags().testFlag(QGraphicsItem::ItemIsMovable)) {
-        QFont font = m_font;
-        font.setPointSize(qRound(m_font.pointSize() * 1.5));
-        painter->setFont(font);
-    } else {
-        painter->setFont(m_font);
-    }
+    
+    painter->setFont(m_font);
+    
     painter->setPen(QPen(Qt::black, 1));
     painter->setBrush(Qt::NoBrush);
     painter->drawText(boundingRect(), Qt::AlignCenter, data(WORD).toString());

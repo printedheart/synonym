@@ -41,7 +41,7 @@
 #include "configdialog.h"
 #include "relation.h"
 #include "graphscene.h"
-#include "layout.h"
+#include "tglayout.h"
 #include "graphcontroller.h"
 
 
@@ -63,7 +63,6 @@ static void addrelationItem(QTableWidget *tableWidget, int row,  QString &item, 
     valueItem->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
     tableWidget->setItem(row, 0, keyItem);
     tableWidget->setItem(row, 1, valueItem);
-
 }
 
 
@@ -143,8 +142,9 @@ DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget 
     : SettingsPage(settings, parent)
 {
     ui.setupUi(this);
-    m_layout = new ForceDirectedLayout(this->parent());
-    m_graphScene = new GraphScene(m_layout, this);
+    m_layout = new TGLayout(); //new ForceDirectedLayout(this->parent());
+    m_graphScene = new GraphScene(m_layout);
+    m_graphScene->setObjectName("config");
     m_graphScene->setItemIndexMethod(QGraphicsScene::NoIndex);
     m_graphScene->setSceneRect(-500, -500, 1000, 1000);
     ui.graphicsView->setScene(m_graphScene);
@@ -176,6 +176,7 @@ DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget 
 DisplayPage::~DisplayPage()
 {
     m_layout->stop();   
+    m_graphScene->deleteLater();
 }
 static void setBackgroundColorToButton(const QColor &color, QPushButton *button)
 {
@@ -285,6 +286,7 @@ void DisplayPage::circleSizeChanged(int value)
 void DisplayPage::edgeLenghChanged(int value)
 {
     m_layout->setRestDistance(value);
+    m_layout->resetDamper();
     m_graphScene->itemMoved();
     emit settingsChanged(this);
 }
