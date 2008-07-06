@@ -47,8 +47,8 @@ static void disturbLayout(WordGraph *graph)
     QList<GraphicsNode*> nodes = graph->nodes();
     foreach (GraphicsNode* node, nodes) {
         int sign = (qrand() % 2) ? 1 : -1;
-        double x = node->pos().x() + (qrand() % 30) * sign;
-        double y = node->pos().y() - (qrand() % 30) * sign;
+        double x = node->pos().x() + (qrand() % 50) * sign;
+        double y = node->pos().y() - (qrand() % 50) * sign;
         node->setPos(x, y); 
     }
 }  
@@ -86,10 +86,10 @@ static void adjustMass(WordGraph *graph)
     foreach (GraphicsNode *node, nodes) {
         if (IsMeaning() (node)) {
             QSet<GraphicsNode*> neighbors = node->neighbors(); 
-            if (neighbors.size() > 6) {
+            if (neighbors.size() > 3) {
                 foreach (GraphicsNode *neighbor, neighbors) {
                     if (neighbor != graph->centralNode()) {
-                        neighbor->setMass(0.7);
+                        neighbor->setMass(2);
                     }
                 }
             }   
@@ -124,14 +124,16 @@ WordGraph*  GraphController::makeGraph(const QString &word)
         GraphicsNode *centralNode;
         qDebug() << "makeGraph(" << word << ")";
         if (m_graph && m_graph->node(word) && IsMeaning()(m_graph->node(word))) {
-            m_backHistory.append(m_graph->clone());
+            WordGraph *clone = m_graph->clone();
+            m_backHistory.append(m_graph);
+            m_graph = clone;
+            GraphicsNode *prevCentralNode = m_graph->node(clone->centralNode()->id());
+            prevCentralNode->setMass(1.0);
+            prevCentralNode->setFlag(QGraphicsItem::ItemIsMovable);
+            
             m_graph->setCentralNode(word);
             centralNode = m_graph->node(word);
             m_graph->enableAll();     
-            // Reset current central node
-            GraphicsNode *currentCentralNode = m_scene->centralNode();
-            currentCentralNode->setMass(1.0);
-            currentCentralNode->setFlag(QGraphicsItem::ItemIsMovable); 
         } else {
             QString searchWord = word;
             WordGraph *newGraph = m_loader->createWordGraph(searchWord, m_relTypes);
@@ -160,7 +162,7 @@ WordGraph*  GraphController::makeGraph(const QString &word)
         }
         m_forwardHistory.clear();
         
-        centralNode->setMass(10);
+     //   centralNode->setMass(10);
         centralNode->setFlag(QGraphicsItem::ItemIsMovable, false);     
         filterGraphNodes();
         adjustMass(m_graph);
@@ -361,7 +363,12 @@ void GraphController::applyUserSettings()
     font.setPointSize(settings.value("Font Size").toInt());
     QList<Node*> nodes = m_graph->nodes();
     for (int i = 0; i < nodes.size(); i++) {
-        nodes[i]->setFont(font);
+        if (nodes[i] == m_graph->centralNode()) {
+            QFont bigFont = font;
+            bigFont.setPointSize(qRound(font.pointSize() * 1.5));
+            nodes[i]->setFont(bigFont);
+        } else 
+            nodes[i]->setFont(font);
     }
     
     // meaning nodes

@@ -101,11 +101,10 @@ signals:
     void soundButtonClicked();
 protected:
     void timerEvent(QTimerEvent *event);
-  //  void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
     void layout();
-    
 private:
     Layout *m_layout;
     

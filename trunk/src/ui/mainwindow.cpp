@@ -27,7 +27,7 @@
 #include "wordnetutil.h"
 #include "relation.h"
 #include "configdialog.h"
-#include "layout.h"
+#include "tglayout.h"
 #include "dbdataloader.h"
 #include "audiopronunciationloaderfactory.h"
 #include "audiopronunciationloader.h"
@@ -43,7 +43,8 @@
 MainWindow::MainWindow()
  : QMainWindow(), m_currentGraph(0), soundLoader(0)
 {
-    m_layout = new ForceDirectedLayout();
+    //m_layout = new ForceDirectedLayout();
+    m_layout = new TGLayout();
     GraphScene *scene = new GraphScene(m_layout, this);
     m_scene = scene;
     scene->setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -386,7 +387,6 @@ void MainWindow::soundLoaded(const Phonon::MediaSource &sound)
 
 void MainWindow::play()
 {
-    qDebug() << mediaObject->currentSource().fileName();
     mediaObject->play();
     
 }

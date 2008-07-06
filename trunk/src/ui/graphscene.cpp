@@ -20,7 +20,7 @@
 #include "graphscene.h"
 #include "graphedge.h"
 #include "graphnode.h"
-#include "layout.h"
+#include "tggraphlayout.h"
 #include "math.h"
                 
 #include <QtGui>
@@ -67,14 +67,16 @@ void GraphScene::timerEvent(QTimerEvent *event)
 void GraphScene::layout()
 {
     QList<GraphicsNode*> nodes = graphNodes();
-    QList<GraphicsEdge*> edges = graphEdges();    
+    QList<GraphicsEdge*> edges = graphEdges();
+    if (nodes.size() == 0)
+        return;
     
     bool needsLayout = m_layout->layout();
     if (!needsLayout) {
         killTimer(m_timerId);
         m_timerId = 0;
         adjustEdges();
-    }
+     }
    
 }  
 
@@ -108,6 +110,7 @@ void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     m_timerInterval = 10;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
     if (m_grabbedNode) {
+        m_layout->startDamper();
         adjustEdges();
         QTimer::singleShot(10, this, SLOT(itemMoved()));
     }
@@ -126,15 +129,24 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
             emit soundButtonClicked();
             return;
         }
-        GraphicsNode *node = dynamic_cast<GraphicsNode*>(item);
-        if (node) {
-            int nodesCount = graphNodes().size();
-            m_timerInterval = qMax(20   , 12 * (nodesCount / 10));
-            m_grabbedNode = node;
-        }
+         GraphicsNode *node = dynamic_cast<GraphicsNode*>(item);
+         if (node) {
+              m_layout->stopDamper();
+              m_layout->layout();
+              int nodesCount = graphNodes().size();
+              m_timerInterval = qMax(20   , 12 * (nodesCount / 10));
+             
+             m_grabbedNode = node;
+         }
     }   
         
     QGraphicsScene::mousePressEvent(mouseEvent);
+}
+
+void GraphScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+{
+    m_layout->resetDamper();
+    QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
 
@@ -143,6 +155,8 @@ void GraphScene::setLayout(bool enable)
     m_enableLayout = enable;
     if (!enable)
         m_layout->stop();
+    else 
+        m_layout->resetDamper();
 }
 
 void GraphScene::signalClickEvent(GraphicsNode *graphNode)
@@ -164,13 +178,19 @@ GraphicsNode* GraphScene::centralNode() const
 
 void GraphScene::displaySoundIcon()
 {
+    QList<QGraphicsItem*> childItem = m_centralNode->childItems();
+    foreach (QGraphicsItem *item, childItem) {
+        if (qgraphicsitem_cast<QGraphicsSvgItem*>(item))
+            return; // sound icon is already displayed
+    }
+    
     QGraphicsSvgItem *soundIcon = new QGraphicsSvgItem(m_centralNode);
     soundIcon->setSharedRenderer(m_soundIconRenderer);
     
     QRectF centralNodeRect = m_centralNode->boundingRect();
     soundIcon->scale(0.15, 0.15);
-    QPointF soundPos(centralNodeRect.right() + 10,
-                     centralNodeRect.top() + 5);
+    QPointF soundPos(centralNodeRect.right() - 5,
+                     centralNodeRect.top() + 10);
    
     soundIcon->setPos(soundPos);
     soundIcon->setAcceptsHoverEvents(true);
@@ -231,5 +251,7 @@ void GraphScene::adjustEdges()
         edge->adjust();
     update(sceneRect());
 }
+
+
 
 
