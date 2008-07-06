@@ -25,7 +25,9 @@ HEADERS = src/model/wordgraph.h \
         src/audio/audiopronunciationloader.h \
         src/audio/localaudiopronunciationloader.h \
         src/audio/audiopronunciationloaderfactory.h \
-        src/audio/soundsource.h
+        src/audio/soundsource.h \
+         src/ui/tglayout.h \
+         src/ui/forcedirectedlayout.h
 #        src/test/graphtest.h
 
 SOURCES = src/model/wordgraph.cpp \
@@ -46,7 +48,9 @@ SOURCES = src/model/wordgraph.cpp \
         src/audio/scriptablesoundsource.cpp \
         src/audio/audiopronunciationloader.cpp \
         src/audio/localaudiopronunciationloader.cpp \
-        src/audio/audiopronunciationloaderfactory.cpp
+        src/audio/audiopronunciationloaderfactory.cpp \
+        src/ui/tglayout.cpp \
+        src/ui/forcedirectedlayout.cpp
 
 #        src/test/graphtest.cpp 
 
@@ -71,7 +75,7 @@ gui \
 svg \
 sql \
 phonon \
-script
+script \
 #CONFIG -= release
 
 DESTDIR = .
@@ -82,5 +86,6 @@ DESTDIR = .
 
 DISTFILES += src/scripts/parse.js \
  src/scripts/wikiwords.js \
- src/scripts/webster.js
+ src/scripts/webster.js \
+ temp
 
