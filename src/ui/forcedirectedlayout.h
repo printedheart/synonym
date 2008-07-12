@@ -28,7 +28,7 @@ class ForceDirectedLayout : public QThread, public Layout
 {
 Q_OBJECT
 public:
-    ForceDirectedLayout(QObject *parent = 0);
+    ForceDirectedLayout(QObject *parent);
     ~ForceDirectedLayout();
 
     // TODO: make the following parameters configurable.

@@ -31,7 +31,7 @@
 #include "layout.h"
 
 #include <QThread>
-
+#include <QWaitCondition>
 
 class TGLayout : public QThread, public Layout
 {
@@ -73,6 +73,9 @@ private:
     
     volatile bool stopped;
     
+    bool m_doingLayout;
+    QMutex m_mutex;
+    QWaitCondition m_needsLayout;
 private slots:
     void advanceNodes();    
 };

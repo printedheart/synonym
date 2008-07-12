@@ -48,6 +48,11 @@ TGLayout::TGLayout(QObject *parent)
 
 TGLayout::~TGLayout()
 {
+    if (isRunning()) {
+        terminate();
+    }
+    while (isRunning())
+        wait(0);
 }
 
 
@@ -57,19 +62,22 @@ TGLayout::~TGLayout()
  When a user moves nodes around we layout in the same thread, 
  and this appears to be faster.
 */
+
+
 bool TGLayout::layout()
 {
-      if (m_scene->mouseGrabberItem()) {
-          if (isRunning()) return true;
-          relax();
-          return true;
-      } else {
-        if (!isRunning()) {
-            start(QThread::LowestPriority);
+    
+    if (m_scene->mouseGrabberItem()) {
+        relax();
+        return true;
+    } else {
+        if (!m_doingLayout) {
+            m_needsLayout.wakeAll();
         }
         return false;
     }
 }
+
 
 void TGLayout::relax()
 {
@@ -83,13 +91,23 @@ void TGLayout::relax()
 
 void TGLayout::run()
 {
-    do {
-        if (m_scene->mouseGrabberItem())
-            return;
-        relax();
-        emit updateNodes();
-    } while (m_maxMotion > 0.001 && m_damper > 0.01 && !stopped);
+    forever {
+        m_mutex.lock();
+        m_needsLayout.wait(&m_mutex); 
+        m_doingLayout = true;
+        do {
+             if (m_scene->mouseGrabberItem()) {
+                 m_mutex.unlock();
+                 break;
+             }
+            relax();
+            emit updateNodes();
+        } while (m_maxMotion > 0.001 && m_damper > 0.01 && !stopped);
+        m_doingLayout = false;
+        m_mutex.unlock();
+    }
 }
+
 
 void TGLayout::advanceNodes()
 {
@@ -99,7 +117,6 @@ void TGLayout::advanceNodes()
         if (node != grabber)
             node->setPos(node->p);
     }
-    m_scene->update();
 }
 
 
@@ -162,7 +179,6 @@ void TGLayout::avoidLabels()
             if (distance2 == 0.0) {
                 dx = qrand() % 10 * (qrand() % 2 == 1 ? 1 : -1);
                 dy = qrand() % 10 * (qrand() % 2 == 1 ? 1 : -1);
-                double distance2 = vx * vx + vy * vy;
             } else {
                 
                 dx = vx /  (distance2);
@@ -191,9 +207,9 @@ void TGLayout::moveNode(GraphicsNode *node) {
     dx = qMax(-30.0, qMin(30.0, dx));
     dy = qMax(-30.0, qMin(30.0, dy));
     
-    QRectF sceneRect = m_scene->sceneRect();
-    dx = qMin(qMax(dx, sceneRect.left() + 10), sceneRect.right() - 10);
-    dy = qMin(qMax(dy, sceneRect.top() + 10), sceneRect.bottom() - 10);
+//     QRectF sceneRect = m_scene->sceneRect();
+//     dx = qMin(qMax(dx, sceneRect.left() + 10), sceneRect.right() - 10);
+//     dy = qMin(qMax(dy, sceneRect.top() + 10), sceneRect.bottom() - 10);
     
     if (node->flags().testFlag(QGraphicsItem::ItemIsMovable) && node != m_scene->mouseGrabberItem()) {
         node->p += QPointF(dx, dy);

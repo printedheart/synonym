@@ -137,7 +137,6 @@ QVariant GraphicsNode::itemChange(GraphicsItemChange change, const QVariant &val
             foreach (GraphicsEdge *edge, m_edges) {
                 edge->adjust();
             }
-            graphScene()->itemMoved();
             break;
         default:
             break;
@@ -161,6 +160,7 @@ void GraphicsNode::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void GraphicsNode::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     QGraphicsItem::mouseMoveEvent(event);
+    graphScene()->itemMoved();
     p = event->scenePos();
 }
 

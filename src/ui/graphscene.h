@@ -127,7 +127,7 @@ private:
     QPointF m_mousePos;
     QPointF m_mouseLayoutPos;
     
-    GraphicsNode *m_grabbedNode;
+    QGraphicsItem *m_grabbedNode;
     
 };
 

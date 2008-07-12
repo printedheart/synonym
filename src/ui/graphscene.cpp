@@ -20,7 +20,7 @@
 #include "graphscene.h"
 #include "graphedge.h"
 #include "graphnode.h"
-#include "tggraphlayout.h"
+#include "tglayout.h"
 #include "math.h"
                 
 #include <QtGui>
@@ -41,6 +41,7 @@ GraphScene::GraphScene(Layout *layout, QObject *parent)
 
 GraphScene::~GraphScene()
 {
+    m_layout->stop();
     delete m_layout;
 }
 
@@ -110,6 +111,12 @@ void GraphScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
     m_timerInterval = 10;
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
     if (m_grabbedNode) {
+        QGraphicsSvgItem *svgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(m_grabbedNode);
+        if (svgItem) {
+            emit soundButtonClicked();
+            m_grabbedNode = 0;
+            return;
+        }
         m_layout->startDamper();
         adjustEdges();
         QTimer::singleShot(10, this, SLOT(itemMoved()));
@@ -126,17 +133,17 @@ void GraphScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
     foreach (QGraphicsItem *item, eventItems) {
         QGraphicsSvgItem *svgItem = qgraphicsitem_cast<QGraphicsSvgItem*>(item);
         if (svgItem) {
-            emit soundButtonClicked();
+            //emit soundButtonClicked();
+            m_grabbedNode = svgItem;
             return;
         }
          GraphicsNode *node = dynamic_cast<GraphicsNode*>(item);
          if (node) {
               m_layout->stopDamper();
-              m_layout->layout();
               int nodesCount = graphNodes().size();
               m_timerInterval = qMax(20   , 12 * (nodesCount / 10));
-             
              m_grabbedNode = node;
+             itemMoved();
          }
     }   
         
