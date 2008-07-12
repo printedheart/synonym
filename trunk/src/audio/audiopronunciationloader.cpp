@@ -25,7 +25,6 @@
 AudioPronunciationLoader::AudioPronunciationLoader(QObject *parent)
     :QObject(parent)
 {
-    setAutoDelete(false);
 }
 
 
@@ -34,19 +33,10 @@ AudioPronunciationLoader::~AudioPronunciationLoader()
 }
 
 
-void AudioPronunciationLoader::run() 
-{
-    doGetAudio(m_currentWord);
-}
-
-
 void AudioPronunciationLoader::loadAudio(const QString &word)
 {
     m_currentWord = word;
     doGetAudio(word);
-    
-    //TODO: make this work.
- //   QThreadPool::globalInstance()->start(this);
 }
 
 

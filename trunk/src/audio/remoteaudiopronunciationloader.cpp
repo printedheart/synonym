@@ -23,58 +23,104 @@
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
-#include  <QNetworkReply>
+#include <QNetworkReply>
 #include <QBuffer>
 #include <QDir>
 
 
 RemoteAudioPronunciationLoader::RemoteAudioPronunciationLoader(SoundSource *soundSource, QObject *parent)
-    :AudioPronunciationLoader (parent), m_soundData(0), m_reply(0)
+    :AudioPronunciationLoader (parent), m_networkManager(0)
 {
     m_soundSource = soundSource;
-    m_networkManager = new QNetworkAccessManager(this);
-    
+    m_audioCache.setMaxCost(20);  
     connect(m_soundSource, SIGNAL(soundUrlFound(const QString&,const QUrl&)), 
             this, SLOT(slotSoundUrlFound(const QString&,const QUrl&)));
+    
+    QDir dir = QDir::tempPath();
+    if (!dir.exists("synonym")) {
+        if (dir.mkdir("synonym")) {
+            dir.cd("synonym");
+            dirPath = dir.canonicalPath();
+        }
+    } else {
+        dir.cd("synonym");
+        dirPath = dir.canonicalPath();
+    }
+    
 }
 
 RemoteAudioPronunciationLoader::~RemoteAudioPronunciationLoader()
 {
-    delete m_soundData;
+    delete m_networkManager;
 }
+
+
+class TempFile : public QFile
+{
+public:    
+    TempFile(const QString &filename) : QFile(filename) {}
+    ~TempFile() { remove(); }
+};
 
 
 
 void RemoteAudioPronunciationLoader::doGetAudio(const QString &word)
 {
-    qDebug() << "remote doGetAudio";
-    m_Word = word;
-    delete m_soundData;
-    if (m_reply) {
-        m_reply->abort();
-        m_reply->deleteLater();
+    if (dirPath.isEmpty())
+        return;
+    qDebug() << "remote doGetAudio " << word;
+    if (m_audioCache.contains(word)) {
+        QFile *file = m_audioCache[word];
+        emit soundFound(word, Phonon::MediaSource(file->fileName()));
+        return;
     }
-    m_soundData = new QByteArray();
+    m_Word = word;
     m_soundSource->findSoundUrl(word);
 }
 
-void RemoteAudioPronunciationLoader::slotReadyRead()
+
+
+void RemoteAudioPronunciationLoader::slotSoundLoadingFinished(QNetworkReply *reply)
 {
-    m_soundData->append(m_reply->readAll());
+    if (reply->error() == QNetworkReply::NoError && reply->objectName() == m_Word) {
+        QStringList items = reply->url().toString().split(".");
+        QString extension;
+        if (items.size() > 0) 
+            extension = items.last();
+        QFile *file = new TempFile(dirPath + "/" + reply->objectName() + "." + extension);
+        file->open(QIODevice::WriteOnly);
+        file->write(reply->readAll());
+        file->close();
+        m_audioCache.insert(m_Word, file);
+        Phonon::MediaSource source(file->fileName());
+        source.setAutoDelete(false);
+        soundFound(m_Word, source);
+    }
+    reply->deleteLater();
 }
 
-void RemoteAudioPronunciationLoader::slotSoundLoadingFinished()
+
+
+
+
+/*
+void RemoteAudioPronunciationLoader::slotSoundLoadingFinished(QNetworkReply *reply)
 {
-    m_soundData->append(m_reply->readAll());
-    
-    QBuffer *buffer = new QBuffer(m_soundData);
-    qDebug() << "Sound buffer size " << buffer->size();
-    Phonon::MediaSource source(buffer);
-    source.setAutoDelete(true);
-    soundFound(m_Word, source);
-    m_reply->deleteLater();
-    m_reply = 0;
+    qDebug() << "slotSoundLoadingFinished " << reply->objectName();
+    if (reply->error() == QNetworkReply::NoError && reply->objectName() == m_Word) {
+        QBuffer *buffer = new QBuffer();
+        buffer->open(QIODevice::ReadWrite);
+        buffer->write(reply->readAll());
+        buffer->reset();
+        m_audioCache.insert(reply->objectName(), buffer);
+        Phonon::MediaSource source(buffer);
+        soundFound(reply->objectName(), source);
+    }
+    reply->deleteLater();
 }
+*/
+
+
 
 void RemoteAudioPronunciationLoader::slotSoundUrlFound(const QString &word, const QUrl &url)
 {
@@ -85,9 +131,14 @@ void RemoteAudioPronunciationLoader::slotSoundUrlFound(const QString &word, cons
 void RemoteAudioPronunciationLoader::downloadSound(const QUrl &url)
 {
     QNetworkRequest request(url);
-    m_reply = m_networkManager->get(request);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));    
-    connect(m_reply, SIGNAL(finished()), this, SLOT(slotSoundLoadingFinished()));
+    if (!m_networkManager) {
+        m_networkManager = new QNetworkAccessManager();
+        connect(m_networkManager, SIGNAL(finished(QNetworkReply*)),
+                this, SLOT(slotSoundLoadingFinished(QNetworkReply*)));
+    }
+    
+    QNetworkReply *reply = m_networkManager->get(request);
+    reply->setObjectName(m_Word);
 }
 
 
