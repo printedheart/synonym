@@ -23,12 +23,11 @@
 #include <QObject>
 #include <QString>
 #include <phonon/mediasource.h>
-#include <QRunnable>
 
 /**
     @author Sergey Melderis <sergey.melderis@gmail.com>
 */
-class AudioPronunciationLoader : public QObject, public QRunnable
+class AudioPronunciationLoader : public QObject
 {
 Q_OBJECT
 public:
@@ -37,8 +36,6 @@ public:
     ~AudioPronunciationLoader();
     
     void loadAudio(const QString &word);
-    
-    void run();
     
 signals:    
     void soundLoaded(const Phonon::MediaSource &soundSource);

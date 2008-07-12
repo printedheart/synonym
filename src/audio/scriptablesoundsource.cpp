@@ -25,19 +25,23 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include  <QNetworkReply>
-
+#include <QApplication>
 
 
 ScriptableSoundSource::ScriptableSoundSource(QObject *parent)
-    :SoundSource(parent), m_reply(0)
+    :SoundSource(parent), m_networkManager(0), m_reply(0)
 {
-    m_networkManager = new QNetworkAccessManager(this);
-    QScriptValue thisValue = m_scriptEngine.newQObject(this);
-    m_scriptEngine.globalObject().setProperty("downloader", thisValue);
+    
+    m_scriptEngine = new QScriptEngine(this);
+    QScriptValue thisValue = m_scriptEngine->newQObject(this);
+    m_scriptEngine->globalObject().setProperty("downloader", thisValue);
+    connect(this, SIGNAL(findSoundUrlLater(const QString&)), this, SLOT(_findSoundUrl(const QString&)));
 }
 
 ScriptableSoundSource::~ScriptableSoundSource()
-{}
+{
+    delete m_networkManager;
+}
 
     
 void ScriptableSoundSource::setScriptSource(const QString &fileName)
@@ -59,60 +63,87 @@ void ScriptableSoundSource::setScriptSource(const QString &fileName)
 
 void ScriptableSoundSource::setScript(const QString &script)
 {
-    m_script = m_scriptEngine.evaluate(script);
-    QScriptValue global = m_scriptEngine.globalObject();
+    m_script = m_scriptEngine->evaluate(script);
+    QScriptValue global = m_scriptEngine->globalObject();
     QScriptValue init = global.property("init");
     if (init.isFunction()) qDebug() << "init is function";
     init.call(QScriptValue());
-    if (m_scriptEngine.hasUncaughtException()) {
+    if (m_scriptEngine->hasUncaughtException()) {
         m_script = QScriptValue();
     }
 }
 
 
+void ScriptableSoundSource::_findSoundUrl(const QString &word)
+{
+    if (word != m_currentWord)
+        return;
+    findSoundUrl(word);
+}
+
 void ScriptableSoundSource::findSoundUrl(const QString &word)
 {
+    qDebug() << "findSoundUrl() start";
     if (!m_script.isValid())
         return;
-    
-    stopNetwork();
     m_currentWord = word;
-    QScriptValue global = m_scriptEngine.globalObject();
-    QScriptValue findSoundUrl = global.property("findSoundUrl");
-    
-    if (findSoundUrl.isFunction()) {
-        qDebug() << "findSoundUrl is a function";
-    } else {
-        qDebug() << "findSoundUrl us not a function";
+    if (!m_networkManager)
+        m_networkManager = new QNetworkAccessManager();
+    if (m_reply) {
+        stopNetwork();
+        emit findSoundUrlLater(word);
+        return;
     }
+ 
+    QScriptValue global = m_scriptEngine->globalObject();
+    QScriptValue findSoundUrl = global.property("findSoundUrl");
     QScriptValueList args;
-    args << QScriptValue(&m_scriptEngine, word);
+    args << QScriptValue(m_scriptEngine, word);
     findSoundUrl.call(QScriptValue(), args);                 
 }
 
 
-void ScriptableSoundSource::download(const QString &urlString)
+void ScriptableSoundSource::download(const QString &urlString, const QString &callback)
 {
-    qDebug() << "download(" << urlString << ")";
+   // qDebug() << "download(" << urlString << ", " << callback << ")";
     stopNetwork();
     QUrl url(urlString);
     const QNetworkRequest request(url);
-    m_networkManager->moveToThread(QThread::currentThread());
     m_reply = m_networkManager->get(request);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));    
+    m_reply->setObjectName(callback);
+    connect(m_reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead())); 
+    connect(m_reply, SIGNAL(finished()), this, SLOT(stopNetwork()));   
 }
 
 void ScriptableSoundSource::urlFound(const QString &urlString)
 {
-    stopNetwork();
+    m_reply->abort();
     QUrl url(urlString);
     if (url.isValid())
         emit soundUrlFound(m_currentWord, QUrl(url));
+    
+}
+
+
+void ScriptableSoundSource::invokeCallback(QString &callback, QStringList &lines)
+{
+    QScriptValue global = m_scriptEngine->globalObject();
+    QScriptValue callbackFunc = global.property(callback);
+    QScriptValue array = m_scriptEngine->newArray(lines.size());
+    for (int i = 0; i < lines.size(); i++)
+        array.setProperty(i, QScriptValue(m_scriptEngine, lines[i]));
+    QScriptValueList args;
+    args << array;
+    callbackFunc.call(QScriptValue(), args);                 
 }
 
 
 void ScriptableSoundSource::slotReadyRead()
 {
+    //qDebug() << "slotReadyRead() start";
+    if (!m_reply)
+        return;
+    
     QStringList lines;
     while (true) {
         QByteArray data = m_reply->readLine();
@@ -122,7 +153,9 @@ void ScriptableSoundSource::slotReadyRead()
         QString line(data);
         lines << line;
     }
-    emit linesAvailable(lines);
+    QString callback = m_reply->objectName();
+    invokeCallback(callback, lines);
+    //qDebug() << "slotReadyRead() end";
 }
 
 void ScriptableSoundSource::stopNetwork()

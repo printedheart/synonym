@@ -55,6 +55,8 @@ public:
     void setScriptSource(const QString &fileName);
     
     
+signals:
+    void findSoundUrlLater(const QString &word);    
     
 public slots:
         
@@ -62,7 +64,7 @@ public slots:
      * Public slot for scripts. Initializes downloading of the resource 
      * specified by url.
      */
-    void download(const QString &url);
+    void download(const QString &url, const QString &callback);
     
     
     /**
@@ -83,19 +85,22 @@ signals:
         
 private slots:    
     void slotReadyRead();
+    void stopNetwork();
     
+    void _findSoundUrl(const QString &word);
 private:    
     QNetworkAccessManager *m_networkManager;
     QNetworkReply *m_reply;
     QByteArray m_data;
     
     
-    QScriptEngine m_scriptEngine;
+    QScriptEngine *m_scriptEngine;
     QScriptValue m_script;
     
     QString m_currentWord;
     
-    void stopNetwork();
+    void invokeCallback(QString &callback, QStringList &lines);
+    
 
 };
 

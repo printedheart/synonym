@@ -26,9 +26,11 @@
 #include "soundsource.h"
 
 #include <QString>
-
+#include <QCache>
+#include <QBuffer>
 #include <phonon/mediasource.h>
 #include <QByteArray>
+#include <QTemporaryFile>
 
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -44,8 +46,7 @@ protected:
     virtual void doGetAudio(const QString &word);
     
 private slots:    
-    void slotReadyRead();
-    void slotSoundLoadingFinished();
+    void slotSoundLoadingFinished(QNetworkReply *reply);
     
     void slotSoundUrlFound(const QString &word, const QUrl &url);
     
@@ -53,10 +54,12 @@ private:
     SoundSource *m_soundSource;
     
     QNetworkAccessManager *m_networkManager;
-    QNetworkReply *m_reply;
-    QByteArray *m_soundData;
     
     QString m_Word;
+    
+    QCache<QString, QFile> m_audioCache;
+    
+    QString dirPath;
     
     void downloadSound(const QUrl &url);
 };
