@@ -117,7 +117,7 @@ private:
 };
 
 class GraphScene;
-class Layout;
+class TGLayout;
 class GraphController;
 
 #include "ui_displayconfig.h"
@@ -148,7 +148,7 @@ private slots:
     
 private:    
     GraphScene *m_graphScene;    
-    Layout *m_layout;
+    TGLayout *m_layout;
     GraphController *controller;
     Ui::DisplayPageUi ui;
     

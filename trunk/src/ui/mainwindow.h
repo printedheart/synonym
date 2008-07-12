@@ -40,6 +40,7 @@ class GraphScene;
 class QModelIndex;
 class QCheckBox;
 class Layout;
+class TGLayout;
 class AudioPronunciationLoader;
 
 
@@ -53,6 +54,9 @@ public:
     MainWindow();
 
     virtual ~MainWindow();
+    
+signals:    
+    void audioRequested(const QString &word);
     
 public slots:    
     void nodeActivated(const QModelIndex &index);
@@ -93,10 +97,9 @@ private slots:
     void soundLoaded(const Phonon::MediaSource &sound);
     void soundLoaded(const QString &fileName);
     void play();
-    void resetSource();
 private:
     WordGraph *m_currentGraph;    
-    Layout *m_layout;
+    TGLayout *m_layout;
     
     
     void configure();
@@ -114,7 +117,6 @@ private:
     Phonon::MediaObject *mediaObject;
     bool soundAvailable();
     void loadSound();
-    
 };
 
 #endif

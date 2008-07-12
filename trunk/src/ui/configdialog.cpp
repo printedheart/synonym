@@ -143,6 +143,7 @@ DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget 
 {
     ui.setupUi(this);
     m_layout = new TGLayout(); //new ForceDirectedLayout(this->parent());
+    m_layout->start();
     m_graphScene = new GraphScene(m_layout);
     m_graphScene->setObjectName("config");
     m_graphScene->setItemIndexMethod(QGraphicsScene::NoIndex);

@@ -68,7 +68,8 @@ MainWindow::MainWindow()
 
     QToolBar *toolBar = addToolBar("synonym");
     
-    QPushButton *backButton = new QPushButton("Back", toolBar);
+    QPushButton *backButton = new QPushButton(toolBar);
+    backButton->setIcon(style()->standardIcon(QStyle::QStyle::SP_ArrowLeft));
     QPushButton *forwardButton = new QPushButton("Forward", toolBar);
     toolBar->addWidget(backButton);
     toolBar->addWidget(forwardButton);
@@ -135,17 +136,18 @@ MainWindow::MainWindow()
   
    //Zack's Rusin advice. http://developer.kde.org/documentation/other/mistakes.html
    QTimer::singleShot(10, this, SLOT(initServices()));
+   m_layout->start();
 }
 
 
 MainWindow::~MainWindow()
 {
-        
 }
 
 
 void MainWindow::initServices()
 {
+    configure();
     initSound();
     initCompleter();
 }
@@ -219,9 +221,6 @@ public:
 
 void MainWindow::initCompleter()
 {
-    configure();
-    
-    //This could take a second or two to load.
     CompleterLoader *l = new CompleterLoader(this, m_loader);
     l->setObjectName("completerloader");
     connect (l, SIGNAL(finished()), this, SLOT(completerLoaderFinished()));
@@ -348,6 +347,59 @@ void MainWindow::showConfigDialog()
         
 }
 
+static QObject *__soundLoaderThread__;
+static void cleanupRoutine()
+{
+    delete __soundLoaderThread__;
+}
+
+class SoundLoaderThread : public QThread
+{
+Q_OBJECT    
+public:    
+    SoundLoaderThread(QObject *parent, AudioPronunciationLoader *loader) 
+        : QThread(parent) {
+        m_loader = loader;
+        connect (loader, SIGNAL(soundLoaded(const Phonon::MediaSource&)),
+                 this, SLOT(slotSoundLoaded(const Phonon::MediaSource&)));
+        connect (loader, SIGNAL(soundLoaded(const QString&)),
+                 this, SLOT(slotSoundLoaded(const QString&)));
+    }
+    
+    ~SoundLoaderThread() {
+        exit(0);
+        while (isRunning()) 
+            wait(1);
+        delete m_loader;
+    }
+    
+    void run() {
+        exec();
+    }
+    
+signals:    
+    void soundLoaded(const Phonon::MediaSource&);
+    void soundLoaded(const QString&);
+    
+public slots:    
+    void loadSound(const QString &word) {
+        m_loader->loadAudio(word);
+    }
+    
+    void slotSoundLoaded(const Phonon::MediaSource& source) {
+        emit soundLoaded(source);
+    }
+    
+    void slotSoundLoaded(const QString &filename) {
+        emit soundLoaded(filename);
+    }
+    
+private:    
+    AudioPronunciationLoader *m_loader;    
+};
+
+
+Q_DECLARE_METATYPE(Phonon::MediaSource)
 
 void MainWindow::initSound()
 {
@@ -357,14 +409,23 @@ void MainWindow::initSound()
     Phonon::createPath(mediaObject, audioOutput);
     AudioPronunciationLoaderFactory factory;
     soundLoader = factory.createAudioLoader();
-    soundLoader->setParent(this);
-    if (soundLoader) {
-        connect (soundLoader, SIGNAL(soundLoaded(const Phonon::MediaSource&)),
-                this, SLOT(soundLoaded(const Phonon::MediaSource&)));
+    if (soundLoader) {        
         connect (m_scene, SIGNAL(soundButtonClicked()), this, SLOT(play()));
-        connect (soundLoader, SIGNAL(soundLoaded(const QString&)),
-                this, SLOT(soundLoaded(const QString&)));
-        connect (mediaObject, SIGNAL(finished()), this, SLOT(resetSource()));
+        qRegisterMetaType<Phonon::MediaSource>();
+        SoundLoaderThread *loaderThread = new SoundLoaderThread(0, soundLoader);
+        loaderThread->start(QThread::LowestPriority);
+        loaderThread->moveToThread(loaderThread);
+        soundLoader->moveToThread(loaderThread);
+        
+        connect (this, SIGNAL(audioRequested(const QString&)), 
+                 loaderThread, SLOT(loadSound(const QString&)), Qt::QueuedConnection);
+        
+        connect (loaderThread, SIGNAL(soundLoaded(const Phonon::MediaSource&)),
+                 this, SLOT(soundLoaded(const Phonon::MediaSource&)), Qt::QueuedConnection);
+        connect (loaderThread, SIGNAL(soundLoaded(const QString&)),
+                 this, SLOT(soundLoaded(const QString&)),  Qt::QueuedConnection);
+        __soundLoaderThread__ = loaderThread;
+        qAddPostRoutine(cleanupRoutine);
     }
     
 }
@@ -379,24 +440,31 @@ void MainWindow::soundLoaded(const QString &fileName)
 
 void MainWindow::soundLoaded(const Phonon::MediaSource &sound)
 {
+    bool playAfterSet = mediaObject->state() == Phonon::ErrorState;
+    mediaObject->clearQueue();
     mediaObject->setCurrentSource(sound);
     m_scene->displaySoundIcon();
-    
+    if (playAfterSet)
+        play();
 }
 
 
 void MainWindow::play()
 {
-    mediaObject->play();
-    
+    if (mediaObject->state() == Phonon::ErrorState) {
+        qDebug() << mediaObject->errorString();
+        emit audioRequested(m_currentGraph->centralNode()->id());
+    }
+    else if (mediaObject->state() == Phonon::PlayingState) {
+        mediaObject->stop();
+        mediaObject->seek(0);
+        mediaObject->play();
+    } else {
+        if (mediaObject->currentTime() == mediaObject->totalTime()) 
+            mediaObject->seek(0);
+        mediaObject->play();    
+    }
 }
-
-void MainWindow::resetSource()
-{
-    Phonon::MediaSource source = mediaObject->currentSource();
-    mediaObject->setCurrentSource(source);
-}
-
 
 bool MainWindow::soundAvailable() 
 {
@@ -410,7 +478,7 @@ void MainWindow::loadSound()
         if (dynamic_cast<WordGraphicsNode*>(centralNode)) { 
             mediaObject->stop();
             mediaObject->clearQueue();
-            soundLoader->loadAudio(centralNode->id());
+            emit audioRequested(centralNode->id());
         }
     }    
 }
