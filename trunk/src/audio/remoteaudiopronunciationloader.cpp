@@ -55,6 +55,11 @@ RemoteAudioPronunciationLoader::~RemoteAudioPronunciationLoader()
 }
 
 
+SoundSource *RemoteAudioPronunciationLoader::soundSource()
+{
+    return m_soundSource;
+}
+
 class TempFile : public QFile
 {
 public:    

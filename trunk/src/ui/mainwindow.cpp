@@ -339,8 +339,10 @@ void MainWindow::showConfigDialog()
 {
     ConfigDialog dialog(m_loader);
     dialog.exec();
-    if (dialog.settingsChanged())
+    if (dialog.settingsChanged()) {
         configure();
+        AudioPronunciationLoaderFactory::instance()->reconfigure();
+    }
     if (m_currentGraph) {
         m_graphController->makeGraph(m_currentGraph->centralNode()->id());
     }
@@ -407,8 +409,7 @@ void MainWindow::initSound()
     
     Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
     Phonon::createPath(mediaObject, audioOutput);
-    AudioPronunciationLoaderFactory factory;
-    soundLoader = factory.createAudioLoader();
+    soundLoader = AudioPronunciationLoaderFactory::instance()->createAudioLoader();
     if (soundLoader) {        
         connect (m_scene, SIGNAL(soundButtonClicked()), this, SLOT(play()));
         qRegisterMetaType<Phonon::MediaSource>();

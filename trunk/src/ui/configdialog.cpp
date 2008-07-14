@@ -43,7 +43,7 @@
 #include "graphscene.h"
 #include "tglayout.h"
 #include "graphcontroller.h"
-
+#include "audioscriptpage.h"
 
 
 
@@ -86,7 +86,7 @@ RelationPage::RelationPage(QSettings *settings, QWidget *parent)
                 addrelationItem(relationTable, insertRow++,  rel, selected);
             }
         }
-        m_settings->endGroup();
+        settings->endGroup();
     }
     
     // Verify that no relation type is missing in the settings.
@@ -128,13 +128,13 @@ void RelationPage::slotTableChanged()
 
 void RelationPage::writeSettings()
 {
-    m_settings->beginGroup("relations");
+    settings()->beginGroup("relations");
     for (int row = 0; row < relationTable->rowCount(); row++) {
         QString key = relationTable->item(row, 0)->data(Qt::DisplayRole).toString();
         bool selected = relationTable->item(row, 1)->checkState() == Qt::Checked;
-        m_settings->setValue(key, selected);
+        settings()->setValue(key, selected);
     }
-    m_settings->endGroup();    
+    settings()->endGroup();    
 }
 
 
@@ -166,7 +166,7 @@ DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget 
     connect (ui.edgeLenghSlider, SIGNAL(valueChanged(int)), this, SLOT(edgeLenghChanged(int)));
     connect (ui.lineContrastSlider, SIGNAL(valueChanged(int)), this, SLOT(edgeContrastChanged(int)));
     
-    if (m_settings->childGroups().contains("display"))
+    if (settings->childGroups().contains("display"))
         initializeFromSettings();
     
     controller = new GraphController(m_graphScene, loader,  this);
@@ -187,22 +187,22 @@ static void setBackgroundColorToButton(const QColor &color, QPushButton *button)
 
 void DisplayPage::initializeFromSettings()
 {
-    m_settings->beginGroup("display");
+    settings()->beginGroup("display");
     QFont font;
-    font.setFamily(m_settings->value("Font Family").toString());
+    font.setFamily(settings()->value("Font Family").toString());
     ui.fontComboBox->setCurrentFont(font);
-    ui.fontSizeSpinBox->setValue(m_settings->value("Font Size").toInt());
-    ui.circleSizeSlider->setValue(m_settings->value("Circle Radius").toInt());
+    ui.fontSizeSpinBox->setValue(settings()->value("Font Size").toInt());
+    ui.circleSizeSlider->setValue(settings()->value("Circle Radius").toInt());
     
-    setBackgroundColorToButton(QColor(m_settings->value("Noun Color").toString().trimmed()), ui.nounColorButton);
-    setBackgroundColorToButton(QColor(m_settings->value("Verb Color").toString().trimmed()), ui.verbColorButton);
-    setBackgroundColorToButton(QColor(m_settings->value("Adjective Color").toString().trimmed()), ui.adjColorButton);
-    setBackgroundColorToButton(QColor(m_settings->value("Adverb Color").toString().trimmed()), ui.advColorButton);
+    setBackgroundColorToButton(QColor(settings()->value("Noun Color").toString().trimmed()), ui.nounColorButton);
+    setBackgroundColorToButton(QColor(settings()->value("Verb Color").toString().trimmed()), ui.verbColorButton);
+    setBackgroundColorToButton(QColor(settings()->value("Adjective Color").toString().trimmed()), ui.adjColorButton);
+    setBackgroundColorToButton(QColor(settings()->value("Adverb Color").toString().trimmed()), ui.advColorButton);
     
-    ui.edgeLenghSlider->setValue(m_settings->value("Edge Length").toInt());
-    ui.edgeWidthSlider->setValue(m_settings->value("Edge Width").toInt());
-    ui.lineContrastSlider->setValue(m_settings->value("Edge Contrast").toInt());
-    m_settings->endGroup();    
+    ui.edgeLenghSlider->setValue(settings()->value("Edge Length").toInt());
+    ui.edgeWidthSlider->setValue(settings()->value("Edge Width").toInt());
+    ui.lineContrastSlider->setValue(settings()->value("Edge Contrast").toInt());
+    settings()->endGroup();    
 }
 
 void DisplayPage::loadWord()
@@ -314,18 +314,18 @@ void DisplayPage::edgeContrastChanged(int value)
 
 void DisplayPage::writeSettings()
 {
-    m_settings->beginGroup("display");
-    m_settings->setValue("Font Family",  ui.fontComboBox->currentFont().family());
-    m_settings->setValue("Font Size", ui.fontSizeSpinBox->value());
-    m_settings->setValue("Circle Radius", ui.circleSizeSlider->value());
-    m_settings->setValue("Noun Color", QVariant(ui.nounColorButton->styleSheet().section(':', 1, -1)));
-    m_settings->setValue("Verb Color", ui.verbColorButton->styleSheet().section(':', 1, -1));
-    m_settings->setValue("Adjective Color", ui.adjColorButton->styleSheet().section(':', 1, -1));
-    m_settings->setValue("Adverb Color", ui.advColorButton->styleSheet().section(':', 1, -1));
-    m_settings->setValue("Edge Length", ui.edgeLenghSlider->value());
-    m_settings->setValue("Edge Width", ui.edgeWidthSlider->value());
-    m_settings->setValue("Edge Contrast", ui.lineContrastSlider->value());
-    m_settings->endGroup();
+    settings()->beginGroup("display");
+    settings()->setValue("Font Family",  ui.fontComboBox->currentFont().family());
+    settings()->setValue("Font Size", ui.fontSizeSpinBox->value());
+    settings()->setValue("Circle Radius", ui.circleSizeSlider->value());
+    settings()->setValue("Noun Color", QVariant(ui.nounColorButton->styleSheet().section(':', 1, -1)));
+    settings()->setValue("Verb Color", ui.verbColorButton->styleSheet().section(':', 1, -1));
+    settings()->setValue("Adjective Color", ui.adjColorButton->styleSheet().section(':', 1, -1));
+    settings()->setValue("Adverb Color", ui.advColorButton->styleSheet().section(':', 1, -1));
+    settings()->setValue("Edge Length", ui.edgeLenghSlider->value());
+    settings()->setValue("Edge Width", ui.edgeWidthSlider->value());
+    settings()->setValue("Edge Contrast", ui.lineContrastSlider->value());
+    settings()->endGroup();
 }
 
 
@@ -337,6 +337,7 @@ ConfigDialog::ConfigDialog(IWordDataLoader *loader)
     contentsWidget->setIconSize(QSize(96, 84));
     contentsWidget->setMovement(QListView::Static);
     contentsWidget->setMaximumWidth(128);
+    contentsWidget->setMinimumWidth(128);
     contentsWidget->setSpacing(12);
 
     m_settings =  new QSettings("http://code.google.com/p/synonym/", "synonym");
@@ -344,6 +345,7 @@ ConfigDialog::ConfigDialog(IWordDataLoader *loader)
     pagesWidget = new QStackedWidget;
     pagesWidget->addWidget(new RelationPage(m_settings));
     pagesWidget->addWidget(new DisplayPage(m_settings, loader));
+    pagesWidget->addWidget(new AudioScriptPage(m_settings));
 
     m_applyButton = new QPushButton(tr("Apply"));
     m_applyButton->setEnabled(false);
@@ -373,7 +375,11 @@ ConfigDialog::ConfigDialog(IWordDataLoader *loader)
         connect (page, SIGNAL(settingsChanged(SettingsPage*)), 
                  this, SLOT(settingsChanged(SettingsPage*)));
     }
+    qDebug() << pagesWidget->width();
+    qDebug() << pagesWidget->minimumWidth();
 }
+
+
 
 void ConfigDialog::createIcons()
 {
@@ -388,7 +394,11 @@ void ConfigDialog::createIcons()
     displayButton->setTextAlignment(Qt::AlignHCenter);
     displayButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
 
-    
+    QListWidgetItem *audioScriptButton = new QListWidgetItem(contentsWidget);
+    audioScriptButton->setText(tr("Audio"));
+    audioScriptButton->setTextAlignment(Qt::AlignHCenter);
+    audioScriptButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+
     
     connect(contentsWidget,
             SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
@@ -417,6 +427,7 @@ void ConfigDialog::applySettings()
     m_settings->sync();
     m_changedPages.clear();
     m_settingsChanged = true;
+    m_applyButton->setEnabled(false);
 }
 
 

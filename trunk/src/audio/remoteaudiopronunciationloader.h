@@ -42,6 +42,8 @@ public:
     RemoteAudioPronunciationLoader(SoundSource *soundSource, QObject *parent = 0);
     virtual ~RemoteAudioPronunciationLoader();
     
+    SoundSource *soundSource();
+    
 protected:    
     virtual void doGetAudio(const QString &word);
     

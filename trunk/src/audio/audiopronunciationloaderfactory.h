@@ -20,9 +20,8 @@
 #ifndef AUDIOPRONUNCIATIONLOADERFACTORY_H
 #define AUDIOPRONUNCIATIONLOADERFACTORY_H
 
-
-#include <QObject>
-
+#include "remoteaudiopronunciationloader.h" 
+#include "scriptablesoundsource.h"
 
 class AudioPronunciationLoader;
 
@@ -31,15 +30,24 @@ class AudioPronunciationLoader;
 */
 class AudioPronunciationLoaderFactory : public QObject
 {
-Q_OBJECT
 public:
-    AudioPronunciationLoaderFactory(QObject *parent = 0);
+    static AudioPronunciationLoaderFactory* instance();
+
 
     ~AudioPronunciationLoaderFactory();
     
     
     AudioPronunciationLoader *createAudioLoader();
-
+    
+    void reconfigure();
+    
+private:    
+    AudioPronunciationLoaderFactory();
+    static AudioPronunciationLoaderFactory *m_instance;
+    
+    RemoteAudioPronunciationLoader *m_remoteLoader;
+    ScriptableSoundSource *m_soundSource;
+    bool configureScript();
 };
 
 #endif
