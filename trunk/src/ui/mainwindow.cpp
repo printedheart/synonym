@@ -70,7 +70,8 @@ MainWindow::MainWindow()
     
     QPushButton *backButton = new QPushButton(toolBar);
     backButton->setIcon(style()->standardIcon(QStyle::QStyle::SP_ArrowLeft));
-    QPushButton *forwardButton = new QPushButton("Forward", toolBar);
+    QPushButton *forwardButton = new QPushButton(toolBar);
+    forwardButton->setIcon(style()->standardIcon(QStyle::QStyle::SP_ArrowRight));
     toolBar->addWidget(backButton);
     toolBar->addWidget(forwardButton);
     toolBar->addSeparator();
