@@ -46,6 +46,7 @@ ScriptableSoundSource::~ScriptableSoundSource()
     
 void ScriptableSoundSource::setScriptSource(const QString &fileName)
 {
+    qDebug() << "Initializing ScriptableSoundSource from script " << fileName;
     QFile file(fileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qDebug() << "Cannot open file " << fileName;
@@ -63,10 +64,10 @@ void ScriptableSoundSource::setScriptSource(const QString &fileName)
 
 void ScriptableSoundSource::setScript(const QString &script)
 {
+    
     m_script = m_scriptEngine->evaluate(script);
     QScriptValue global = m_scriptEngine->globalObject();
     QScriptValue init = global.property("init");
-    if (init.isFunction()) qDebug() << "init is function";
     init.call(QScriptValue());
     if (m_scriptEngine->hasUncaughtException()) {
         m_script = QScriptValue();

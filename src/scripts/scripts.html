@@ -1,0 +1,129 @@
+<html>
+<head>
+  <title>sd</title>
+  <script type="text/javascript">
+
+    //<![CDATA[
+    var scripts = ["wikiwords.js", "webster.js", "bartleby.js"];
+
+    function contains(array, item) {
+      for (var i = 0; i < array.length; i++) {
+        if (array[i] == item)
+          return true;
+      }
+      return false;
+    }
+    function setInstalled(installed) {
+      for (var i = 0; i < scripts.length; i++) {
+        if (contains(installed, scripts[i])) {
+          document.getElementById(scripts[i] + ".install").style.display = "none";
+          document.getElementById(scripts[i] + ".delete").style.display = "";
+          document.getElementById(scripts[i] + ".setcurrent").style.display = "";
+        } else {
+          document.getElementById(scripts[i] + ".delete").style.display = "none";
+          document.getElementById(scripts[i] + ".install").style.display = "";
+          document.getElementById(scripts[i] + ".setcurrent").style.display = "none";
+        }
+      }
+    }
+
+    function setCurrent(current) {
+      document.getElementById(current + ".setcurrent").disabled = true;
+      for(var i = 0; i < scripts.length; i++) {
+        if (scripts[i] != current) {
+          document.getElementById(scripts[i] + ".setcurrent").disabled = false;
+        }
+      }
+    }
+    // ]]>
+
+  </script>
+
+
+  <style type="text/css">
+    .body {
+      width: 600px;
+      position: relative;
+      left: 10px;
+    }
+
+    .scriptblock {
+      width: 70%;
+      float: right;
+    }
+
+    .heading {
+      height: 25px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: black;
+      font-size: larger;
+      font-family: serif;
+      padding-left: 10px;
+      background-color: whitesmoke;
+      margin-top: 25px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100px;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    .buttons {
+      margin-top: 30px;
+    }
+  </style>
+
+</head>
+
+
+<body>
+<div class="body" >
+  <div>
+    <div class="heading">Wiktionary</div>
+   <span class="scriptblock">
+
+       <span>Welcome to the English language Wiktionary, a collaborative project to produce a free-content multilingual dictionary.</span>
+     <div class="buttons">
+       <button id="wikiwords.js.install" onclick="window.location='/home/sergey/devel/graphs/trunk/synonym/src/scripts/wikiwords.js'">Install</button>
+       <button  id="wikiwords.js.delete" onclick="window.location='wikiwords.js.delete'">Uninstall</button>
+       <button  id="wikiwords.js.setcurrent" onclick="window.location='wikiwords.js.setcurrent'">Use this</button>
+     </div>
+  </span>
+    <img src="http://upload.wikimedia.org/wikipedia/commons/b/b4/Wiktionary-logo-en.png" width="131" height="195" alt=""/>
+  </div>
+
+
+  <div>
+    <div class="heading">Webster</div>
+    <span class="scriptblock">
+      <span>About 105,000 audio pronunciations from Webster Online</span>
+    <div class="buttons">
+      <button id="webster.js.install" onclick="window.location='/home/sergey/devel/graphs/trunk/synonym/src/scripts/webster.js'">Install</button>
+      <button  id="webster.js.delete" onclick="window.location='webster.js.delete'">Uninstall</button>
+      <button  id="webster.js.setcurrent" onclick="window.location='webster.js.setcurrent'">Use this</button>
+    </div>
+      </span>
+    <img src="http://www.merriam-webster.com/images/hdr_mw_logo_area.gif" alt="Webster"/>
+
+  </div>
+
+  <div>
+    <div class="heading">Bartleby</div>
+    <span class="scriptblock">
+            <span>About 70,000 audio word pronunciations from The American Heritage<font size="+1"><sup>&#174;</sup></font> Dictionary of the English Language.
+      </span>
+    <div class="buttons">
+      <button id="bartleby.js.install" onclick="window.location='/home/sergey/devel/graphs/trunk/synonym/src/scripts/bartleby.js'">Install</button>
+      <button  id="bartleby.js.delete" onclick="window.location='bartleby.js.delete'">Uninstall</button>
+      <button  id="bartleby.js.setcurrent" onclick="window.location='bartleby.js.setcurrent'">Use this</button>
+    </div>
+      </span>
+    <img src="http://www.bartleby.com/link/images/logo3.gif" alt="Bartleby"/>
+
+  </div>
+</div>
+</body>
+</html>

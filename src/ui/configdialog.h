@@ -63,6 +63,8 @@ public:
 signals:    
     void settingsChanged(SettingsPage *page);
 protected:    
+    QSettings* settings() { return m_settings; }
+private:
     QSettings *m_settings;
 };
 
@@ -156,7 +158,5 @@ private:
     void setColorToMeaningNodes(const QList<GraphicsNode*> &nodes, PartOfSpeech pos, const QColor &color);
     void updatePreview();
     void initializeFromSettings();
-    
-    
 };
 #endif

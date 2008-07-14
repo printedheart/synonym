@@ -29,11 +29,25 @@
 #include <QSettings>
 #include <QVariant>
 #include <QStringList>
+#include <QMutex>
+#include <QMutexLocker>
 
 
+AudioPronunciationLoaderFactory*  AudioPronunciationLoaderFactory::m_instance = 0;
 
-AudioPronunciationLoaderFactory::AudioPronunciationLoaderFactory(QObject *parent)
- : QObject(parent)
+AudioPronunciationLoaderFactory *AudioPronunciationLoaderFactory::instance() 
+{
+    QMutex mutex;
+    QMutexLocker locker(&mutex);
+    if (m_instance == 0) {
+        m_instance = new AudioPronunciationLoaderFactory();
+    }
+    return m_instance;
+}
+
+
+AudioPronunciationLoaderFactory::AudioPronunciationLoaderFactory()
+    : m_remoteLoader(0), m_soundSource(0)
 {
 }
 
@@ -43,7 +57,7 @@ AudioPronunciationLoaderFactory::~AudioPronunciationLoaderFactory()
 }
 
 
-AudioPronunciationLoader * AudioPronunciationLoaderFactory::createAudioLoader() 
+AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader() 
 {
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     if (settings.childGroups().contains("audio")) {
@@ -53,20 +67,38 @@ AudioPronunciationLoader * AudioPronunciationLoaderFactory::createAudioLoader()
             QVariant soundDirectory = settings.value("SoundDirectory");
             return new LocalAudioPronunciationLoader(0, soundDirectory.toString());
         } if (loaderType == "remote") {
-            QVariant scriptName = settings.value("CurrentScript");
-            QVariant scriptFileName = settings.value(scriptName.toString() + "/Filename");
-            QFile file(scriptFileName.toString());
-            if (file.exists()) {
-                ScriptableSoundSource *source = new ScriptableSoundSource(0);
-                source->setScriptSource(file.fileName());
-                AudioPronunciationLoader *loader = new RemoteAudioPronunciationLoader(source, 0);
-                source->setParent(loader);
-                return loader;
+            if (!m_remoteLoader) {
+                if (!m_soundSource)
+                    m_soundSource = new ScriptableSoundSource(0);
+                if (configureScript()) {
+                    m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
+                    m_soundSource->setParent(m_remoteLoader);
+                    return m_remoteLoader;
+                }
             }
         }
     }
     return 0;
 }
 
+bool AudioPronunciationLoaderFactory::configureScript()
+{
+    QSettings settings("http://code.google.com/p/synonym/", "synonym");
+    settings.beginGroup("audio");
+    QVariant script = settings.value("CurrentScript");
+    settings.endGroup();
+    QFile file(QDir::homePath() + "/.synonym/" + script.toString());
+    if (file.exists()) {
+        m_soundSource->setScriptSource(file.fileName());
+        return true;
+    }        
+    return false;
+}
 
+
+void AudioPronunciationLoaderFactory::reconfigure()
+{
+    if (m_soundSource)
+        configureScript();
+}
 
