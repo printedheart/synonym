@@ -28,7 +28,12 @@
     }
 
     function setCurrent(current) {
-      document.getElementById(current + ".setcurrent").disabled = true;
+      if (current) {  
+        var currentElement = document.getElementById(current + ".setcurrent");
+        if (currentElement) {
+            currentElement.disabled = true;
+        }  
+      }
       for(var i = 0; i < scripts.length; i++) {
         if (scripts[i] != current) {
           document.getElementById(scripts[i] + ".setcurrent").disabled = false;
