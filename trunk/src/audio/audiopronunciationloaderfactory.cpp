@@ -86,9 +86,12 @@ bool AudioPronunciationLoaderFactory::configureScript()
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     settings.beginGroup("audio");
     QVariant script = settings.value("CurrentScript");
+    if (script.isNull())
+        return false;
     settings.endGroup();
     QFile file(QDir::homePath() + "/.synonym/" + script.toString());
-    if (file.exists()) {
+    QFileInfo fileInfo(file);
+    if (fileInfo.exists() && fileInfo.isFile() && fileInfo.isReadable()) {
         m_soundSource->setScriptSource(file.fileName());
         return true;
     }        
