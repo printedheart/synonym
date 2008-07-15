@@ -30,6 +30,7 @@ AudioWebPage::AudioWebPage(QObject *parent)
     setForwardUnsupportedContent(true);
     connect (this, SIGNAL(unsupportedContent(QNetworkReply *)), 
              this, SLOT(handleUnsupportedContent(QNetworkReply*)));
+    
 }
     
 AudioWebPage::~AudioWebPage()
@@ -41,6 +42,7 @@ bool AudioWebPage::acceptNavigationRequest(QWebFrame *frame, const QNetworkReque
 {
     bool accept = true;
     QString url = request.url().toString();
+    qDebug() << "acceptNavigationRequest() " << url;
     if (url.endsWith(".js")) {
         emit downloadRequested(request);
         accept = false;
@@ -72,8 +74,10 @@ static QString createJavaScriptArray(const QStringList &list)
 {
     QStringList scriptStr;
     scriptStr << "var arr = new Array();";
-    foreach (QString item, list)
+    foreach (QString item, list) {
+        if (!item.isEmpty())
             scriptStr << "arr.push('" + item + "');";
+    }
     return scriptStr.join("\n");
 }
 
@@ -96,7 +100,8 @@ AudioScriptPage::AudioScriptPage(QSettings *settings, QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_webView);
     setLayout(mainLayout);
-    m_webView->load(QUrl("file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/scripts.html"));           
+    m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("http://synonym.googlecode.com/svn/trunk/src/scripts/scripts.html")));
+    connect (m_pageReply, SIGNAL(finished()), this, SLOT(pageDownloaded()));
 }
     
 AudioScriptPage::~AudioScriptPage()
@@ -111,18 +116,22 @@ void AudioScriptPage::pageLoaded(bool ok)
             settings()->beginGroup("audio");
             QVariant scripts = settings()->value("Scripts");
             qDebug() << "pageLoaded " << scripts;
-            if (!scripts.isNull()) {
-                QStringList scriptList = scripts.toStringList();
-                QString js = createJavaScriptArray(scriptList) + "\nsetInstalled(arr);";
-                m_webView->page()->mainFrame()->evaluateJavaScript(js);
-            }
+            QStringList scriptList = scripts.toStringList();
+            QString js = createJavaScriptArray(scriptList) + "\nsetInstalled(arr);";
+            m_webView->page()->mainFrame()->evaluateJavaScript(js);
+           
             QVariant currentScript = settings()->value("CurrentScript");
+            QString js2;
             if (!currentScript.isNull()) {
-                QString js = "setCurrent('" + currentScript.toString() + "');";
-                m_webView->page()->mainFrame()->evaluateJavaScript(js);
+                js2 = "setCurrent('" + currentScript.toString() + "');";
+            } else {
+                js2 = "setCurrent(null)";
             }
+            m_webView->page()->mainFrame()->evaluateJavaScript(js2);
             settings()->endGroup();
         }
+    } else {
+        
     }    
 }
 
@@ -133,9 +142,23 @@ void AudioScriptPage::downloadScript(const QNetworkRequest &request)
     connect (m_scriptReply, SIGNAL(finished()), this, SLOT(downloadFinished()));
 }
 
+void AudioScriptPage::pageDownloaded()
+{
+    if (m_pageReply->error() != QNetworkReply::NoError) {
+        m_webView->page()->mainFrame()->setHtml(
+                        "<html><head></head><body>"
+                        "<h3>It seems that you are not connected to the Internet.<br/>"
+                        "Audio pronunciation is available only if you are connected to Internet.</h3></body></html>");
+    } else {
+        m_webView->page()->mainFrame()->setContent(m_pageReply->readAll());
+    }
+    m_pageReply->deleteLater();
+}
+
 
 void AudioScriptPage::downloadFinished()
 {
+    m_scriptReply->deleteLater();
     if (m_scriptReply->error() == QNetworkReply::NoError) {
         QString scriptUrl = m_scriptReply->url().toString();
         QString scriptName = scriptUrl.split("/").last();
