@@ -54,6 +54,8 @@ public:
     
     void setScriptSource(const QString &fileName);
     
+    bool isAvailable() const;
+    
     
 signals:
     void findSoundUrlLater(const QString &word);    

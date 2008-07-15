@@ -81,6 +81,11 @@ void LocalAudioPronunciationLoader::doGetAudio(const QString &word)
     }
 }
 
+bool LocalAudioPronunciationLoader::isAvailable() const
+{
+    return m_availableWords.size() > 0;
+}
+
 
 
 

@@ -44,6 +44,8 @@ public:
     
     SoundSource *soundSource();
     
+    bool isAvailable() const;
+    
 protected:    
     virtual void doGetAudio(const QString &word);
     

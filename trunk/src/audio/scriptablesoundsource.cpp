@@ -168,6 +168,11 @@ void ScriptableSoundSource::stopNetwork()
     }
 }
 
+bool ScriptableSoundSource::isAvailable() const
+{
+    return m_script.isValid();    
+}
+
 
 
 
