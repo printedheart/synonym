@@ -55,10 +55,12 @@ private slots:
     void downloadScript(const QNetworkRequest &request);
     void downloadFinished();  
     void pageLoaded(bool ok);
+    void pageDownloaded();
     void deleteScript(const QString &script);
     void setCurrent(const QString &script);
 private:    
     QWebView *m_webView;
     QNetworkReply *m_scriptReply;
+    QNetworkReply *m_pageReply;
     QNetworkAccessManager m_accessManager;
 };
