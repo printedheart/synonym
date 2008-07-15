@@ -37,6 +37,8 @@ public:
     
     void loadAudio(const QString &word);
     
+    virtual bool isAvailable() const = 0;
+    
 signals:    
     void soundLoaded(const Phonon::MediaSource &soundSource);
     void soundLoaded(const QString &fileName);    

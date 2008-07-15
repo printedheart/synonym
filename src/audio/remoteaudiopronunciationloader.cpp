@@ -147,6 +147,14 @@ void RemoteAudioPronunciationLoader::downloadSound(const QUrl &url)
 }
 
 
+bool RemoteAudioPronunciationLoader::isAvailable() const
+{
+    return m_soundSource != 0 && m_soundSource->isAvailable();
+}
+
+
+
+
 
 
 

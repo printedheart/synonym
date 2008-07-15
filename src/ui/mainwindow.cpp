@@ -468,7 +468,7 @@ void MainWindow::play()
 
 bool MainWindow::soundAvailable() 
 {
-    return soundLoader != 0;
+    return soundLoader != 0 && soundLoader->isAvailable();
 }
 
 void MainWindow::loadSound()

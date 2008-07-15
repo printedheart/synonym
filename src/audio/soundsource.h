@@ -41,6 +41,8 @@ public:
      */
     virtual  void findSoundUrl(const QString &word) = 0;
     
+    virtual bool isAvailable() const = 0;
+    
     
 signals:    
     /**

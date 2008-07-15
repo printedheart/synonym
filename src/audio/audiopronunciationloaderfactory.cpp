@@ -68,14 +68,17 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
             return new LocalAudioPronunciationLoader(0, soundDirectory.toString());
         } if (loaderType == "remote") {
             if (!m_remoteLoader) {
-                if (!m_soundSource)
+                if (!m_soundSource) {
                     m_soundSource = new ScriptableSoundSource(0);
-                if (configureScript()) {
                     m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
-                    m_soundSource->setParent(m_remoteLoader);
-                    return m_remoteLoader;
+                    if (configureScript()) {
+                        m_soundSource->setParent(m_remoteLoader);
+
+                    }
+
                 }
             }
+            return m_remoteLoader;
         }
     }
     return 0;

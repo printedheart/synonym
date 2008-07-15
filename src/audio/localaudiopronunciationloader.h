@@ -35,6 +35,8 @@ public:
 
     virtual ~LocalAudioPronunciationLoader();
     
+    bool isAvailable() const;
+    
 protected:    
     virtual void doGetAudio(const QString &word);
     
