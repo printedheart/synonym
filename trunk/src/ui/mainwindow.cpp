@@ -34,7 +34,6 @@
 
 #include <QtGui>
 #include <QtCore>
-
 #include <phonon/audiooutput.h>
 
 
@@ -43,7 +42,6 @@
 MainWindow::MainWindow()
  : QMainWindow(), m_currentGraph(0), soundLoader(0)
 {
-    //m_layout = new ForceDirectedLayout();
     m_layout = new TGLayout();
     GraphScene *scene = new GraphScene(m_layout, this);
     m_scene = scene;
