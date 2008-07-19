@@ -5,7 +5,7 @@ function findSoundUrl(word) {
 }
 
 function parseData(lines) {
-    print("parseData");
+   // print("parseData");
     for (i = 0; i < lines.length; i++) {
         line = lines[i];
         test = line.indexOf('<span class="unicode audiolink">');
