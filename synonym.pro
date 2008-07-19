@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-#DEFINES = QT_NO_DEBUG_OUTPUT
+DEFINES = QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH = . src src/ui src/model src/audio
 FORMS = src/ui/displayconfig.ui 
@@ -26,9 +26,9 @@ HEADERS = src/model/wordgraph.h \
         src/audio/localaudiopronunciationloader.h \
         src/audio/audiopronunciationloaderfactory.h \
         src/audio/soundsource.h \
-         src/ui/tglayout.h \
-         src/ui/forcedirectedlayout.h
-#        src/test/graphtest.h
+        src/ui/tglayout.h \
+        src/ui/forcedirectedlayout.h \
+        src/ui/audioscriptpage.h
 
 SOURCES = src/model/wordgraph.cpp \
         src/model/partofspeechlistmodel.cpp \
@@ -50,9 +50,8 @@ SOURCES = src/model/wordgraph.cpp \
         src/audio/localaudiopronunciationloader.cpp \
         src/audio/audiopronunciationloaderfactory.cpp \
         src/ui/tglayout.cpp \
-        src/ui/forcedirectedlayout.cpp
-
-#        src/test/graphtest.cpp 
+        src/ui/forcedirectedlayout.cpp \
+        src/ui/audioscriptpage.cpp
 
 
 RESOURCES += src/synonym.qrc
@@ -76,16 +75,7 @@ svg \
 sql \
 phonon \
 script \
-#CONFIG -= release
+webkit 
 
 DESTDIR = .
-
-
-
-
-
-DISTFILES += src/scripts/parse.js \
- src/scripts/wikiwords.js \
- src/scripts/webster.js \
- temp
 
