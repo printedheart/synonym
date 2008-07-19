@@ -39,7 +39,7 @@
       <includestyle>4</includestyle>
       <designerintegration>ExternalDesigner</designerintegration>
       <qmake>/usr/local/Trolltech/Qt-4.4.0/bin/qmake</qmake>
-      <designer></designer>
+      <designer>/usr/bin/designer-qt4</designer>
       <root>/usr/lib/qt4</root>
       <designerpluginpaths/>
     </qt>

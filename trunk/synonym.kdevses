@@ -1,16 +1,73 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!DOCTYPE KDevPrjSession>
 <KDevPrjSession>
- <DocsAndViews NumberOfDocuments="3" >
-  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/synonym.pro" >
-   <View0 Encoding="" line="48" Type="Source" />
+ <DocsAndViews NumberOfDocuments="22" >
+  <Doc0 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/webster.js" >
+   <View0 Encoding="" line="0" Type="Source" />
   </Doc0>
-  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.cpp" >
-   <View0 Encoding="" line="20" Type="Source" />
+  <Doc1 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/scripts.html" >
+   <View0 Encoding="" line="90" Type="Source" />
   </Doc1>
-  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.h" >
-   <View0 Encoding="" line="12" Type="Source" />
+  <Doc2 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/audioscriptpage.cpp" >
+   <View0 Encoding="" line="7" Type="Source" />
   </Doc2>
+  <Doc3 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/audioscriptpage.h" >
+   <View0 Encoding="" line="57" Type="Source" />
+  </Doc3>
+  <Doc4 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/model/dbdataloader.cpp" >
+   <View0 Encoding="" line="0" Type="Source" />
+  </Doc4>
+  <Doc5 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/audiopronunciationloaderfactory.cpp" >
+   <View0 Encoding="" line="79" Type="Source" />
+  </Doc5>
+  <Doc6 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/io/qfile.cpp" >
+   <View0 Encoding="" line="403" Type="Source" />
+  </Doc6>
+  <Doc7 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/io/qfile.h" >
+   <View0 Encoding="" line="68" Type="Source" />
+  </Doc7>
+  <Doc8 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/io/qfsfileengine_unix.cpp" >
+   <View0 Encoding="" line="788" Type="Source" />
+  </Doc8>
+  <Doc9 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/io/qfsfileengine.h" >
+   <View0 Encoding="" line="60" Type="Source" />
+  </Doc9>
+  <Doc10 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/tools/qstring.h" >
+   <View0 Encoding="" line="675" Type="Source" />
+  </Doc10>
+  <Doc11 NumberOfViews="1" URL="file:///home/sergey/Software/qt-x11-opensource-src-4.4.0/src/corelib/arch/qatomic_x86_64.h" >
+   <View0 Encoding="" line="122" Type="Source" />
+  </Doc11>
+  <Doc12 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/scriptablesoundsource.cpp" >
+   <View0 Encoding="" line="172" Type="Source" />
+  </Doc12>
+  <Doc13 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/soundsource.h" >
+   <View0 Encoding="" line="43" Type="Source" />
+  </Doc13>
+  <Doc14 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/audiopronunciationloader.h" >
+   <View0 Encoding="" line="39" Type="Source" />
+  </Doc14>
+  <Doc15 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/localaudiopronunciationloader.h" >
+   <View0 Encoding="" line="37" Type="Source" />
+  </Doc15>
+  <Doc16 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/localaudiopronunciationloader.cpp" >
+   <View0 Encoding="" line="83" Type="Source" />
+  </Doc16>
+  <Doc17 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/scriptablesoundsource.h" >
+   <View0 Encoding="" line="56" Type="Source" />
+  </Doc17>
+  <Doc18 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.h" >
+   <View0 Encoding="" line="46" Type="Source" />
+  </Doc18>
+  <Doc19 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationloader.cpp" >
+   <View0 Encoding="" line="151" Type="Source" />
+  </Doc19>
+  <Doc20 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.h" >
+   <View0 Encoding="" line="49" Type="Source" />
+  </Doc20>
+  <Doc21 NumberOfViews="1" URL="file:///home/sergey/devel/graphs/trunk/synonym/src/ui/mainwindow.cpp" >
+   <View0 Encoding="" line="470" Type="Source" />
+  </Doc21>
  </DocsAndViews>
  <pluginList>
   <kdevdebugger>
@@ -18,6 +75,9 @@
     <breakpoint0 location="/home/sergey/devel/graphs/trunk/synonym/src/audio/remoteaudiopronunciationproducer.cpp:50" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
      <tracedExpressions/>
     </breakpoint0>
+    <breakpoint1 location="/home/sergey/devel/graphs/trunk/synonym/src/audio/audiopronunciationloaderfactory.cpp:91" type="1" tracingFormatString="" traceFormatStringEnabled="0" condition="" tracingEnabled="0" enabled="1" >
+     <tracedExpressions/>
+    </breakpoint1>
    </breakpointList>
    <showInternalCommands value="1" />
   </kdevdebugger>
@@ -28,7 +88,7 @@
   <kdevbookmarks>
    <bookmarks>
     <bookmark url="/home/sergey/devel/graphs/trunk/synonym/src/ui/graphedge.cpp" >
-     <mark line="45" />
+     <mark line="48" />
     </bookmark>
     <bookmark url="/home/sergey/devel/graphs/synonym/src/sound/pronunciationsoundfactoryimpl.cpp" >
      <mark line="54" />
