@@ -218,7 +218,7 @@ QStringList DbDataLoader::words() const
 
 void DbDataLoader::selectDbFile()
 {
-    QString dbFileName = QFileDialog::getOpenFileName(0,"Select database file");
+    QString dbFileName = QFileDialog::getOpenFileName(0,"Select database file", QDir::homePath());
     qDebug() << dbFileName;
     if (QFile(dbFileName).exists()) {
         QSettings settings("http://code.google.com/p/synonym/", "synonym");
@@ -239,10 +239,12 @@ void DbDataLoader::checkDatabase()
         settings.endGroup();
     }
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+    bool ok = QFile::exists(dbFilePath);
+    if (ok) {
+        db.setDatabaseName(dbFilePath);
+        ok = db.open();
+    }
     
-    db.setDatabaseName(dbFilePath);
-    
-    bool ok = db.open();
     if (ok) {
         QSqlQuery query(db);
         ok = query.exec("SELECT word.wordid from word where lemma = 'word'");
@@ -258,6 +260,7 @@ void DbDataLoader::checkDatabase()
         
         if (answer & QMessageBox::Yes) {
             QTimer::singleShot(0, this, SLOT(selectDbFile()));
-        }                               
+        }      
+                                 
     }
 }
