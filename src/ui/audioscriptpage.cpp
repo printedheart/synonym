@@ -100,7 +100,8 @@ AudioScriptPage::AudioScriptPage(QSettings *settings, QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_webView);
     setLayout(mainLayout);
-    m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("http://synonym.googlecode.com/svn/trunk/src/scripts/scripts.html")));
+   // m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("http://synonym.googlecode.com/svn/trunk/src/scripts/scripts.html")));
+    m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/scripts.html")));
     connect (m_pageReply, SIGNAL(finished()), this, SLOT(pageDownloaded()));
 }
     
@@ -111,6 +112,7 @@ AudioScriptPage::~AudioScriptPage()
 
 void AudioScriptPage::pageLoaded(bool ok)
 {
+    qDebug() << "pageLoaded";
     if (ok) {
         if (settings()->childGroups().contains("audio")) {
             settings()->beginGroup("audio");
@@ -129,9 +131,10 @@ void AudioScriptPage::pageLoaded(bool ok)
             }
             m_webView->page()->mainFrame()->evaluateJavaScript(js2);
             settings()->endGroup();
+        } else {
+            m_webView->page()->mainFrame()->evaluateJavaScript("setInstalled(null);");
         }
-    } else {
-        
+            
     }    
 }
 
@@ -151,6 +154,7 @@ void AudioScriptPage::pageDownloaded()
                         "Audio pronunciation is available only if you are connected to Internet.</h3></body></html>");
     } else {
         m_webView->page()->mainFrame()->setContent(m_pageReply->readAll());
+        pageLoaded(true);
     }
     m_pageReply->deleteLater();
 }
