@@ -1,4 +1,4 @@
-Changes in in reverse-chronological order.
+Changes in reverse-chronological order.
 
 = Synonym 0.2 =
 
