@@ -44,6 +44,7 @@ TGLayout::TGLayout(QObject *parent)
     m_restDistance = 100;
     stopped = false;
     connect (this, SIGNAL(updateNodes()), this, SLOT(advanceNodes()), Qt::BlockingQueuedConnection);
+    m_doingLayout = false;
 }
 
 TGLayout::~TGLayout()
