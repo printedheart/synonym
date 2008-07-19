@@ -383,21 +383,27 @@ ConfigDialog::ConfigDialog(IWordDataLoader *loader)
 
 void ConfigDialog::createIcons()
 {
+    QFont font;
+    font.setPointSize(font.pointSize  () * 1.2);
+    font.setBold(true);
     QListWidgetItem *relationButton = new QListWidgetItem(contentsWidget);
     relationButton->setText(tr("Relations"));
     relationButton->setTextAlignment(Qt::AlignHCenter);
     relationButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    relationButton->setFont(font);
 
 
     QListWidgetItem *displayButton = new QListWidgetItem(contentsWidget);
     displayButton->setText(tr("Display"));
     displayButton->setTextAlignment(Qt::AlignHCenter);
     displayButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    displayButton->setFont(font);
 
     QListWidgetItem *audioScriptButton = new QListWidgetItem(contentsWidget);
     audioScriptButton->setText(tr("Audio"));
     audioScriptButton->setTextAlignment(Qt::AlignHCenter);
     audioScriptButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    audioScriptButton->setFont(font);
 
     
     connect(contentsWidget,
