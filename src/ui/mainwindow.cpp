@@ -281,6 +281,7 @@ void MainWindow::configure()
         posColors[1] =  QColor(settings.value("Verb Color").toString().trimmed());
         posColors[2] =  QColor(settings.value("Adjective Color").toString().trimmed());
         posColors[3] =  QColor(settings.value("Adverb Color").toString().trimmed());
+        settings.endGroup();
     } else {
         for (int i = 0; i < 4; i++)
             posColors[i] = MeaningGraphicsNode::DEFAULT_COLORS[i];
