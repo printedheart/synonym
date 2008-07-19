@@ -164,7 +164,8 @@ void AudioScriptPage::downloadFinished()
         QString scriptName = scriptUrl.split("/").last();
         QDir home = QDir::home();
         if (!home.exists(".synonym")) {
-            if (home.mkdir(".synonym")) {
+            home.mkdir(".synonym");
+            if (!home.exists(".synonym")) {
                 qDebug() << "Error creating synonym directory";
                 return;
             }
