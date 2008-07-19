@@ -60,8 +60,8 @@ CONFIG += warn_on \
       qt \
       rtti \
       thread \
-      debug
-#      release 
+#      debug
+      release 
 #qtestlib
 
 TARGET = bin/synonym
