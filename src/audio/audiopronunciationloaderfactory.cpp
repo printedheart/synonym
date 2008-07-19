@@ -59,6 +59,8 @@ AudioPronunciationLoaderFactory::~AudioPronunciationLoaderFactory()
 
 AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader() 
 {
+    if (m_remoteLoader)
+        return m_remoteLoader;
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     if (settings.childGroups().contains("audio")) {
         settings.beginGroup("audio");
@@ -78,6 +80,7 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
     } else {
         m_soundSource = new ScriptableSoundSource(0);
         m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
+        m_soundSource->setParent(m_remoteLoader);
     }
     return m_remoteLoader;
 }
