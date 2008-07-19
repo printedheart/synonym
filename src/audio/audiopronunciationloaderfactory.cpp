@@ -62,11 +62,11 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     if (settings.childGroups().contains("audio")) {
         settings.beginGroup("audio");
-        QVariant loaderType = settings.value("LoaderType", "local");
+        QString loaderType = settings.value("LoaderType").toString();
         if (loaderType == "local") {
             QVariant soundDirectory = settings.value("SoundDirectory");
             return new LocalAudioPronunciationLoader(0, soundDirectory.toString());
-        } if (loaderType == "remote") {
+        } else {
             if (!m_remoteLoader) {
                 if (!m_soundSource) {
                     m_soundSource = new ScriptableSoundSource(0);
@@ -78,10 +78,12 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
 
                 }
             }
-            return m_remoteLoader;
         }
+    } else {
+        m_soundSource = new ScriptableSoundSource(0);
+        m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
     }
-    return 0;
+    return m_remoteLoader;
 }
 
 bool AudioPronunciationLoaderFactory::configureScript()
