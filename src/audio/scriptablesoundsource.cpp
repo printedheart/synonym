@@ -112,8 +112,7 @@ void ScriptableSoundSource::download(const QString &urlString, const QString &ca
     const QNetworkRequest request(url);
     m_reply = m_networkManager->get(request);
     m_reply->setObjectName(callback);
-    connect(m_reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead())); 
-    connect(m_reply, SIGNAL(finished()), this, SLOT(stopNetwork()));   
+    connect(m_reply, SIGNAL(readyRead()), this, SLOT(slotReadyRead()));     
 }
 
 void ScriptableSoundSource::urlFound(const QString &urlString)
