@@ -9,7 +9,7 @@ function parseMainPage(lines) {
         var line = lines[i];
         var result = line.match(re);
         if (result) {
-            print("Match " + result);
+          //  print("Match " + result);
             try {
                 var newUrl = result[1];
                 downloader.download(newUrl, "parseResultPage");
