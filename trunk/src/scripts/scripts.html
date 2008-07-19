@@ -7,6 +7,8 @@
     var scripts = ["wikiwords.js", "webster.js", "bartleby.js"];
 
     function contains(array, item) {
+      if (!array || !item)
+        return false;  
       for (var i = 0; i < array.length; i++) {
         if (array[i] == item)
           return true;
@@ -14,6 +16,7 @@
       return false;
     }
     function setInstalled(installed) {
+      alert(installed);
       for (var i = 0; i < scripts.length; i++) {
         if (contains(installed, scripts[i])) {
           document.getElementById(scripts[i] + ".install").style.display = "none";
