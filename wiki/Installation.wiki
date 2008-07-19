@@ -1,6 +1,6 @@
 Installation Instructions.
 
-== Installing Synonym (version 0.2 was currently verified only on Linux) ==
+== Installing Synonym (version 0.2 was verified only on Linux) ==
 
 *To build:*
  * Make sure you have Qt >= Qt4.4 
