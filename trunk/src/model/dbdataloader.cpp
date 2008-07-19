@@ -253,7 +253,7 @@ void DbDataLoader::checkDatabase()
         QSqlDatabase::removeDatabase("QSQLITE");
         int answer = QMessageBox::question(0,
                               "Synonym",
-                              "Cannot open database file '" + dbFilePath + "'.\n" +
+                              "Database file wordnet30 is not found.\n" 
                               "Do you want to select another database file?\n",
                               QMessageBox::Yes,
                               QMessageBox::No);
