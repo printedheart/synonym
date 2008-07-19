@@ -271,24 +271,28 @@ void MainWindow::configure()
     } else {
         m_graphController->setrelations(Relation::allTypes());
     }
+    QColor posColors[4];
     if (settings.childGroups().contains("display")) {
         settings.beginGroup("display");
         int edgeRestDistance = settings.value("Edge Length").toInt();
         m_layout->setRestDistance(edgeRestDistance);
         
-        const QColor posColors[4] = {
-            QColor(settings.value("Noun Color").toString().trimmed()), 
-            QColor(settings.value("Verb Color").toString().trimmed()),
-            QColor(settings.value("Adjective Color").toString().trimmed()),
-            QColor(settings.value("Adverb Color").toString().trimmed())
-        };
-        for (int i = 0; i < 4; i++) {
-            QString style = "QDockWidget::title {text-align: center; background: " + posColors[i].name() + ";}";
-            qobject_cast<QWidget*>(m_posViews[i]->parent())->setStyleSheet(style);
-        }
-
+        posColors[0] =  QColor(settings.value("Noun Color").toString().trimmed()); 
+        posColors[1] =  QColor(settings.value("Verb Color").toString().trimmed());
+        posColors[2] =  QColor(settings.value("Adjective Color").toString().trimmed());
+        posColors[3] =  QColor(settings.value("Adverb Color").toString().trimmed());
+    } else {
+        for (int i = 0; i < 4; i++)
+            posColors[i] = MeaningGraphicsNode::DEFAULT_COLORS[i];
     }
+    
+    for (int i = 0; i < 4; i++) {
+        QString style = "QDockWidget::title {text-align: center; background: " + posColors[i].name() + ";}";
+        qobject_cast<QWidget*>(m_posViews[i]->parent())->setStyleSheet(style);
+    }
+
 }
+
 
 void MainWindow::slotBack()
 {
