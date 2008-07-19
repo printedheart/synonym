@@ -352,8 +352,12 @@ void GraphController::updateSceneNodes()
 void GraphController::applyUserSettings()
 {
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
-    if (!settings.childGroups().contains("display"))
+    if (!settings.childGroups().contains("display")) {
+        QFont font;
+        font.setPointSize(qRound(font.pointSize() * 1.5));
+        m_graph->centralNode()->setFont(font);
         return;
+    }
     
     settings.beginGroup("display");
     
