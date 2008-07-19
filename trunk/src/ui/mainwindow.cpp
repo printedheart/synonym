@@ -404,10 +404,7 @@ Q_DECLARE_METATYPE(Phonon::MediaSource)
 
 void MainWindow::initSound()
 {
-    mediaObject = new Phonon::MediaObject(this);
-    
-    Phonon::AudioOutput *audioOutput = new Phonon::AudioOutput(Phonon::MusicCategory, this);
-    Phonon::createPath(mediaObject, audioOutput);
+    mediaObject = Phonon::createPlayer(Phonon::MusicCategory);
     soundLoader = AudioPronunciationLoaderFactory::instance()->createAudioLoader();
     if (soundLoader) {        
         connect (m_scene, SIGNAL(soundButtonClicked()), this, SLOT(play()));
