@@ -15,4 +15,4 @@ Installation Instructions.
  * download database file 
  * unpack(tar -zxvf wordnet30.1.tar.gz) 
  * place wordnet30 file somewhere on the filesystem. During the first run a dialog will appear to select the database file.
- * Audio pronunciation works only if connected to internet. To enable go to Settings/Audio and install the script of your choice.
+ * Audio pronunciation works only if connected to the Internet. To enable go to Settings/Audio and install a script of your choice.
