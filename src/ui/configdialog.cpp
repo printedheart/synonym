@@ -169,9 +169,8 @@ DisplayPage::DisplayPage(QSettings *settings, IWordDataLoader *loader,  QWidget 
     if (settings->childGroups().contains("display"))
         initializeFromSettings();
     
-    controller = new GraphController(m_graphScene, loader,  this);
-    
-    QTimer::singleShot(100, this, SLOT(loadWord()));
+    controller = new GraphController(m_graphScene, loader,  this);    
+    QTimer::singleShot(0, this, SLOT(loadWord()));
 }
 
 DisplayPage::~DisplayPage()
