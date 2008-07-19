@@ -100,8 +100,8 @@ AudioScriptPage::AudioScriptPage(QSettings *settings, QWidget *parent)
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(m_webView);
     setLayout(mainLayout);
-   // m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("http://synonym.googlecode.com/svn/trunk/src/scripts/scripts.html")));
-    m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/scripts.html")));
+    m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("http://synonym.googlecode.com/svn/trunk/src/scripts/scripts.html")));
+   // m_pageReply = m_accessManager.get(QNetworkRequest(QUrl("file:///home/sergey/devel/graphs/trunk/synonym/src/scripts/scripts.html")));
     connect (m_pageReply, SIGNAL(finished()), this, SLOT(pageDownloaded()));
 }
     
