@@ -71,11 +71,7 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
                 if (!m_soundSource) {
                     m_soundSource = new ScriptableSoundSource(0);
                     m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
-                    if (configureScript()) {
-                        m_soundSource->setParent(m_remoteLoader);
-
-                    }
-
+                    m_soundSource->setParent(m_remoteLoader);
                 }
             }
         }
