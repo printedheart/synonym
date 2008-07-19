@@ -16,7 +16,6 @@
       return false;
     }
     function setInstalled(installed) {
-      alert(installed);
       for (var i = 0; i < scripts.length; i++) {
         if (contains(installed, scripts[i])) {
           document.getElementById(scripts[i] + ".install").style.display = "none";
