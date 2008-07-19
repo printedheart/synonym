@@ -295,7 +295,7 @@ void WordGraphicsNode::setFont(const QFont &font)
     MeaningGraphicsNode definition
 */
 
-static const QColor DEFAULT_COLORS[4] = { QColor(213, 28, 8), QColor(152, 169, 47), QColor(222, 172, 47), QColor(86, 20, 122) };
+const QColor MeaningGraphicsNode::DEFAULT_COLORS[4] = { QColor(213, 28, 8), QColor(152, 169, 47), QColor(222, 172, 47), QColor(86, 20, 122) };
 static const int DEFAULT_RADIUS = 5;
 
 MeaningGraphicsNode::MeaningGraphicsNode(const QString &id, WordGraph *graph)

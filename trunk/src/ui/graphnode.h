@@ -152,6 +152,8 @@ public:
     MeaningGraphicsNode(const MeaningGraphicsNode &other);
     virtual ~MeaningGraphicsNode();
     
+    static const QColor DEFAULT_COLORS[4];
+    
     virtual MeaningGraphicsNode *clone() const;
     
     void setCircleRadius(int radius);
