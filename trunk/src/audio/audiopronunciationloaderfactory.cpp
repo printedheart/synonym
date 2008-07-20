@@ -74,6 +74,7 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
                     m_soundSource = new ScriptableSoundSource(0);
                     m_remoteLoader = new RemoteAudioPronunciationLoader(m_soundSource, 0);
                     m_soundSource->setParent(m_remoteLoader);
+                    configureScript();
                 }
             }
         }
@@ -85,21 +86,27 @@ AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader()
     return m_remoteLoader;
 }
 
-bool AudioPronunciationLoaderFactory::configureScript()
+void  AudioPronunciationLoaderFactory::configureScript()
 {
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     settings.beginGroup("audio");
     QVariant script = settings.value("CurrentScript");
     if (script.isNull())
-        return false;
+        return;
     settings.endGroup();
     QFile file(QDir::homePath() + "/.synonym/" + script.toString());
     QFileInfo fileInfo(file);
     if (fileInfo.exists() && fileInfo.isFile() && fileInfo.isReadable()) {
         m_soundSource->setScriptSource(file.fileName());
-        return true;
-    }        
-    return false;
+        return;
+    } else {
+        settings.beginGroup("audio");
+        settings.remove("CurrentScript");
+        QStringList scripts = settings.value("Scripts").toStringList();
+        scripts.removeOne(script.toString());
+        settings.setValue("Scripts", scripts);
+        settings.endGroup();
+    }
 }
 
 
