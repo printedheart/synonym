@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-#DEFINES = QT_NO_DEBUG_OUTPUT
+DEFINES = QT_NO_DEBUG_OUTPUT
 
 INCLUDEPATH = . src src/ui src/model src/audio
 FORMS = src/ui/displayconfig.ui 
