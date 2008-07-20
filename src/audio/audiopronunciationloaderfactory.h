@@ -47,7 +47,7 @@ private:
     
     RemoteAudioPronunciationLoader *m_remoteLoader;
     ScriptableSoundSource *m_soundSource;
-    bool configureScript();
+    void configureScript();
 };
 
 #endif
