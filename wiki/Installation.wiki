@@ -6,7 +6,7 @@ Installation Instructions.
 *To build:*
  * Make sure you have Qt >= Qt4.4 
  * download 
- * unpack( tar -zxvf synonym-0.1.1-src.tar.gz) 
+ * unpack( tar -zxvf synonym-0.2-src.tar.gz) 
  * cd synonym 
  * qmake 
  * make 
