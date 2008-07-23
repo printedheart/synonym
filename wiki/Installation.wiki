@@ -1,7 +1,15 @@
 #labels Phase-Deploy
 Installation Instructions.
 
-== Installing Synonym (version 0.2 was verified only on Linux) ==
+== Installing Synonym on Windows ==
+ * Download [http://synonym.googlecode.com/files/synonym-0.2-exe.zip Windows package].
+ * Unpack the archive, which will result in the synonym folder. Inside the folder there will be "synonym.exe" file, "plugins" folder, and several files. Do not move synonym.exe outside of the directory, if you want to move synonym in some other place move the whole synonym folder.
+ * Download [http://synonym.googlecode.com/files/wordnet30.1.tar.gz database package].
+ * To open the archive you can use [http://www.rarlab.com/download.htm Winrar].
+ * When you unpack the archive you will see "wordnet30" file. For convenience you can place the database file in the "synonym" folder where you have "synonym.exe"
+ * Run synonym.exe. If you put "wordnet30" file outside of "synonym" folder you will get a dialog to choose the database file.
+
+== Installing Synonym on Linux ==
 
 *To build:*
  * Make sure you have Qt >= Qt4.4 
