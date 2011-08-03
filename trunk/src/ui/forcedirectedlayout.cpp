@@ -25,9 +25,13 @@
 #include <QtGui>
 #include <QtCore>
 
+
+
 static const double PI = 3.14159265358979323846264338327950288419717;
 static double TWO_PI = 2.0 * PI;
-
+ 
+static const qreal STIFFNESS = 0.2;
+static const qreal REPULSION = 3000;
 
 ForceDirectedLayout::ForceDirectedLayout(QObject *parent)
     :QThread(parent)

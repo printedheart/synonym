@@ -23,8 +23,9 @@
 
 
 PartOfSpeechItemDelegate::PartOfSpeechItemDelegate(PartOfSpeechItemView *parent)
- : QAbstractItemDelegate(parent)
+ : QAbstractItemDelegate(parent), m_fontMetrics(m_font)
 {
+	m_font.setPointSize(13);
 }
 
 
@@ -39,10 +40,10 @@ QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, con
 {
     Q_UNUSED(option);
     QAbstractItemView *view = dynamic_cast<QAbstractItemView*>(parent());
-    QFontMetricsF fontMetrics(view->fontMetrics());
+//    QFontMetricsF fontMetrics(view->fontMetrics());
     QString str = index.data().toString().trimmed();
     QStringList words = str.split(QChar(' '));
-    QRectF boundingRect = fontMetrics.boundingRect(str);
+    QRectF boundingRect = m_fontMetrics.boundingRect(str);
     int width = view->viewport()->width() - 6;
     int times = 0;
     while (words.size() > 0) {
@@ -51,17 +52,17 @@ QSize PartOfSpeechItemDelegate::sizeHint(const QStyleOptionViewItem &option, con
         bool enoughSpace = true;
         do {
             QString word = words.first();
-            qreal wordWidth = fontMetrics.width(word);
+            qreal wordWidth = m_fontMetrics.width(word);
             if (wordWidth + lineWidth < width) {
                 lineWidth += wordWidth;
-                lineWidth += fontMetrics.width(QChar(' '));
+                lineWidth += m_fontMetrics.width(QChar(' '));
                 words.removeFirst();
             } else 
                 enoughSpace = false;
                 
         } while (enoughSpace && words.size() > 0);
     }
-    return QSize(width, qRound(boundingRect.height() * times) - times + 1);
+    return QSize(width, qRound(boundingRect.height() * times) - times + 7);
 }
         
 void PartOfSpeechItemDelegate::paint(QPainter *painter,
@@ -86,14 +87,19 @@ void PartOfSpeechItemDelegate::paint(QPainter *painter,
     rect.setLeft(rect.left() + 4);
     rect.setTop(rect.top() + 2);
     rect.setRight(rect.right() - 2);
+	painter->save();
+	painter->setFont(m_font);
     painter->drawText(rect, Qt::TextWordWrap , index.data().toString());
+	painter->restore();
 }
 
 
 PartOfSpeechItemView::PartOfSpeechItemView(QWidget *parent):
     QListView(parent)
 {
-    
+	QFont f = font();
+	f.setPointSize(12);
+	setFont(f);
 }
     
 

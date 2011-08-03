@@ -1,9 +1,11 @@
 TEMPLATE = app
 
-DEFINES = QT_NO_DEBUG_OUTPUT
+#DEFINES = QT_NO_DEBUG_OUTPUT
+#DEFINES = QT_MAC_USE_COCOA
 
 INCLUDEPATH = . src src/ui src/model src/audio
-FORMS = src/ui/displayconfig.ui 
+FORMS = src/ui/displayconfig.ui
+
 HEADERS = src/model/wordgraph.h \
         src/model/partofspeechlistmodel.h \
         src/ui/graphnode.h \
@@ -20,15 +22,14 @@ HEADERS = src/model/wordgraph.h \
         src/model/iworddataloader.h \
         src/model/relation.h \
         src/model/dbdataloader.h \
-        src/audio/remoteaudiopronunciationloader.h \
-        src/audio/scriptablesoundsource.h \
         src/audio/audiopronunciationloader.h \
         src/audio/localaudiopronunciationloader.h \
         src/audio/audiopronunciationloaderfactory.h \
-        src/audio/soundsource.h \
         src/ui/tglayout.h \
         src/ui/forcedirectedlayout.h \
-        src/ui/audioscriptpage.h
+        src/audio/wordnikloader.h \
+        src/audio/merriamwebsterloader.h
+
 
 SOURCES = src/model/wordgraph.cpp \
         src/model/partofspeechlistmodel.cpp \
@@ -44,14 +45,13 @@ SOURCES = src/model/wordgraph.cpp \
         src/main.cpp \
         src/model/relation.cpp \
         src/model/dbdataloader.cpp \
-        src/audio/remoteaudiopronunciationloader.cpp \
-        src/audio/scriptablesoundsource.cpp \
         src/audio/audiopronunciationloader.cpp \
         src/audio/localaudiopronunciationloader.cpp \
         src/audio/audiopronunciationloaderfactory.cpp \
         src/ui/tglayout.cpp \
         src/ui/forcedirectedlayout.cpp \
-        src/ui/audioscriptpage.cpp
+        src/audio/wordnikloader.cpp \
+        src/audio/merriamwebsterloader.cpp
 
 
 RESOURCES += src/synonym.qrc
@@ -60,8 +60,8 @@ CONFIG += warn_on \
       qt \
       rtti \
       thread \
-#      debug
-      release 
+      debug \
+      release \
 #qtestlib
 
 TARGET = bin/synonym
@@ -75,7 +75,8 @@ svg \
 sql \
 phonon \
 script \
-webkit 
+webkit \
+opengl
+
 
 DESTDIR = .
-

@@ -87,12 +87,14 @@ void RemoteAudioPronunciationLoader::doGetAudio(const QString &word)
 
 void RemoteAudioPronunciationLoader::slotSoundLoadingFinished(QNetworkReply *reply)
 {
+    qDebug() << "slotSoundLoadingFinished";
     if (reply->error() == QNetworkReply::NoError && reply->objectName() == m_Word) {
         QStringList items = reply->url().toString().split(".");
         QString extension;
         if (items.size() > 0) 
             extension = items.last();
-        QFile *file = new TempFile(dirPath + "/" + reply->objectName() + "." + extension);
+        QFile *file = new TempFile(dirPath + "/" + reply->objectName() + ".wav");
+        qDebug() << file->fileName();
         file->open(QIODevice::WriteOnly);
         file->write(reply->readAll());
         file->close();
@@ -100,6 +102,8 @@ void RemoteAudioPronunciationLoader::slotSoundLoadingFinished(QNetworkReply *rep
         Phonon::MediaSource source(file->fileName());
         source.setAutoDelete(false);
         soundFound(m_Word, source);
+    } else {
+        qDebug() << "error";
     }
     reply->deleteLater();
 }
@@ -135,6 +139,7 @@ void RemoteAudioPronunciationLoader::slotSoundUrlFound(const QString &word, cons
 
 void RemoteAudioPronunciationLoader::downloadSound(const QUrl &url)
 {
+    qDebug() << "downloading sound " << url;
     QNetworkRequest request(url);
     if (!m_networkManager) {
         m_networkManager = new QNetworkAccessManager();

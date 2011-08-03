@@ -140,7 +140,7 @@ void ScriptableSoundSource::invokeCallback(QString &callback, QStringList &lines
 
 void ScriptableSoundSource::slotReadyRead()
 {
-    //qDebug() << "slotReadyRead() start";
+    qDebug() << "slotReadyRead() start";
     if (!m_reply)
         return;
     
@@ -155,7 +155,7 @@ void ScriptableSoundSource::slotReadyRead()
     }
     QString callback = m_reply->objectName();
     invokeCallback(callback, lines);
-    //qDebug() << "slotReadyRead() end";
+    qDebug() << "slotReadyRead() end";
 }
 
 void ScriptableSoundSource::stopNetwork()
