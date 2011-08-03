@@ -4,15 +4,16 @@
 function parseMainPage(lines) {
     for (i = 0; i < lines.length; i++) {
         var line = lines[i];
-        var test = line.indexOf("javascript:popWin('/cgi-bin/audio.pl");
+        var test = line.indexOf("return au");
         if (test != -1) {
             try {
-            var startIndex = line.indexOf("/", test);
-            var endIndex = line.indexOf("')", test);
-            var urlPart = line.substring(startIndex, endIndex);
-            var newUrl = "http://www.merriam-webster.com" + urlPart;
-            downloader.download(newUrl, "parseSoundPage");
-            break;
+                var startIndex = test + "return au".length + 2;
+                var endIndex = line.indexOf("')", test);
+                var parts = line.substring(startIndex, endIndex).split("', '");
+
+                var newUrl = "http://www.merriam-webster.com/cgi-bin/audio.pl?" + parts[0] + "=" + parts[1];
+                downloader.download(newUrl, "parseSoundPage");
+                break;
             } catch (e) {
                 print(e);
             }
@@ -27,8 +28,8 @@ function parseSoundPage(lines) {
         var test = line.indexOf("Click here to listen with your default audio player");
         if (test != -1) {
             var startIndex = line.indexOf("http");
-            var endIndex = line.indexOf("wav");
-            var soundUrl = line.substring(startIndex, endIndex + 3);
+            var endIndex = line.indexOf("\">Click here");
+            var soundUrl = line.substring(startIndex, endIndex);
             downloader.urlFound(soundUrl);
             return;
         }

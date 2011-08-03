@@ -32,6 +32,8 @@
 #include <algorithm>
 #include <cmath>
 
+static const double REPULSION = 10.0;
+
 
 TGLayout::TGLayout(QObject *parent)
     :QThread(parent)
@@ -45,13 +47,16 @@ TGLayout::TGLayout(QObject *parent)
     stopped = false;
     connect (this, SIGNAL(updateNodes()), this, SLOT(advanceNodes()), Qt::BlockingQueuedConnection);
     m_doingLayout = false;
+	m_terminateFlag = false;
 }
 
 TGLayout::~TGLayout()
 {
+	m_terminateFlag = true;
     if (isRunning()) {
-        terminate();
+        m_needsLayout.wakeAll();
     }
+	
     while (isRunning())
         wait(0);
 }
@@ -67,7 +72,6 @@ TGLayout::~TGLayout()
 
 bool TGLayout::layout()
 {
-    
     if (m_scene->mouseGrabberItem()) {
         relax();
         return true;
@@ -86,6 +90,7 @@ void TGLayout::relax()
         relaxEdges();
         avoidLabels();
         moveNodes();
+        QList<GraphicsEdge*> edges = m_scene->graphEdges();
     }
 }
 
@@ -94,7 +99,10 @@ void TGLayout::run()
 {
     forever {
         m_mutex.lock();
-        m_needsLayout.wait(&m_mutex); 
+        m_needsLayout.wait(&m_mutex);
+		if (m_terminateFlag) {
+			return;
+		}
         m_doingLayout = true;
         do {
              if (m_scene->mouseGrabberItem()) {
@@ -117,6 +125,10 @@ void TGLayout::advanceNodes()
     foreach (GraphicsNode *node, nodes) {
         if (node != grabber)
             node->setPos(node->p);
+    }
+
+    foreach (GraphicsEdge *edge, m_scene->graphEdges()) {
+        edge->adjust();
     }
 }
 
@@ -226,8 +238,12 @@ void TGLayout::moveNodes()
     QGraphicsItem *grabberItem = m_scene->mouseGrabberItem();
     foreach (GraphicsNode *node, nodes) {
         moveNode(node);
-        if (grabberItem && node != grabberItem)
+        if (grabberItem && node != grabberItem) {
             node->setPos(node->p);
+            foreach (GraphicsEdge *edge, node->edges()) {
+                edge->adjust();
+            }
+        }
     }
    
     if (m_maxMotion > 0.0) 

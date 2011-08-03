@@ -34,6 +34,7 @@
 
 #include <QtGui>
 #include <QtCore>
+#include <QGLWidget>
 #include <phonon/audiooutput.h>
 
 
@@ -49,12 +50,12 @@ MainWindow::MainWindow()
     scene->setSceneRect(-800, -800, 1600, 1600);
     
     m_graphView = new QGraphicsView(scene, this);
+ //    m_graphView->setViewport(new QGLWidget());
     setCentralWidget(m_graphView);
 
     m_loader = new DbDataLoader(this);
     m_graphController = new GraphController(scene, m_loader);
-
-    m_graphView->setCacheMode(QGraphicsView::CacheBackground);
+  //  m_graphView->setCacheMode(QGraphicsView::CacheBackground);
     m_graphView->setRenderHint(QPainter::Antialiasing);
     m_graphView->setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing);
     m_graphView->setOptimizationFlag(QGraphicsView::DontClipPainter);
@@ -254,6 +255,7 @@ void MainWindow::dockWidgetVisibilityChanged()
 
 void MainWindow::configure()
 {    
+	qDebug() << "configure()";
     QSettings settings("http://code.google.com/p/synonym/", "synonym");
     if (settings.childGroups().contains("relations")) {
         Relation::Types userTypes;
@@ -273,10 +275,12 @@ void MainWindow::configure()
     }
     QColor posColors[4];
     if (settings.childGroups().contains("display")) {
+		qDebug() << "setting display";
         settings.beginGroup("display");
         int edgeRestDistance = settings.value("Edge Length").toInt();
         m_layout->setRestDistance(edgeRestDistance);
         
+		qDebug() << "set rest distance";
         posColors[0] =  QColor(settings.value("Noun Color").toString().trimmed()); 
         posColors[1] =  QColor(settings.value("Verb Color").toString().trimmed());
         posColors[2] =  QColor(settings.value("Adjective Color").toString().trimmed());
@@ -291,7 +295,7 @@ void MainWindow::configure()
         QString style = "QDockWidget::title {text-align: center; background: " + posColors[i].name() + ";}";
         qobject_cast<QWidget*>(m_posViews[i]->parent())->setStyleSheet(style);
     }
-
+	qDebug() << "configure done";
 }
 
 
@@ -300,6 +304,7 @@ void MainWindow::slotBack()
     WordGraph * graph = m_graphController->previousGraph();
     if (graph)
         setNewGraph(graph);
+
 }
 
 
@@ -316,6 +321,7 @@ void MainWindow::setNewGraph(WordGraph *graph)
     for (int i = 0; i < 4; i++)
         m_posModels[i]->setDataGraph(graph);
     loadSound();
+    QTimer::singleShot(10, m_scene, SLOT(itemMoved()));
 }
 
 void MainWindow::createMenus()
@@ -343,14 +349,15 @@ void MainWindow::showConfigDialog()
 {
     ConfigDialog dialog(m_loader);
     dialog.exec();
+	qDebug() << "after dialog exec";
     if (dialog.settingsChanged()) {
         configure();
-        AudioPronunciationLoaderFactory::instance()->reconfigure();
+       // AudioPronunciationLoaderFactory::instance()->reconfigure();
     }
     if (m_currentGraph) {
         m_graphController->makeGraph(m_currentGraph->centralNode()->id());
     }
-        
+    qDebug() << "showConfigDialog() done";    
 }
 
 static QObject *__soundLoaderThread__;
@@ -423,9 +430,9 @@ void MainWindow::initSound()
                  loaderThread, SLOT(loadSound(const QString&)), Qt::QueuedConnection);
         
         connect (loaderThread, SIGNAL(soundLoaded(const Phonon::MediaSource&)),
-                 this, SLOT(soundLoaded(const Phonon::MediaSource&)), Qt::QueuedConnection);
+                 this, SLOT(soundLoaded(const Phonon::MediaSource&)), Qt::DirectConnection);
         connect (loaderThread, SIGNAL(soundLoaded(const QString&)),
-                 this, SLOT(soundLoaded(const QString&)),  Qt::QueuedConnection);
+                 this, SLOT(soundLoaded(const QString&)),  Qt::DirectConnection);
         __soundLoaderThread__ = loaderThread;
         qAddPostRoutine(cleanupRoutine);
     }

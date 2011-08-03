@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Sergejs Melderis                                *
+ *   Copyright (C) 2011 by Sergejs Melderis                                *
  *   sergey.melderis@gmail.com                                             *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,58 +17,35 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  **************************************************************************/
- 
 
+#ifndef WORDNIKLOADER_H
+#define WORDNIKLOADER_H
 
-#include "audiopronunciationloaderfactory.h"
-#include "localaudiopronunciationloader.h"
-#include "wordnikloader.h"
-#include "merriamwebsterloader.h"
+#include "audiopronunciationloader.h"
 
+class QNetworkAccessManager;
+class QNetworkReply;
 
-#include <QSettings>
-#include <QVariant>
-#include <QStringList>
-#include <QMutex>
-#include <QMutexLocker>
-#include <QCoreApplication>
-
-
-AudioPronunciationLoaderFactory*  AudioPronunciationLoaderFactory::m_instance = 0;
-
-AudioPronunciationLoaderFactory *AudioPronunciationLoaderFactory::instance() 
+/**
+WordnikLoader loads audio pronunciations using wordnik api
+http://developer.wordnik.com/
+  */
+class WordnikLoader : public AudioPronunciationLoader
 {
-    static QMutex mutex;
-    QMutexLocker locker(&mutex);
-    if (m_instance == 0) {
-        m_instance = new AudioPronunciationLoaderFactory();
-    }
-    return m_instance;
-}
+Q_OBJECT
+public:
+    WordnikLoader(QObject *parent);
+    virtual ~WordnikLoader();
+    void doGetAudio(const QString &word);
 
+    bool isAvailable() const;
+private:
+    QNetworkAccessManager* networkManager();
 
-AudioPronunciationLoaderFactory::AudioPronunciationLoaderFactory()
+    QNetworkAccessManager *m_networkManager;
+    QString apiKey;
+private slots:
+    void slotFinished(QNetworkReply *reply);
+};
 
-{
-}
-
-
-AudioPronunciationLoaderFactory::~AudioPronunciationLoaderFactory()
-{
-}
-
-
-AudioPronunciationLoader *AudioPronunciationLoaderFactory::createAudioLoader() 
-{
-    QStringList args = QCoreApplication::arguments();
-    if (args.contains("-webster")) {
-        qDebug() << "Using MerriamWebster sound loader";
-        return new MerriamWebsterLoader(0);
-    }
-    return new WordnikLoader(0);
-}
-
-
-
-
-
+#endif // WORDNIKLOADER_H

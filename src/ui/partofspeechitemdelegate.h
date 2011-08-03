@@ -22,6 +22,7 @@
 
 #include <QAbstractItemDelegate>
 #include <QListView>
+#include <QFont>
 
 /**
 	@author Sergejs <sergey.melderis@gmail.com>
@@ -66,7 +67,11 @@ public:
     
     
 protected:
-    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;  
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const; 
+	
+private:
+	QFont m_font;
+	QFontMetrics m_fontMetrics;
     
     
 };

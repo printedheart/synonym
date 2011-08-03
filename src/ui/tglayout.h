@@ -40,8 +40,6 @@ public:
     TGLayout(QObject *parent = 0);
 
     ~TGLayout();
-    
-    static const double REPULSION = 10.0;
 
     virtual bool layout();
 
@@ -76,6 +74,7 @@ private:
     bool m_doingLayout;
     QMutex m_mutex;
     QWaitCondition m_needsLayout;
+	bool m_terminateFlag;
 private slots:
     void advanceNodes();    
 };

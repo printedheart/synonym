@@ -32,8 +32,7 @@ public:
     ~ForceDirectedLayout();
 
     // TODO: make the following parameters configurable.
-    static const qreal STIFFNESS = 0.2;
-    static const qreal REPULSION = 3000;
+   
     
     static const int FINISHED = 1;
     static const int CALC_ANIMATION = 2;

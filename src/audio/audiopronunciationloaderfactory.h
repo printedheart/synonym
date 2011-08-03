@@ -44,10 +44,6 @@ public:
 private:    
     AudioPronunciationLoaderFactory();
     static AudioPronunciationLoaderFactory *m_instance;
-    
-    RemoteAudioPronunciationLoader *m_remoteLoader;
-    ScriptableSoundSource *m_soundSource;
-    void configureScript();
 };
 
 #endif

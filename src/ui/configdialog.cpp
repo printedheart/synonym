@@ -43,7 +43,7 @@
 #include "graphscene.h"
 #include "tglayout.h"
 #include "graphcontroller.h"
-#include "audioscriptpage.h"
+
 
 
 
@@ -344,7 +344,6 @@ ConfigDialog::ConfigDialog(IWordDataLoader *loader)
     pagesWidget = new QStackedWidget;
     pagesWidget->addWidget(new RelationPage(m_settings));
     pagesWidget->addWidget(new DisplayPage(m_settings, loader));
-    pagesWidget->addWidget(new AudioScriptPage(m_settings));
 
     m_applyButton = new QPushButton(tr("Apply"));
     m_applyButton->setEnabled(false);
@@ -398,13 +397,6 @@ void ConfigDialog::createIcons()
     displayButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     displayButton->setFont(font);
 
-    QListWidgetItem *audioScriptButton = new QListWidgetItem(contentsWidget);
-    audioScriptButton->setText(tr("Audio"));
-    audioScriptButton->setTextAlignment(Qt::AlignHCenter);
-    audioScriptButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-    audioScriptButton->setFont(font);
-
-    
     connect(contentsWidget,
             SIGNAL(currentItemChanged(QListWidgetItem *, QListWidgetItem *)),
                    this, SLOT(changePage(QListWidgetItem *, QListWidgetItem*)));
